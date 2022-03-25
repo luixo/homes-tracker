@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@stitches/react": "^1.2.7",
     "aws-sdk": "^2.1100.0",
     "axios": "^0.26.1",
     "next": "12.1.0",

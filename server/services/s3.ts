@@ -47,6 +47,29 @@ const withLogger = async <T>(
   }
 };
 
+export const getS3Keys = async <T>(
+  logger: winston.Logger,
+  keys: string[]
+): Promise<T[]> => {
+  return withLogger(logger, `Get keys ${keys.join(", ")}`, async () => {
+    return await Promise.all(
+      keys.map(async (key) => {
+        const objectPromise = await s3Provider
+          .getObject({
+            Bucket: BUCKET,
+            Key: key,
+          })
+          .promise();
+        if (!objectPromise.Body) {
+          throw new Error("Body is empty!");
+        }
+        const parsed = JSON.parse(objectPromise.Body.toString("utf-8"));
+        return parsed;
+      })
+    );
+  });
+};
+
 export const getS3Key = async <T>(
   logger: winston.Logger,
   key: string
@@ -140,10 +163,6 @@ export const listAllKeys = async (
 
 export const removeKeys = async (logger: winston.Logger, keys: string[]) => {
   return withLogger(logger, `Delete ${keys.length} keys`, async () => {
-    console.log(
-      "keys",
-      keys.map((key) => ({ Key: key }))
-    );
     await s3Provider
       .deleteObjects({
         Bucket: BUCKET,

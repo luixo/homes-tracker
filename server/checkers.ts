@@ -1,18 +1,20 @@
 import winston from "winston";
 import { listAllKeys } from "./services/s3";
 
-export type GetNewResults<T> = (prevResult: T[], nextResult: T[]) => T[];
+import { checker as myHomeChecker } from "./scraped/myhome";
+
+export type GetNewResults<T> = (prevResult: T, nextResult: T) => T;
 
 export type Checker<T> = {
   id: string;
-  checkFn: () => Promise<T[]>;
+  checkFn: () => Promise<T>;
   getNewResults: GetNewResults<T>;
-  getMessages: (results: T[]) => string[];
+  getMessages: (results: T) => string[];
 };
 
 export type CheckData<T> = {
   id: string;
-  results: T[];
+  results: T;
 }[];
 
 export const CHECKERS_PREFIX = "checkers/";
@@ -25,19 +27,25 @@ export const extractTimestampFromKey = (key: string): string => {
   return key.split(CHECKERS_PREFIX).filter(Boolean)[0];
 };
 
-export const getLastKey = async (
+export const getLastKeys = async (
   logger: winston.Logger
-): Promise<string | undefined> => {
+): Promise<string[]> => {
   logger.info("Fetching last key");
   const keys = await listAllKeys(logger, CHECKERS_PREFIX);
-  const lastKeyTimestamp = keys
+  const lastKeysTimestamps = keys
     .map(extractTimestampFromKey)
-    .sort((a, b) => Number(a) - Number(b))[0];
-  if (!lastKeyTimestamp) {
+    .sort((a, b) => Number(a) - Number(b));
+  if (lastKeysTimestamps.length === 0) {
     logger.info(`Got no last key!`);
-    return;
+  } else {
+    logger.info(`Got last key: ${getCheckerKey(lastKeysTimestamps[0])}`);
   }
-  const lastKey = getCheckerKey(lastKeyTimestamp);
-  logger.info(`Got last key: ${lastKey}`);
-  return lastKey;
+  return lastKeysTimestamps.map(getCheckerKey);
 };
+
+export const checkers: Record<string, Checker<unknown>> = [
+  myHomeChecker,
+].reduce<Record<string, Checker<any>>>((acc, checker) => {
+  acc[checker.id] = checker;
+  return acc;
+}, {});

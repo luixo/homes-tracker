@@ -2,15 +2,12 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getS3Key, putS3Key } from "../../server/services/s3";
 import {
   CheckData,
-  Checker,
   getCheckerKey,
-  getLastKey,
+  getLastKeys,
+  checkers,
 } from "../../server/checkers";
-import { checker as myHomeChecker } from "../../server/scraped/myhome";
 import { sendToTelegram } from "../../server/services/telegram";
 import { globalLogger } from "../../server/logger";
-
-const checkers: Checker<any>[] = [myHomeChecker];
 
 type Response =
   | {
@@ -24,29 +21,36 @@ export default async function handler(
 ) {
   const logger = globalLogger.child({ handler: "check" });
   try {
+    const checkersValues = Object.values(checkers);
     logger.info(
-      `Starting checks for ${checkers.length} checkers: ${checkers
+      `Starting checks for ${checkers.length} checkers: ${checkersValues
         .map((checker) => checker.id)
         .join(", ")}`
     );
-    const results = await Promise.all(
-      checkers.map((checker) => checker.checkFn())
+    const currentResults: CheckData<unknown> = await Promise.all(
+      checkersValues.map((checker) => {
+        return {
+          id: checker.id,
+          results: checker.checkFn(),
+        };
+      })
     );
-    logger.info(`Got results from ${checkers.length} checkers`);
-    const currentResults: CheckData<unknown> = results.map((result, index) => ({
-      id: checkers[index].id,
-      results: result,
-    }));
-    const prevKey = await getLastKey(logger);
-    if (prevKey) {
-      const prevResults = await getS3Key<CheckData<unknown>>(logger, prevKey);
+    logger.info(`Got results from ${checkersValues.length} checkers`);
+    const lastKeys = await getLastKeys(logger);
+    if (lastKeys.length !== 0) {
+      const prevResults = await getS3Key<CheckData<unknown>>(
+        logger,
+        lastKeys[0]
+      );
       if (prevResults) {
         const messageGroups = currentResults.map((nextResult, index) => {
-          const prevResult = prevResults.find((result) => result.id);
+          const prevResult = prevResults.find(
+            (result) => result.id === nextResult.id
+          );
           if (!prevResult) {
             return;
           }
-          const checker = checkers[index];
+          const checker = checkers[nextResult.id];
           const newResults = checker.getNewResults(
             prevResult.results,
             nextResult.results
@@ -75,7 +79,7 @@ export default async function handler(
     await putS3Key<CheckData<unknown>>(logger, nextKey, currentResults);
     res.status(200).send({
       success: `Successfully updated ${
-        prevKey ? "next" : "first"
+        lastKeys ? "next" : "first"
       } data: ${nextKey}`,
     });
     logger.info("Done, 200");
