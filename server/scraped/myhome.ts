@@ -129,6 +129,9 @@ export const checker: Checker<MyHomeResult> = {
   },
   getMessages: (results) =>
     results.map((result) => {
-      return `${result.bedrooms} / ${result.rooms} (area ${result.areaSize} / ${result.yardSize}) for ${result.price} at ${result.address} (${result.anotherAddress}): https://www.myhome.ge/en/pr/${result.id}/`;
+      return {
+        description: `${result.bedrooms} / ${result.rooms} (area ${result.areaSize} / ${result.yardSize}) for ${result.price} at ${result.address} (${result.anotherAddress})`,
+        url: `https://www.myhome.ge/en/pr/${result.id}/`,
+      };
     }),
 };

@@ -65,7 +65,9 @@ export default async function handler(
             if (!group || group.messages.length === 0) {
               return;
             }
-            return `On id ${group.id}:\n${group.messages.join("\n")}`;
+            return `${group.id}:\n${group.messages
+              .map((message) => `${message.description}: ${message.url}`)
+              .join("\n")}`;
           })
           .filter((x): x is string => Boolean(x));
         if (formattedMessages.length !== 0) {

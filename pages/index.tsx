@@ -30,13 +30,17 @@ const Timestamp = styled("div", {
   paddingLeft: 16,
 });
 
-const IdHeader = styled("div", {
+const CheckerHeader = styled("div", {
   paddingTop: 16,
 });
 
-const IdMessages = styled("div", {
+const CheckerMessages = styled("div", {
   fontFamily: "monospace",
   whiteSpace: "pre-wrap",
+});
+
+const CheckerMessage = styled("a", {
+  textDecoration: "underline",
 });
 
 type Props = {
@@ -64,7 +68,7 @@ const Home: NextPage<Props> = (props) => {
                 {new Date(Number(timeSlice.timestamp)).toUTCString()}
               </Timestamp>
               {sliceIndex === props.timeSlices.length - 1 ? (
-                <IdHeader>This is base result</IdHeader>
+                <CheckerHeader>This is base result</CheckerHeader>
               ) : (
                 timeSlice.result.map((result) => {
                   const checker = checkers[result.id];
@@ -74,8 +78,20 @@ const Home: NextPage<Props> = (props) => {
                   }
                   return (
                     <React.Fragment key={result.id}>
-                      <IdHeader>{result.id}</IdHeader>
-                      <IdMessages>{messages.join("\n")}</IdMessages>
+                      <CheckerHeader>{result.id}</CheckerHeader>
+                      <CheckerMessages>
+                        {messages.map((message, index) => {
+                          return (
+                            <CheckerMessage
+                              key={index}
+                              href={message.url}
+                              target="_blank"
+                            >
+                              {message.description}
+                            </CheckerMessage>
+                          );
+                        })}
+                      </CheckerMessages>
                     </React.Fragment>
                   );
                 })

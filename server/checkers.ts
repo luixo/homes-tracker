@@ -9,7 +9,10 @@ export type Checker<T> = {
   id: string;
   checkFn: () => Promise<T>;
   getNewResults: GetNewResults<T>;
-  getMessages: (results: T) => string[];
+  getMessages: (results: T) => {
+    description: string;
+    url: string;
+  }[];
 };
 
 export type CheckData<T> = {
