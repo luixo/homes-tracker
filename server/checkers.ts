@@ -44,7 +44,7 @@ export const getLastKeys = async (
   } else {
     logger.info(`Got last key: ${getCheckerKey(lastKeysTimestamps[0])}`);
   }
-  return lastKeysTimestamps.map(getCheckerKey);
+  return lastKeysTimestamps.map(getCheckerKey).reverse();
 };
 
 export const checkers: Record<string, Checker<unknown>> = [

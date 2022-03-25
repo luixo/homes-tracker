@@ -37,6 +37,8 @@ const CheckerHeader = styled("div", {
 const CheckerMessages = styled("div", {
   fontFamily: "monospace",
   whiteSpace: "pre-wrap",
+  display: "flex",
+  flexDirection: "column",
 });
 
 const CheckerMessage = styled("a", {
@@ -116,7 +118,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   const logger = globalLogger.child({ handler: "index" });
   const amount = Number(context.query.amount ?? 5);
   try {
-    const lastKeys = [...(await getLastKeys(logger))].reverse();
+    const lastKeys = await getLastKeys(logger);
     const timeSlices = await getS3Keys<CheckData<unknown>>(
       logger,
       lastKeys.slice(0, amount)
