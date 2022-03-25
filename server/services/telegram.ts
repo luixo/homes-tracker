@@ -19,6 +19,8 @@ const verifyCredentials = () => {
   }
 };
 
+const MAX_TELEGRAM_CHARS = 4096;
+
 export const sendToTelegram = async (
   logger: winston.Logger,
   message: string
@@ -28,9 +30,12 @@ export const sendToTelegram = async (
   try {
     verifyCredentials();
     logger.info(`${name} started`);
-    await bot.sendMessage(chatId, message, {
-      disable_web_page_preview: true,
-    });
+    while (message.length > 0) {
+      await bot.sendMessage(chatId, message.slice(0, MAX_TELEGRAM_CHARS), {
+        disable_web_page_preview: true,
+      });
+      message = message.slice(MAX_TELEGRAM_CHARS + 1);
+    }
     logger.info(`${name} succeed`);
   } catch (error) {
     logger.error(`${name} failed`, error);

@@ -13,6 +13,7 @@ export type Checker<T> = {
     description: string;
     url: string;
   }[];
+  isEmpty: (data: T) => boolean;
 };
 
 export type CheckData<T> = {

@@ -134,4 +134,5 @@ export const checker: Checker<MyHomeResult> = {
         url: `https://www.myhome.ge/en/pr/${result.id}/`,
       };
     }),
+  isEmpty: (results) => results.length === 0,
 };

@@ -28,10 +28,10 @@ export default async function handler(
         .join(", ")}`
     );
     const currentResults: CheckData<unknown> = await Promise.all(
-      checkersValues.map((checker) => {
+      checkersValues.map(async (checker) => {
         return {
           id: checker.id,
-          results: checker.checkFn(),
+          results: await checker.checkFn(),
         };
       })
     );
@@ -43,16 +43,16 @@ export default async function handler(
         lastKeys[0]
       );
       if (prevResults) {
-        const messageGroups = currentResults.map((nextResult, index) => {
-          const prevResult = prevResults.find(
-            (result) => result.id === nextResult.id
+        const messageGroups = currentResults.map((nextResult) => {
+          const matchedPrevResult = prevResults.find(
+            (prevResult) => prevResult.id === nextResult.id
           );
-          if (!prevResult) {
+          if (!matchedPrevResult) {
             return;
           }
           const checker = checkers[nextResult.id];
           const newResults = checker.getNewResults(
-            prevResult.results,
+            matchedPrevResult.results,
             nextResult.results
           );
           return {
@@ -78,7 +78,13 @@ export default async function handler(
       }
     }
     const nextKey = getCheckerKey(new Date().valueOf().toString());
-    await putS3Key<CheckData<unknown>>(logger, nextKey, currentResults);
+    const updatedResults = currentResults.filter((checkerData) => {
+      const checkerDefintion = checkers[checkerData.id];
+      return !checkerDefintion.isEmpty(checkerData.results);
+    });
+    if (updatedResults.length !== 0) {
+      await putS3Key<CheckData<unknown>>(logger, nextKey, currentResults);
+    }
     res.status(200).send({
       success: `Successfully updated ${
         lastKeys ? "next" : "first"

@@ -65,7 +65,7 @@ const Home: NextPage<Props> = (props) => {
           return (
             <TimeSlice key={timeSlice.timestamp}>
               <Timestamp>
-                {new Date(Number(timeSlice.timestamp)).toUTCString()}
+                {new Date(Number(timeSlice.timestamp)).toLocaleString()}
               </Timestamp>
               {sliceIndex === props.timeSlices.length - 1 ? (
                 <CheckerHeader>This is base result</CheckerHeader>
