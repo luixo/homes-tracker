@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { listAllKeys, removeKeys } from "../../server/services/s3";
-import { extractTimestampFromKey, getCheckerKey } from "../../server/checkers";
+import { getCheckerKey } from "../../server/checkers";
 import { globalLogger } from "../../server/logger";
 
 type Response =
@@ -17,10 +17,7 @@ export default async function handler(
 ) {
   const logger = globalLogger.child({ handler: "clear-keys" });
   try {
-    const allKeys = await listAllKeys(logger);
-    const sortedKeys = allKeys
-      .map((key) => extractTimestampFromKey(key))
-      .sort((a, b) => Number(a) - Number(b));
+    const sortedKeys = await listAllKeys(logger);
 
     const keysToRemove = sortedKeys
       .slice(KEYS_LEFT)

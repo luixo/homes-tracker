@@ -9,7 +9,6 @@ import {
 } from "../../server/checkers";
 import { sendToTelegram } from "../../server/services/telegram";
 import { globalLogger } from "../../server/logger";
-import { stringify } from "querystring";
 
 type Response =
   | {
@@ -87,7 +86,7 @@ export default async function handler(
   try {
     const checkersValues = Object.values(checkers);
     logger.info(
-      `Starting checks for ${checkers.length} checkers: ${checkersValues
+      `Starting checks for ${checkersValues.length} checkers: ${checkersValues
         .map((checker) => checker.id)
         .join(", ")}`
     );
@@ -95,7 +94,7 @@ export default async function handler(
       checkersValues.map(async (checker) => {
         return {
           id: checker.id,
-          results: await checker.checkFn(),
+          results: await checker.checkFn(logger),
         };
       })
     );

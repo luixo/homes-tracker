@@ -5,7 +5,10 @@ export const globalLogger = winston.createLogger({
   format: winston.format.json(),
   transports: [
     new winston.transports.Console({
-      format: winston.format.simple(),
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.simple()
+      ),
     }),
   ],
 });

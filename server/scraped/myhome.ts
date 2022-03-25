@@ -88,23 +88,27 @@ const getMyHomeResponse = async (
   ).data.Data.Prs;
 };
 
+const PAGES_TO_FETCH = 1;
+
 export const checker: Checker<MyHomeResult> = {
   id: "myhome.ge",
-  checkFn: async () => {
+  checkFn: async (logger) => {
     const request: MyHomeRequest = {
       bedrooms: 3,
       minAreaSize: 100,
       maxPrice: 3500,
       page: 1,
     };
+    logger.info("Started fetching myhome.ge");
     const results = await Promise.all(
-      new Array(3).fill(null).map((_, index) =>
+      new Array(PAGES_TO_FETCH).fill(null).map((_, index) =>
         getMyHomeResponse({
           ...request,
           page: index + 1,
         })
       )
     );
+    logger.info("Done fetching myhome.ge");
     return results.reduce<MyHomeResult>((acc, page) => {
       const mapped: MyHomeResult = page.map((element) => ({
         id: element.product_id,

@@ -129,21 +129,21 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
           return {
             result: timeSlice.map((checkerData) => {
               const checkerDefinition = checkers[checkerData.id];
-              const nextTimeSlice = timeSlices[sliceIndex + 1];
-              if (!nextTimeSlice) {
+              const prevTimeSlice = timeSlices[sliceIndex + 1];
+              if (!prevTimeSlice) {
                 return checkerData;
               }
-              const nextCheckerData = nextTimeSlice.find(
+              const prevCheckerData = prevTimeSlice.find(
                 (someChecker) => someChecker.id === checkerData.id
               );
-              if (!nextCheckerData) {
+              if (!prevCheckerData) {
                 return checkerData;
               }
               return {
                 id: checkerData.id,
                 results: checkerDefinition.getNewResults(
-                  checkerData.results,
-                  nextCheckerData.results
+                  prevCheckerData.results,
+                  checkerData.results
                 ) as typeof checkers,
               };
             }),

@@ -2,12 +2,13 @@ import winston from "winston";
 import { listAllKeys } from "./services/s3";
 
 import { checker as myHomeChecker } from "./scraped/myhome";
+import { checker as ssChecker } from "./scraped/ss";
 
 export type GetNewResults<T> = (prevResult: T, nextResult: T) => T;
 
 export type Checker<T> = {
   id: string;
-  checkFn: () => Promise<T>;
+  checkFn: (logger: winston.Logger) => Promise<T>;
   getNewResults: GetNewResults<T>;
   getMessages: (results: T) => {
     description: string;
@@ -38,17 +39,18 @@ export const getLastKeys = async (
   const keys = await listAllKeys(logger, CHECKERS_PREFIX);
   const lastKeysTimestamps = keys
     .map(extractTimestampFromKey)
-    .sort((a, b) => Number(a) - Number(b));
+    .sort((a, b) => Number(b) - Number(a));
   if (lastKeysTimestamps.length === 0) {
     logger.info(`Got no last key!`);
   } else {
     logger.info(`Got last key: ${getCheckerKey(lastKeysTimestamps[0])}`);
   }
-  return lastKeysTimestamps.map(getCheckerKey).reverse();
+  return lastKeysTimestamps.map(getCheckerKey);
 };
 
 export const checkers: Record<string, Checker<unknown>> = [
   myHomeChecker,
+  ssChecker,
 ].reduce<Record<string, Checker<any>>>((acc, checker) => {
   acc[checker.id] = checker;
   return acc;
