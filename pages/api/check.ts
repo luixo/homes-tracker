@@ -6,9 +6,12 @@ import {
   getCheckerKey,
   getLastKeys,
   checkers,
+  POLYGON,
 } from "../../server/checkers";
 import { sendToTelegram } from "../../server/services/telegram";
 import { globalLogger } from "../../server/logger";
+
+const NO_UPDATE = Boolean(process.env.NO_UPDATE);
 
 type Response =
   | {
@@ -28,7 +31,9 @@ const updateS3IfExist = async (
   if (updatedResults.length === 0) {
     return;
   }
-  await putS3Key<CheckData<unknown>>(logger, nextKey, checkData);
+  if (!NO_UPDATE) {
+    await putS3Key<CheckData<unknown>>(logger, nextKey, checkData);
+  }
   return nextKey;
 };
 
@@ -47,18 +52,20 @@ const updateResults = async (
         return;
       }
       const checker = checkers[nextResult.id];
+      const newResults = checker.getNewResults(
+        matchedPrevResult.results,
+        nextResult.results
+      ) as typeof nextResult.results;
+      const mapFilteredResults = checker.checkGeo(newResults, POLYGON);
       return {
         id: checker.id,
-        messages: checker.getNewResults(
-          matchedPrevResult.results,
-          nextResult.results
-        ) as typeof nextResult.results,
+        results: mapFilteredResults,
       };
     })
-    .filter((x): x is { id: string; messages: unknown } => Boolean(x));
-  const messageGroups = newResults.map((result) => ({
-    id: result.id,
-    messages: checkers[result.id].getMessages(result.messages),
+    .filter((x): x is { id: string; results: unknown } => Boolean(x));
+  const messageGroups = newResults.map((newResult) => ({
+    id: newResult.id,
+    messages: checkers[newResult.id].getMessages(newResult.results),
   }));
   const formattedMessages = messageGroups
     .map((group) => {
@@ -92,12 +99,10 @@ export default async function handler(
         .join(", ")}`
     );
     const currentResults: CheckData<unknown> = await Promise.all(
-      checkersValues.map(async (checker) => {
-        return {
-          id: checker.id,
-          results: await checker.checkFn(logger),
-        };
-      })
+      checkersValues.map(async (checker) => ({
+        id: checker.id,
+        results: await checker.checkFn(logger),
+      }))
     );
     logger.info(`Got results from ${checkersValues.length} checkers`);
     const lastKeys = await getLastKeys(logger);

@@ -1,4 +1,5 @@
 import axios from "axios";
+import pointInPolygon from "@turf/boolean-point-in-polygon";
 import { Checker } from "./../checkers";
 
 type MyHomeResult = {
@@ -10,6 +11,7 @@ type MyHomeResult = {
   price: number;
   address: string;
   anotherAddress: string;
+  coordinates?: [number, number];
 }[];
 type MyHomeRequest = {
   bedrooms?: number;
@@ -119,6 +121,10 @@ export const checker: Checker<MyHomeResult> = {
         price: Number(element.price),
         address: element.street_address,
         anotherAddress: JSON.parse(element.pathway_json).en,
+        coordinates:
+          element.map_lon && element.map_lat
+            ? [Number(element.map_lon), Number(element.map_lat)]
+            : undefined,
       }));
       return acc.concat(mapped);
     }, []);
@@ -139,4 +145,12 @@ export const checker: Checker<MyHomeResult> = {
       };
     }),
   isEmpty: (results) => results.length === 0,
+  checkGeo: (results, polygon) => {
+    return results.filter((result) => {
+      if (!result.coordinates) {
+        return true;
+      }
+      return pointInPolygon(result.coordinates, polygon);
+    });
+  },
 };

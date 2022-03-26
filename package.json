@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@stitches/react": "^1.2.7",
+    "@turf/boolean-point-in-polygon": "^6.5.0",
     "aws-sdk": "^2.1100.0",
     "axios": "^0.26.1",
     "next": "12.1.0",
@@ -20,6 +21,7 @@
     "winston": "^3.6.0"
   },
   "devDependencies": {
+    "@types/geojson": "^7946.0.8",
     "@types/node": "17.0.23",
     "@types/node-telegram-bot-api": "^0.56.0",
     "@types/react": "17.0.43",

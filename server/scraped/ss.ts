@@ -126,4 +126,5 @@ export const checker: Checker<SsResult> = {
       };
     }),
   isEmpty: (results) => results.length === 0,
+  checkGeo: (results) => results,
 };
