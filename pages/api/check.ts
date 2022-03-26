@@ -74,8 +74,9 @@ const updateResults = async (
     logger.info("No updates to send to telegram");
     return;
   }
+  const nextKey = await updateS3IfExist(logger, nextResults);
   await sendToTelegram(logger, formattedMessages.join("\n\n"));
-  return updateS3IfExist(logger, nextResults);
+  return nextKey;
 };
 
 export default async function handler(
