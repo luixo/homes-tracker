@@ -163,6 +163,7 @@ export const listAllKeys = async (
 
 export const removeKeys = async (logger: winston.Logger, keys: string[]) => {
   return withLogger(logger, `Delete ${keys.length} keys`, async () => {
+    console.log("start remove", keys[0]);
     await s3Provider
       .deleteObjects({
         Bucket: BUCKET,
@@ -171,5 +172,6 @@ export const removeKeys = async (logger: winston.Logger, keys: string[]) => {
         },
       })
       .promise();
+    console.log("done remove");
   });
 };

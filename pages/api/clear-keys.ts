@@ -9,7 +9,7 @@ type Response =
     }
   | { error: string; stack?: string };
 
-const KEYS_LEFT = 3;
+const KEYS_LEFT = 100;
 
 export default async function handler(
   _req: NextApiRequest,
@@ -19,9 +19,7 @@ export default async function handler(
   try {
     const sortedKeys = await listAllKeys(logger);
 
-    const keysToRemove = sortedKeys
-      .slice(KEYS_LEFT)
-      .map((key) => getCheckerKey(key));
+    const keysToRemove = sortedKeys.slice(KEYS_LEFT);
     if (keysToRemove.length === 0) {
       logger.info("Nothing to remove");
     } else {
