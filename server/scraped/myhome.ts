@@ -10,7 +10,6 @@ type MyHomeResult = {
   bedrooms: number;
   price: number;
   address: string;
-  anotherAddress: string;
   coordinates?: [number, number];
 }[];
 type MyHomeRequest = {
@@ -119,8 +118,7 @@ export const checker: Checker<MyHomeResult> = {
         rooms: Number(element.rooms),
         bedrooms: Number(element.bedrooms),
         price: Number(element.price),
-        address: element.street_address,
-        anotherAddress: JSON.parse(element.pathway_json).en,
+        address: JSON.parse(element.pathway_json).en,
         coordinates:
           element.map_lon && element.map_lat
             ? [Number(element.map_lon), Number(element.map_lat)]
@@ -137,10 +135,17 @@ export const checker: Checker<MyHomeResult> = {
       (lookupId) => nextResult.find(({ id }) => id === lookupId)!
     );
   },
-  getMessages: (results) =>
+  getFormatted: (results) =>
     results.map((result) => {
       return {
-        description: `${result.bedrooms} / ${result.rooms} (area ${result.areaSize} / ${result.yardSize}) for ${result.price} at ${result.address} (${result.anotherAddress})`,
+        price: result.price,
+        pricePerMeter: Math.ceil(result.price / result.areaSize),
+        pricePerBedroom: Math.ceil(result.price / result.bedrooms),
+        areaSize: result.areaSize,
+        yardSize: result.yardSize,
+        rooms: result.rooms,
+        bedrooms: result.bedrooms,
+        address: result.address,
         url: `https://www.myhome.ge/en/pr/${result.id}/`,
       };
     }),

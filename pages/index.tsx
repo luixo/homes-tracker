@@ -6,6 +6,7 @@ import {
   CheckData,
   checkers,
   extractTimestampFromKey,
+  formatMessage,
   getLastKeys,
 } from "../server/checkers";
 import { globalLogger } from "../server/logger";
@@ -74,7 +75,7 @@ const Home: NextPage<Props> = (props) => {
               ) : (
                 timeSlice.result.map((result) => {
                   const checker = checkers[result.id];
-                  const messages = checker.getMessages(result.results);
+                  const messages = checker.getFormatted(result.results);
                   if (messages.length === 0) {
                     return null;
                   }
@@ -89,7 +90,7 @@ const Home: NextPage<Props> = (props) => {
                               href={message.url}
                               target="_blank"
                             >
-                              {message.description}
+                              {formatMessage(message)}
                             </CheckerMessage>
                           );
                         })}

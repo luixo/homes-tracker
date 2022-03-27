@@ -1,0 +1,275 @@
+[
+  {
+    "id": 32,
+    "title": "Avchala",
+    "parentId": 2
+  },
+  {
+    "id": 33,
+    "title": "Gldani",
+    "parentId": 2
+  },
+  {
+    "id": 34,
+    "title": "Gldanula",
+    "parentId": 2
+  },
+  {
+    "id": 35,
+    "title": "Zahesi",
+    "parentId": 2
+  },
+  {
+    "id": 36,
+    "title": "Tbilisi sea",
+    "parentId": 2
+  },
+  {
+    "id": 37,
+    "title": "Temqa",
+    "parentId": 2
+  },
+  {
+    "id": 53,
+    "title": "Ivertubani",
+    "parentId": 2
+  },
+  {
+    "id": 38,
+    "title": "Koniaki village",
+    "parentId": 2
+  },
+  {
+    "id": 39,
+    "title": "Lotkini",
+    "parentId": 2
+  },
+  {
+    "id": 40,
+    "title": "Mukhiani",
+    "parentId": 2
+  },
+  {
+    "id": 41,
+    "title": "Nadzaladevi",
+    "parentId": 2,
+    "liveable": true
+  },
+  {
+    "id": 42,
+    "title": "Sanzona",
+    "parentId": 2
+  },
+  {
+    "id": 43,
+    "title": "Gldani village",
+    "parentId": 2
+  },
+  {
+    "id": 1,
+    "title": "Didube",
+    "parentId": 1,
+    "liveable": true
+  },
+  {
+    "id": 28,
+    "title": "Digomi",
+    "parentId": 1
+  },
+  {
+    "id": 29,
+    "title": "Kukia",
+    "parentId": 1
+  },
+  {
+    "id": 30,
+    "title": "Svanetis ubani",
+    "parentId": 1
+  },
+  {
+    "id": 31,
+    "title": "Chugureti",
+    "parentId": 1,
+    "liveable": true
+  },
+  {
+    "id": 44,
+    "title": "Bagebi",
+    "parentId": 3,
+    "liveable": true
+  },
+  {
+    "id": 45,
+    "title": "Didi digomi",
+    "parentId": 3
+  },
+  {
+    "id": 46,
+    "title": "Digomi 1 - 9",
+    "parentId": 3
+  },
+  {
+    "id": 47,
+    "title": "Vake",
+    "parentId": 3,
+    "liveable": true
+  },
+  {
+    "id": 48,
+    "title": "Vashlijvari",
+    "parentId": 3
+  },
+  {
+    "id": 49,
+    "title": "Vedzisi",
+    "parentId": 3,
+    "liveable": true
+  },
+  {
+    "id": 50,
+    "title": "Tkhinvali",
+    "parentId": 3
+  },
+  {
+    "id": 27,
+    "title": "Turtle lake",
+    "parentId": 3
+  },
+  {
+    "id": 26,
+    "title": "Lisi lake",
+    "parentId": 3
+  },
+  {
+    "id": 2,
+    "title": "Nutsubidze plateau",
+    "parentId": 3
+  },
+  {
+    "id": 3,
+    "title": "Saburtalo",
+    "parentId": 3,
+    "liveable": true
+  },
+  {
+    "id": 4,
+    "title": "Digomi village",
+    "parentId": 3
+  },
+  {
+    "id": 5,
+    "title": "Districts of Vazha-Pshavela",
+    "parentId": 3,
+    "liveable": true
+  },
+  {
+    "id": 6,
+    "title": "Airport village",
+    "parentId": 4
+  },
+  {
+    "id": 7,
+    "title": "Dampalo village",
+    "parentId": 4
+  },
+  {
+    "id": 8,
+    "title": "Vazisubani",
+    "parentId": 4
+  },
+  {
+    "id": 9,
+    "title": "Varketili",
+    "parentId": 4,
+    "liveable": true
+  },
+  {
+    "id": 10,
+    "title": "Isani",
+    "parentId": 4,
+    "liveable": true
+  },
+  {
+    "id": 11,
+    "title": "Lilo",
+    "parentId": 4
+  },
+  {
+    "id": 13,
+    "title": "Mesame masivi",
+    "parentId": 4
+  },
+  {
+    "id": 24,
+    "title": "Navtlugi",
+    "parentId": 4
+  },
+  {
+    "id": 14,
+    "title": "Ortachala",
+    "parentId": 4,
+    "liveable": true
+  },
+  {
+    "id": 15,
+    "title": "Orkhevi",
+    "parentId": 4
+  },
+  {
+    "id": 16,
+    "title": "Samgori",
+    "parentId": 4,
+    "liveable": true
+  },
+  {
+    "id": 17,
+    "title": "Ponichala",
+    "parentId": 4
+  },
+  {
+    "id": 18,
+    "title": "Airport",
+    "parentId": 4
+  },
+  {
+    "id": 19,
+    "title": "Afrika",
+    "parentId": 4
+  },
+  {
+    "id": 20,
+    "title": "Abanotubani",
+    "parentId": 5,
+    "liveable": true
+  },
+  {
+    "id": 21,
+    "title": "Avlabari",
+    "parentId": 5,
+    "liveable": true
+  },
+  {
+    "id": 22,
+    "title": "Elia",
+    "parentId": 5,
+    "liveable": true
+  },
+  {
+    "id": 23,
+    "title": "Vera",
+    "parentId": 5,
+    "liveable": true
+  },
+  {
+    "id": 51,
+    "title": "Mtatsminda",
+    "parentId": 5,
+    "liveable": true
+  },
+  {
+    "id": 52,
+    "title": "Sololaki",
+    "parentId": 5,
+    "liveable": true
+  }
+]

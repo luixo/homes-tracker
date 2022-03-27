@@ -7,6 +7,7 @@ import {
   getLastKeys,
   checkers,
   POLYGON,
+  formatMessage,
 } from "../../server/checkers";
 import { sendToTelegram } from "../../server/services/telegram";
 import { globalLogger } from "../../server/logger";
@@ -65,16 +66,14 @@ const updateResults = async (
     .filter((x): x is { id: string; results: unknown } => Boolean(x));
   const messageGroups = newResults.map((newResult) => ({
     id: newResult.id,
-    messages: checkers[newResult.id].getMessages(newResult.results),
+    messages: checkers[newResult.id].getFormatted(newResult.results),
   }));
   const formattedMessages = messageGroups
     .map((group) => {
       if (group.messages.length === 0) {
         return;
       }
-      return `${group.id}:\n${group.messages
-        .map((message) => `${message.description}: ${message.url}`)
-        .join("\n")}`;
+      return group.messages.map(formatMessage).join("\n\n");
     })
     .filter((x): x is string => Boolean(x));
   if (formattedMessages.length === 0) {

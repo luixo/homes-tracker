@@ -6,14 +6,23 @@ import { checker as ssChecker } from "./scraped/ss";
 
 export type GetNewResults<T> = (prevResult: T, nextResult: T) => T;
 
+export type FormattedMessage = {
+  price: number;
+  pricePerMeter?: number;
+  pricePerBedroom?: number;
+  areaSize: number;
+  yardSize?: number;
+  rooms?: number;
+  bedrooms?: number;
+  address: string;
+  url: string;
+};
+
 export type Checker<T> = {
   id: string;
   checkFn: (logger: winston.Logger) => Promise<T>;
   getNewResults: GetNewResults<T>;
-  getMessages: (results: T) => {
-    description: string;
-    url: string;
-  }[];
+  getFormatted: (results: T) => FormattedMessage[];
   isEmpty: (data: T) => boolean;
   checkGeo: (results: T, polygon: GeoJSON.MultiPolygon) => T;
 };
@@ -56,6 +65,33 @@ export const checkers: Record<string, Checker<unknown>> = [
   acc[checker.id] = checker;
   return acc;
 }, {});
+
+export const formatMessage = (message: FormattedMessage): string => {
+  const prices = [
+    `${message.price}$`,
+    message.pricePerBedroom ? `${message.pricePerBedroom}$/🛏️` : undefined,
+    message.pricePerMeter ? `${message.pricePerMeter}$/m2` : undefined,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const areas = [
+    `${message.areaSize}m2`,
+    message.yardSize ? `+ 🌲 ${message.pricePerBedroom}m2` : undefined,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const rooms = [
+    message.rooms ? `${message.rooms}🚪` : undefined,
+    message.bedrooms ? `${message.bedrooms}🛏️` : undefined,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  return [
+    [prices, areas, rooms].filter(Boolean).join("; "),
+    `> ${message.address}`,
+    message.url,
+  ].join("\n");
+};
 
 export const POLYGON: GeoJSON.MultiPolygon = {
   type: "MultiPolygon",

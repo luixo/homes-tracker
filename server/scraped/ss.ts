@@ -1,13 +1,21 @@
 import axios from "axios";
 import * as nodeHtmlParser from "node-html-parser";
+import pointInPolygon from "@turf/boolean-point-in-polygon";
 import { Checker } from "./../checkers";
+
+import streets from "./location-data/streets.json";
+import subdistricts from "./location-data/subdistricts.json";
 
 type SsResult = {
   id: string;
-  areaSize?: number;
-  price?: number;
+  areaSize: number;
+  price: number;
   pricePerMeter?: number;
   address?: string;
+  addressComponents?: {
+    district: string;
+    street: string;
+  };
 }[];
 type SsRequest = {
   bedrooms?: number;
@@ -70,18 +78,22 @@ const getSsResponse = async (request: SsRequest): Promise<SsResult> => {
     const totalPriceBlock = dollarPriceBlock?.querySelector(".latest_price");
     const meterPriceBlock = dollarPriceBlock?.querySelector(".latest_km_price");
     const addressBlock = element.querySelector(".StreeTaddressList");
+    const addressLink = addressBlock?.querySelector("a")?.getAttribute("href");
+    const addressMatch = addressLink?.match(/subdistr=(\d+).*stId=(\d+)/);
     return {
       id,
-      areaSize: areaSizeBlock
-        ? clearNumbers(areaSizeBlock.innerText)
-        : undefined,
-      price: totalPriceBlock
-        ? clearNumbers(totalPriceBlock.innerText)
-        : undefined,
+      areaSize: areaSizeBlock ? clearNumbers(areaSizeBlock.innerText) : 0,
+      price: totalPriceBlock ? clearNumbers(totalPriceBlock.innerText) : 0,
       pricePerMeter: meterPriceBlock
         ? clearNumbers(meterPriceBlock.innerText.split("-")[1])
         : undefined,
       address: addressBlock ? clearChars(addressBlock.innerText) : undefined,
+      addressComponents: addressMatch
+        ? {
+            district: addressMatch[1],
+            street: addressMatch[2],
+          }
+        : undefined,
     };
   });
 };
@@ -118,13 +130,50 @@ export const checker: Checker<SsResult> = {
       (lookupId) => nextResult.find(({ id }) => id === lookupId)!
     );
   },
-  getMessages: (results) =>
+  getFormatted: (results) =>
     results.map((result) => {
       return {
-        description: `${result.areaSize}m2 for ${result.price}$ (${result.pricePerMeter}$/m2) at ${result.address}`,
+        price: result.price,
+        pricePerMeter: result.pricePerMeter,
+        areaSize: result.areaSize,
+        address: result.address || "unknown",
         url: `https://ss.ge/en/real-estate/${result.id}`,
       };
     }),
   isEmpty: (results) => results.length === 0,
-  checkGeo: (results) => results,
+  checkGeo: (results, polygon) => {
+    return results.filter((result) => {
+      const street = result.addressComponents?.street;
+      if (!street) {
+        return true;
+      }
+      const matchedStreet = streets.find(
+        (lookupStreet) => lookupStreet.id === street
+      );
+      if (!matchedStreet) {
+        const district = result.addressComponents?.district;
+        if (district) {
+          const subdistrictParent = subdistricts.find(
+            (lookupDistrict) => lookupDistrict.id === Number(district)
+          );
+          if (subdistrictParent) {
+            return Boolean(subdistrictParent.liveable);
+          }
+        }
+        return true;
+      }
+      if (matchedStreet.coordinates) {
+        return pointInPolygon(matchedStreet.coordinates, polygon);
+      } else {
+        const parentId = matchedStreet.parentId;
+        const subdistrictParent = subdistricts.find(
+          (lookupDistrict) => lookupDistrict.id === parentId
+        );
+        if (subdistrictParent) {
+          return Boolean(subdistrictParent.liveable);
+        }
+        return true;
+      }
+    });
+  },
 };
