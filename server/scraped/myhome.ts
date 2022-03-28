@@ -154,7 +154,7 @@ const getUrlById = (id: string): string => `https://www.myhome.ge/en/pr/${id}/`;
 
 export const checker: Service<ParsedEntity, ServiceRequest> = {
   id: "myhome.ge",
-  lastPagesAmount: 1,
+  lastPagesAmount: 3,
   request: {
     bedrooms: 3,
     minAreaSize: 100,
