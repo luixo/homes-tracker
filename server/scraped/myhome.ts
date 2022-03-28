@@ -1,24 +1,29 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import pointInPolygon from "@turf/boolean-point-in-polygon";
-import { Checker } from "./../checkers";
+import {
+  CommonEntityDescription,
+  Currency,
+  Service,
+} from "./../service-helpers";
 
-type MyHomeResult = {
+type ParsedEntity = {
   id: string;
+  timestamp: number;
   areaSize: number;
   yardSize: number;
   rooms: number;
   bedrooms: number;
   price: number;
   address: string;
+  currency: Currency;
   coordinates?: [number, number];
-}[];
-type MyHomeRequest = {
+};
+type ServiceRequest = {
   bedrooms?: number;
   minAreaSize?: number;
   maxPrice?: number;
-  page?: number;
 };
-type MyHomeProduct = {
+type ServiceItem = {
   product_id: string;
   user_id: string;
   parent_id: string;
@@ -67,95 +72,129 @@ type MyHomeProduct = {
   seo_title_json: string;
   seo_name_json: string;
 };
-const getMyHomeResponse = async (
-  request: MyHomeRequest
-): Promise<MyHomeProduct[]> => {
-  return (
-    await axios("https://www.myhome.ge/en/s/", {
-      params: {
-        Keyword: "Tbilisi",
-        AdTypeID: "3",
-        PrTypeID: "2",
-        cities: "1996871",
-        GID: "1996871",
-        FCurrencyID: "1",
-        FPriceTo: request.maxPrice?.toString(),
-        AreaSizeFrom: request.minAreaSize?.toString(),
-        BedRoomNums: request.bedrooms?.toString(),
-        Ajax: "1",
-        Page: (request.page || 1).toString(),
-      },
-    })
-  ).data.Data.Prs;
+
+const buildParams = (
+  request: ServiceRequest,
+  page: number
+): AxiosRequestConfig["params"] => {
+  return {
+    Keyword: "Tbilisi",
+    AdTypeID: "3",
+    PrTypeID: "2",
+    cities: "1996871",
+    GID: "1996871",
+    FCurrencyID: "1",
+    FPriceTo: request.maxPrice?.toString(),
+    AreaSizeFrom: request.minAreaSize?.toString(),
+    BedRoomNums: request.bedrooms?.toString(),
+    Ajax: "1",
+    Page: page.toString(),
+  };
 };
 
-const PAGES_TO_FETCH = 1;
+const mapResponseElementToResult = (element: ServiceItem): ParsedEntity => {
+  return {
+    id: element.product_id,
+    areaSize: Number(element.area_size_value),
+    yardSize: Number(element.yard_size),
+    rooms: Number(element.rooms),
+    bedrooms: Number(element.bedrooms),
+    price: Number(element.price),
+    address: JSON.parse(element.pathway_json).en,
+    coordinates:
+      element.map_lon && element.map_lat
+        ? [Number(element.map_lon), Number(element.map_lat)]
+        : undefined,
+    timestamp: new Date(element.order_date).valueOf(),
+    currency: element.currency_id === "1" ? "$" : "₾",
+  };
+};
 
-export const checker: Checker<MyHomeResult> = {
+const mapFullElementToEntity = (
+  id: string,
+  html: string
+): Omit<CommonEntityDescription, "timestamp"> => {
+  const fbTrackMatch = html.match(/var fbPixelData = (.*?);/);
+  const fbTrackObject = fbTrackMatch ? JSON.parse(fbTrackMatch[1]) : 0;
+
+  const trackingDataMatch = html.match(/var TrackingData = (.*?);/);
+  const trackingDataObject = trackingDataMatch
+    ? JSON.parse(trackingDataMatch[1])
+    : 0;
+
+  const yardSizeMatch = html.match(/Yard area: (\d+) m/);
+
+  const addressMatch = html.match(/<span class="address">\s*(.*)\s*<\/span>/);
+
+  const price = Number(fbTrackObject.preferred_price_range[0]);
+  const currency = fbTrackObject.currency === "USD" ? "$" : "₾";
+  const meters = Number(trackingDataObject.area_size);
+  const yardSize = yardSizeMatch ? Number(yardSizeMatch[1]) : 0;
+  const rooms = Number(trackingDataObject.rooms);
+  const bedrooms = Number(trackingDataObject.bedrooms);
+  const address = addressMatch ? addressMatch[1] : "unknown";
+  const url = getUrlById(id);
+
+  return {
+    id,
+    currency,
+    price,
+    pricePerMeter: Math.ceil(price / meters),
+    pricePerBedroom: Math.ceil(price / bedrooms),
+    areaSize: meters,
+    yardSize,
+    rooms,
+    bedrooms,
+    address,
+    url,
+  };
+};
+
+const getUrlById = (id: string): string => `https://www.myhome.ge/en/pr/${id}/`;
+
+export const checker: Service<ParsedEntity, ServiceRequest> = {
   id: "myhome.ge",
-  checkFn: async (logger) => {
-    const request: MyHomeRequest = {
-      bedrooms: 3,
-      minAreaSize: 100,
-      maxPrice: 3500,
-      page: 1,
-    };
-    logger.info("Started fetching myhome.ge");
-    const results = await Promise.all(
-      new Array(PAGES_TO_FETCH).fill(null).map((_, index) =>
-        getMyHomeResponse({
-          ...request,
-          page: index + 1,
-        })
-      )
-    );
-    logger.info("Done fetching myhome.ge");
-    return results.reduce<MyHomeResult>((acc, page) => {
-      const mapped: MyHomeResult = page.map((element) => ({
-        id: element.product_id,
-        areaSize: Number(element.area_size_value),
-        yardSize: Number(element.yard_size),
-        rooms: Number(element.rooms),
-        bedrooms: Number(element.bedrooms),
-        price: Number(element.price),
-        address: JSON.parse(element.pathway_json).en,
-        coordinates:
-          element.map_lon && element.map_lat
-            ? [Number(element.map_lon), Number(element.map_lat)]
-            : undefined,
-      }));
-      return acc.concat(mapped);
-    }, []);
+  lastPagesAmount: 1,
+  request: {
+    bedrooms: 3,
+    minAreaSize: 100,
+    maxPrice: 3500,
   },
-  getNewResults: (prevResult, nextResult) => {
-    const prevIds = prevResult.map(({ id }) => id);
-    const nextIds = nextResult.map(({ id }) => id);
-    const newIds = nextIds.filter((id) => !prevIds.includes(id));
-    return newIds.map(
-      (lookupId) => nextResult.find(({ id }) => id === lookupId)!
-    );
+  fetchSinglePage: async (logger, request, page) => {
+    const name = `Fetching myhome.ge page #${page}`;
+    logger.info(`${name} started`);
+    const response: AxiosResponse<{ Data: { Prs: ServiceItem[] } }> =
+      await axios("https://www.myhome.ge/en/s/", {
+        params: buildParams(request, page),
+      });
+    logger.info(`${name} succeed`);
+    return response.data.Data.Prs.map(mapResponseElementToResult);
   },
-  getFormatted: (results) =>
-    results.map((result) => {
-      return {
-        price: result.price,
-        pricePerMeter: Math.ceil(result.price / result.areaSize),
-        pricePerBedroom: Math.ceil(result.price / result.bedrooms),
-        areaSize: result.areaSize,
-        yardSize: result.yardSize,
-        rooms: result.rooms,
-        bedrooms: result.bedrooms,
-        address: result.address,
-        url: `https://www.myhome.ge/en/pr/${result.id}/`,
-      };
-    }),
-  isEmpty: (results) => results.length === 0,
-  checkGeo: (results, polygon) => {
-    return results.filter((result) => {
-      if (!result.coordinates) {
-        return true;
-      }
-      return pointInPolygon(result.coordinates, polygon);
-    });
+  fetchCommonEntity: async (logger, id) => {
+    const name = `Fetching myhome.ge id #${id}`;
+    logger.info(`${name} started`);
+    const response: AxiosResponse<string> = await axios(getUrlById(id));
+    logger.info(`${name} succeed`);
+    return mapFullElementToEntity(id, response.data);
   },
+  filterByPolygon: (element, polygon) => {
+    if (!element.coordinates) {
+      return true;
+    }
+    return pointInPolygon(element.coordinates, polygon);
+  },
+  getCommonEntity: (result) => ({
+    id: result.id,
+    currency: result.currency,
+    timestamp: result.timestamp,
+    price: result.price,
+    pricePerMeter: Math.ceil(result.price / result.areaSize),
+    pricePerBedroom: Math.ceil(result.price / result.bedrooms),
+    areaSize: result.areaSize,
+    yardSize: result.yardSize,
+    rooms: result.rooms,
+    bedrooms: result.bedrooms,
+    address: result.address,
+    url: getUrlById(result.id),
+  }),
 };

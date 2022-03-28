@@ -1,16 +1,17 @@
+import axios, { AxiosResponse } from "axios";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import React from "react";
+import * as ReactQuery from "react-query";
+import { getQueryKeyService, getQueryKeyServices } from "../client/queries";
+import { ENTITIES_FETCH_AMOUNT, Service } from "../client/service";
 import { styled } from "../client/styles";
 import {
-  CheckData,
-  checkers,
-  extractTimestampFromKey,
-  formatMessage,
-  getLastKeys,
-} from "../server/checkers";
+  DatabaseEntityElement,
+  getEntitiesDatabase,
+  sortEntities,
+} from "../server/service-helpers";
 import { globalLogger } from "../server/logger";
-import { getS3Keys } from "../server/services/s3";
 
 const Wrapper = styled("div", {
   padding: "0 1rem",
@@ -23,38 +24,24 @@ const Main = styled("main", {
   flexDirection: "column",
 });
 
-const TimeSlice = styled("div", {
-  padding: 20,
-});
-
-const Timestamp = styled("div", {
-  paddingLeft: 16,
-});
-
-const CheckerHeader = styled("div", {
-  paddingTop: 16,
-});
-
-const CheckerMessages = styled("div", {
-  fontFamily: "monospace",
-  whiteSpace: "pre-wrap",
-  display: "flex",
-  flexDirection: "column",
-});
-
-const CheckerMessage = styled("a", {
-  textDecoration: "underline",
-});
+const Header = styled("h1");
 
 type Props = {
-  timeSlices: {
-    result: CheckData<unknown>;
-    timestamp: string;
-  }[];
+  ids: string[];
   error?: string;
 };
 
+type GetKeysResponse = {
+  keys: string[];
+};
+
 const Home: NextPage<Props> = (props) => {
+  const queryResult = ReactQuery.useQuery(getQueryKeyServices(), async () => {
+    const response: AxiosResponse<GetKeysResponse> = await axios(
+      `/api/service-keys`
+    );
+    return response.data.keys;
+  });
   return (
     <Wrapper>
       <Head>
@@ -64,44 +51,15 @@ const Home: NextPage<Props> = (props) => {
       </Head>
 
       <Main>
-        {props.timeSlices.map((timeSlice, sliceIndex) => {
-          return (
-            <TimeSlice key={timeSlice.timestamp}>
-              <Timestamp>
-                {new Date(Number(timeSlice.timestamp)).toLocaleString()}
-              </Timestamp>
-              {sliceIndex === props.timeSlices.length - 1 ? (
-                <CheckerHeader>This is base result</CheckerHeader>
-              ) : (
-                timeSlice.result.map((result) => {
-                  const checker = checkers[result.id];
-                  const messages = checker.getFormatted(result.results);
-                  if (messages.length === 0) {
-                    return null;
-                  }
-                  return (
-                    <React.Fragment key={result.id}>
-                      <CheckerHeader>{result.id}</CheckerHeader>
-                      <CheckerMessages>
-                        {messages.map((message, index) => {
-                          return (
-                            <CheckerMessage
-                              key={index}
-                              href={message.url}
-                              target="_blank"
-                            >
-                              {formatMessage(message)}
-                            </CheckerMessage>
-                          );
-                        })}
-                      </CheckerMessages>
-                    </React.Fragment>
-                  );
-                })
-              )}
-            </TimeSlice>
-          );
-        })}
+        <Header>Homes tracker</Header>
+        {queryResult.status === "idle" || queryResult.status === "loading" ? (
+          <div>Loading..</div>
+        ) : queryResult.status === "error" ? (
+          <div>Error</div>
+        ) : null}
+        {props.ids.map((id) => (
+          <Service key={id} id={id} />
+        ))}
         {props.error ? (
           <>
             <div>Error:</div>
@@ -113,50 +71,36 @@ const Home: NextPage<Props> = (props) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<Props> = async (
-  context
-) => {
+export const getServerSideProps: GetServerSideProps<Props> = async () => {
   const logger = globalLogger.child({ handler: "index" });
-  const amount = Number(context.query.amount ?? 5);
   try {
-    const lastKeys = await getLastKeys(logger);
-    const timeSlices = await getS3Keys<CheckData<unknown>>(
-      logger,
-      lastKeys.slice(0, amount)
-    );
+    const db = await getEntitiesDatabase(logger);
+    const queryClient = new ReactQuery.QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: 0,
+        },
+      },
+    });
+    queryClient.setQueryData(getQueryKeyServices(), Object.keys(db.services));
+    Object.entries(db.services).forEach(([id, entities]) => {
+      const slice = sortEntities(entities).slice(0, ENTITIES_FETCH_AMOUNT);
+      const queryData: ReactQuery.InfiniteData<DatabaseEntityElement[]> = {
+        pages: [slice],
+        pageParams: [slice[slice.length - 1].timestamp],
+      };
+      queryClient.setQueryData(getQueryKeyService(id), queryData);
+    });
     return {
       props: {
-        timeSlices: timeSlices.map((timeSlice, sliceIndex) => {
-          return {
-            result: timeSlice.map((checkerData) => {
-              const checkerDefinition = checkers[checkerData.id];
-              const prevTimeSlice = timeSlices[sliceIndex + 1];
-              if (!prevTimeSlice) {
-                return checkerData;
-              }
-              const prevCheckerData = prevTimeSlice.find(
-                (someChecker) => someChecker.id === checkerData.id
-              );
-              if (!prevCheckerData) {
-                return checkerData;
-              }
-              return {
-                id: checkerData.id,
-                results: checkerDefinition.getNewResults(
-                  prevCheckerData.results,
-                  checkerData.results
-                ) as typeof checkers,
-              };
-            }),
-            timestamp: extractTimestampFromKey(lastKeys[sliceIndex]),
-          };
-        }),
+        ids: Object.keys(db.services),
+        dehydratedState: ReactQuery.dehydrate(queryClient),
       },
     };
   } catch (e) {
     return {
       props: {
-        timeSlices: [],
+        ids: [],
         error: String(e),
       },
     };

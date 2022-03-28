@@ -1,101 +1,6 @@
-import winston from "winston";
-import { listAllKeys } from "./services/s3";
-
-import { checker as myHomeChecker } from "./scraped/myhome";
-import { checker as ssChecker } from "./scraped/ss";
-
-export type GetNewResults<T> = (prevResult: T, nextResult: T) => T;
-
-export type FormattedMessage = {
-  price: number;
-  pricePerMeter?: number;
-  pricePerBedroom?: number;
-  areaSize: number;
-  yardSize?: number;
-  rooms?: number;
-  bedrooms?: number;
-  address: string;
-  url: string;
-};
-
-export type Checker<T> = {
-  id: string;
-  checkFn: (logger: winston.Logger) => Promise<T>;
-  getNewResults: GetNewResults<T>;
-  getFormatted: (results: T) => FormattedMessage[];
-  isEmpty: (data: T) => boolean;
-  checkGeo: (results: T, polygon: GeoJSON.MultiPolygon) => T;
-};
-
-export type CheckData<T> = {
-  id: string;
-  results: T;
-}[];
-
-export const CHECKERS_PREFIX = "checkers/";
-
-export const getCheckerKey = (postfix: string) => {
-  return `${CHECKERS_PREFIX}${postfix}`;
-};
-
-export const extractTimestampFromKey = (key: string): string => {
-  return key.split(CHECKERS_PREFIX).filter(Boolean)[0];
-};
-
-export const getLastKeys = async (
-  logger: winston.Logger
-): Promise<string[]> => {
-  logger.info("Fetching last key");
-  const keys = await listAllKeys(logger, CHECKERS_PREFIX);
-  const lastKeysTimestamps = keys
-    .map(extractTimestampFromKey)
-    .sort((a, b) => Number(b) - Number(a));
-  if (lastKeysTimestamps.length === 0) {
-    logger.info(`Got no last key!`);
-  } else {
-    logger.info(`Got last key: ${getCheckerKey(lastKeysTimestamps[0])}`);
-  }
-  return lastKeysTimestamps.map(getCheckerKey);
-};
-
-export const checkers: Record<string, Checker<unknown>> = [
-  myHomeChecker,
-  ssChecker,
-].reduce<Record<string, Checker<any>>>((acc, checker) => {
-  acc[checker.id] = checker;
-  return acc;
-}, {});
-
-export const formatMessage = (message: FormattedMessage): string => {
-  const prices = [
-    `${message.price}$`,
-    message.pricePerBedroom ? `${message.pricePerBedroom}$/🛏️` : undefined,
-    message.pricePerMeter ? `${message.pricePerMeter}$/m2` : undefined,
-  ]
-    .filter(Boolean)
-    .join(", ");
-  const areas = [
-    `${message.areaSize}m2`,
-    message.yardSize ? `+ 🌲 ${message.pricePerBedroom}m2` : undefined,
-  ]
-    .filter(Boolean)
-    .join(", ");
-  const rooms = [
-    message.rooms ? `${message.rooms}🚪` : undefined,
-    message.bedrooms ? `${message.bedrooms}🛏️` : undefined,
-  ]
-    .filter(Boolean)
-    .join(", ");
-  return [
-    [prices, areas, rooms].filter(Boolean).join("; "),
-    `> ${message.address}`,
-    message.url,
-  ].join("\n");
-};
-
-export const POLYGON: GeoJSON.MultiPolygon = {
-  type: "MultiPolygon",
-  coordinates: [
+{
+  "type": "MultiPolygon",
+  "coordinates": [
     [
       [
         [44.806575, 41.709727],
@@ -223,8 +128,8 @@ export const POLYGON: GeoJSON.MultiPolygon = {
         [44.809767, 41.706227],
         [44.808231, 41.706691],
         [44.808238, 41.708907],
-        [44.806575, 41.709727],
-      ],
+        [44.806575, 41.709727]
+      ]
     ],
     [
       [
@@ -243,8 +148,8 @@ export const POLYGON: GeoJSON.MultiPolygon = {
         [44.801865, 41.73333],
         [44.800068, 41.734329],
         [44.801353, 41.735329],
-        [44.796616, 41.737434],
-      ],
+        [44.796616, 41.737434]
+      ]
     ],
     [
       [
@@ -257,8 +162,8 @@ export const POLYGON: GeoJSON.MultiPolygon = {
         [44.782509, 41.740509],
         [44.78791, 41.740925],
         [44.788731, 41.742546],
-        [44.787521, 41.74334],
-      ],
+        [44.787521, 41.74334]
+      ]
     ],
     [
       [
@@ -270,8 +175,8 @@ export const POLYGON: GeoJSON.MultiPolygon = {
         [44.786507, 41.725231],
         [44.790485, 41.725353],
         [44.790718, 41.72654],
-        [44.789749, 41.728565],
-      ],
+        [44.789749, 41.728565]
+      ]
     ],
     [
       [
@@ -283,8 +188,8 @@ export const POLYGON: GeoJSON.MultiPolygon = {
         [44.780502, 41.747982],
         [44.781254, 41.748581],
         [44.783005, 41.750328],
-        [44.780754, 41.751575],
-      ],
+        [44.780754, 41.751575]
+      ]
     ],
     [
       [
@@ -298,8 +203,8 @@ export const POLYGON: GeoJSON.MultiPolygon = {
         [44.842667, 41.685257],
         [44.844303, 41.686462],
         [44.842384, 41.687382],
-        [44.841572, 41.688564],
-      ],
+        [44.841572, 41.688564]
+      ]
     ],
     [
       [
@@ -308,8 +213,8 @@ export const POLYGON: GeoJSON.MultiPolygon = {
         [44.85191, 41.685463],
         [44.854462, 41.684349],
         [44.855358, 41.685463],
-        [44.854462, 41.686047],
-      ],
-    ],
-  ],
-};
+        [44.854462, 41.686047]
+      ]
+    ]
+  ]
+}
