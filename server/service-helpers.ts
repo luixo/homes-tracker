@@ -58,11 +58,11 @@ export type EntityWithService<T extends BaseEntity = BaseEntity> = {
 export const ENTITY_DB_PREFIX = "entity-db/";
 export const ENTITY_DB_PATH = ENTITY_DB_PREFIX + "db";
 
-export const services: Record<string, Service<any, any>> = [
+export const services: Record<string, Service<BaseEntity, unknown>> = [
   myHomeService,
   ssService,
-].reduce<Record<string, Service<any, any>>>((acc, service) => {
-  acc[service.id] = service;
+].reduce<Record<string, Service<BaseEntity, unknown>>>((acc, service) => {
+  acc[service.id] = service as unknown as Service<BaseEntity, unknown>;
   return acc;
 }, {});
 
@@ -109,5 +109,5 @@ export const mergeWithDb = <T extends BaseEntity>(
       })),
     ];
     return db;
-  }, db);
+  }, JSON.parse(JSON.stringify(db)));
 };
