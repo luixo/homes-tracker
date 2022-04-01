@@ -151,9 +151,10 @@ const mapFullElementToEntity = (
 };
 
 const getUrlById = (id: string): string => `https://www.myhome.ge/en/pr/${id}/`;
+const ID = "myhome.ge";
 
 export const checker: Service<ParsedEntity, ServiceRequest> = {
-  id: "myhome.ge",
+  id: ID,
   lastPagesAmount: 3,
   request: {
     bedrooms: 3,
@@ -161,7 +162,7 @@ export const checker: Service<ParsedEntity, ServiceRequest> = {
     maxPrice: 3500,
   },
   fetchSinglePage: async (logger, request, page) => {
-    const name = `Fetching myhome.ge page #${page}`;
+    const name = `Fetching ${ID} page #${page}`;
     logger.info(`${name} started`);
     const response: AxiosResponse<{ Data: { Prs: ServiceItem[] } }> =
       await axios("https://www.myhome.ge/en/s/", {
@@ -171,7 +172,7 @@ export const checker: Service<ParsedEntity, ServiceRequest> = {
     return response.data.Data.Prs.map(mapResponseElementToResult);
   },
   fetchCommonEntity: async (logger, id) => {
-    const name = `Fetching myhome.ge id #${id}`;
+    const name = `Fetching ${ID} id #${id}`;
     logger.info(`${name} started`);
     const response: AxiosResponse<string> = await axios(getUrlById(id));
     logger.info(`${name} succeed`);

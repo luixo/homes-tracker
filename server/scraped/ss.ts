@@ -167,9 +167,10 @@ const parseTimeBlock = (text: string): number => {
 };
 
 const getUrlById = (id: string) => `https://ss.ge/en/real-estate/${id}`;
+const ID = "ss.ge";
 
 export const checker: Service<ParsedEntity, ServiceRequest> = {
-  id: "ss.ge",
+  id: ID,
   lastPagesAmount: 1,
   request: {
     bedrooms: 3,
@@ -178,7 +179,7 @@ export const checker: Service<ParsedEntity, ServiceRequest> = {
     priceType: "total",
   },
   fetchSinglePage: async (logger, request, page) => {
-    const name = `Fetching ss.ge page #${page}`;
+    const name = `Fetching ${ID} page #${page}`;
     logger.info(`${name} started`);
     const response = await axios(
       "https://ss.ge/en/real-estate/l/Private-House/For-Rent",
@@ -194,7 +195,7 @@ export const checker: Service<ParsedEntity, ServiceRequest> = {
       .map(mapPreviewElementToResult);
   },
   fetchCommonEntity: async (logger, id) => {
-    const name = `Fetching ss.ge id #${id}`;
+    const name = `Fetching ${ID} id #${id}`;
     logger.info(`${name} started`);
     const response = await axios(getUrlById(id));
     logger.info(`${name} succeed`);
