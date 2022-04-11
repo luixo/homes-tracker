@@ -1,38 +1,26 @@
 import axios, { AxiosResponse } from "axios";
 import React from "react";
 import * as ReactQuery from "react-query";
-import { DatabaseEntityElement } from "../server/service-helpers";
+import { ScrapedEntity } from "../server/types/scraper";
 import { Entity } from "./entity";
-import { getQueryKeyService } from "./queries";
+import { getQueryKeyEntities } from "./queries";
 import { styled } from "./styles";
 
 type Props = {
-  id: string;
+  trackerId: string;
 };
 
 type GetItemsResponse = {
-  items: DatabaseEntityElement[];
+  items: ScrapedEntity[];
 };
 
 type PageParam = {
-  timestamp: number;
+  offset: number;
 };
 
 const Wrapper = styled("div", {});
 
 const Header = styled("h2", {});
-
-const Element = styled("div", {
-  padding: 20,
-});
-
-const ElementTimestamp = styled("div", {
-  paddingLeft: 16,
-});
-
-const ElementHeader = styled("div", {
-  paddingTop: 16,
-});
 
 const NextButton = styled("button", {
   borderRadius: 4,
@@ -43,26 +31,29 @@ const NextButton = styled("button", {
 export const ENTITIES_FETCH_AMOUNT = 10;
 
 export const Service: React.FC<Props> = (props) => {
-  const queryResult = ReactQuery.useInfiniteQuery<DatabaseEntityElement[]>(
-    getQueryKeyService(props.id),
+  const queryResult = ReactQuery.useInfiniteQuery<ScrapedEntity[]>(
+    getQueryKeyEntities(),
     async (
       context: ReactQuery.QueryFunctionContext<ReactQuery.QueryKey, PageParam>
     ) => {
       const response: AxiosResponse<GetItemsResponse> = await axios(
-        `/api/entity-ids`,
+        `/api/entities`,
         {
           params: {
-            timestamp: context.pageParam?.timestamp,
-            id: props.id,
-            amount: ENTITIES_FETCH_AMOUNT,
+            trackerId: props.trackerId,
+            limit: ENTITIES_FETCH_AMOUNT,
+            offset: context.pageParam?.offset,
           },
         }
       );
       return response.data.items;
     },
     {
-      getNextPageParam: (lastPage: DatabaseEntityElement[]): PageParam => ({
-        timestamp: lastPage[lastPage.length - 1].timestamp,
+      getNextPageParam: (
+        _lastPage: ScrapedEntity[],
+        allPages: ScrapedEntity[][]
+      ): PageParam => ({
+        offset: allPages.reduce((acc, page) => acc + page.length, 0),
       }),
     }
   );
@@ -74,21 +65,16 @@ export const Service: React.FC<Props> = (props) => {
       return <div>Error</div>;
     case "success":
       const pages = queryResult.data.pages;
-      const elements = pages.reduce<DatabaseEntityElement[]>(
+      const elements = pages.reduce<ScrapedEntity[]>(
         (acc, page) => [...acc, ...page],
         []
       );
       const hasMore = pages[pages.length - 1].length === ENTITIES_FETCH_AMOUNT;
       return (
         <Wrapper>
-          <Header>{props.id}</Header>
+          <Header>{props.trackerId}</Header>
           {elements.map((element) => (
-            <Entity
-              key={element.id}
-              serviceId={props.id}
-              id={element.id}
-              timestamp={element.timestamp}
-            />
+            <Entity key={element._id} {...element} />
           ))}
           {hasMore ? (
             <NextButton onClick={() => queryResult.fetchNextPage()}>

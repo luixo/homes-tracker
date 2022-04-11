@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  next:
+    container_name: next
+    image: "homes-tracker"
+    build: .
+    ports:
+      - 80:80
+      - 443:443
+
+  bot:
+    container_name: bot
+    image: "homes-tracker-bot"
+    build:
+      context: .
+      dockerfile: bot/Dockerfile

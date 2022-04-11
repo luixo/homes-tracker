@@ -1,16 +1,13 @@
-import axios, { AxiosResponse } from "axios";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import React from "react";
 import * as ReactQuery from "react-query";
-import { getQueryKeyService, getQueryKeyServices } from "../client/queries";
+import { getQueryKeyEntities } from "../client/queries";
 import { ENTITIES_FETCH_AMOUNT, Service } from "../client/service";
 import { styled } from "../client/styles";
-import {
-  DatabaseEntityElement,
-  getEntitiesDatabase,
-  sortEntities,
-} from "../server/service-helpers";
+import { getMatchedEntities } from "../server/utils/db/request-matches";
+import { getEntitiesByIds } from "../server/utils/db/entities";
+import { ScrapedEntity } from "../server/types/scraper";
 import { globalLogger } from "../server/logger";
 
 const Wrapper = styled("div", {
@@ -27,21 +24,11 @@ const Main = styled("main", {
 const Header = styled("h1");
 
 type Props = {
-  ids: string[];
+  trackerId: string;
   error?: string;
 };
 
-type GetKeysResponse = {
-  keys: string[];
-};
-
 const Home: NextPage<Props> = (props) => {
-  const queryResult = ReactQuery.useQuery(getQueryKeyServices(), async () => {
-    const response: AxiosResponse<GetKeysResponse> = await axios(
-      `/api/service-keys`
-    );
-    return response.data.keys;
-  });
   return (
     <Wrapper>
       <Head>
@@ -52,14 +39,7 @@ const Home: NextPage<Props> = (props) => {
 
       <Main>
         <Header>Homes tracker</Header>
-        {queryResult.status === "idle" || queryResult.status === "loading" ? (
-          <div>Loading..</div>
-        ) : queryResult.status === "error" ? (
-          <div>Error</div>
-        ) : null}
-        {props.ids.map((id) => (
-          <Service key={id} id={id} />
-        ))}
+        <Service trackerId={props.trackerId} />
         {props.error ? (
           <>
             <div>Error:</div>
@@ -71,10 +51,18 @@ const Home: NextPage<Props> = (props) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  const logger = globalLogger.child({ handler: "index" });
+export const getServerSideProps: GetServerSideProps<Props> = async (
+  context
+) => {
+  const logger = globalLogger.child({ handler: "/index" });
+  const trackerId = context.query.trackerId;
+  if (Array.isArray(trackerId) || !trackerId) {
+    return {
+      notFound: true,
+    };
+  }
   try {
-    const db = await getEntitiesDatabase(logger);
+    const entityIds = await getMatchedEntities(logger, trackerId);
     const queryClient = new ReactQuery.QueryClient({
       defaultOptions: {
         queries: {
@@ -82,25 +70,29 @@ export const getServerSideProps: GetServerSideProps<Props> = async () => {
         },
       },
     });
-    queryClient.setQueryData(getQueryKeyServices(), Object.keys(db.services));
-    Object.entries(db.services).forEach(([id, entities]) => {
-      const slice = sortEntities(entities).slice(0, ENTITIES_FETCH_AMOUNT);
-      const queryData: ReactQuery.InfiniteData<DatabaseEntityElement[]> = {
-        pages: [slice],
-        pageParams: [slice[slice.length - 1].timestamp],
-      };
-      queryClient.setQueryData(getQueryKeyService(id), queryData);
-    });
+    const entities = await getEntitiesByIds(
+      logger,
+      entityIds.reverse().slice(0, ENTITIES_FETCH_AMOUNT)
+    );
+    const queryData: ReactQuery.InfiniteData<ScrapedEntity[]> = {
+      pages: [entities],
+      pageParams: [
+        {
+          offset: 20,
+        },
+      ],
+    };
+    queryClient.setQueryData(getQueryKeyEntities(), queryData);
     return {
       props: {
-        ids: Object.keys(db.services),
+        trackerId,
         dehydratedState: ReactQuery.dehydrate(queryClient),
       },
     };
   } catch (e) {
     return {
       props: {
-        ids: [],
+        trackerId,
         error: String(e),
       },
     };

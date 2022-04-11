@@ -1,20 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import winston from "winston";
-import { isDeepStrictEqual } from "util";
 import {
-  services,
-  getEntitiesDatabase,
-  putEntitiesDatabase,
-  Service,
-  CommonEntityDescription,
-  mergeWithDb,
-  BaseEntity,
-} from "../../server/service-helpers";
-import POLYGON from "../../server/scraped/polygon.json";
-import { sendToTelegram } from "../../server/services/telegram";
-import { globalLogger } from "../../server/logger";
-
-const NO_UPDATE = Boolean(process.env.NO_UPDATE);
+  getTrackerRequests,
+  updateTrackerRequestWithTimestamp,
+} from "../../server/utils/db/requests";
+import { getEntitiesWithTimestamp } from "../../server/utils/db/entities";
+import {
+  notifyRequest,
+  formatScrapedEntity,
+} from "../../server/services/scrapers";
+import { verifyEntityOverRequest as doesEntityMatchRequest } from "../../server/utils/filters";
+import { putMatchedEntities } from "../../server/utils/db/request-matches";
+import { createQueue, getHandlerLogger } from "../../server/utils";
+import { withLogger } from "../../server/utils/logging";
 
 type Response =
   | {
@@ -22,104 +19,73 @@ type Response =
     }
   | { error: string; stack?: string };
 
-const fetchLastPages = async <T extends BaseEntity, R>(
-  logger: winston.Logger,
-  service: Service<T, R>
-): Promise<T[]> => {
-  const entities = await Promise.all(
-    new Array(service.lastPagesAmount)
-      .fill(null)
-      .map((_, index) =>
-        service.fetchSinglePage(logger, service.request, index + 1)
-      )
-  );
-  return entities.reduce<T[]>((acc, page) => [...acc, ...page], []);
-};
-
-const formatMessage = (entity: CommonEntityDescription): string => {
-  const prices = [
-    `${entity.price}$`,
-    entity.pricePerBedroom ? `${entity.pricePerBedroom}$/🛏️` : undefined,
-    entity.pricePerMeter ? `${entity.pricePerMeter}$/m2` : undefined,
-  ]
-    .filter(Boolean)
-    .join(", ");
-  const areas = [
-    `${entity.areaSize}m2`,
-    entity.yardSize ? `+ 🌲 ${entity.pricePerBedroom}m2` : undefined,
-  ]
-    .filter(Boolean)
-    .join(", ");
-  const rooms = [
-    entity.rooms ? `${entity.rooms}🚪` : undefined,
-    entity.bedrooms ? `${entity.bedrooms}🛏️` : undefined,
-  ]
-    .filter(Boolean)
-    .join(", ");
-  return [
-    [prices, areas, rooms].filter(Boolean).join("; "),
-    `> ${entity.address}`,
-    entity.url,
-  ].join("\n");
-};
-
-const sendEntitiesToTelegram = async (
-  logger: winston.Logger,
-  entitiesGroups: CommonEntityDescription[][]
-): Promise<boolean> => {
-  const notificationMessage = entitiesGroups
-    .map((group) => group.map(formatMessage).join("\n\n"))
-    .filter(Boolean)
-    .join("\n\n");
-  if (notificationMessage.length !== 0) {
-    await sendToTelegram(logger, notificationMessage);
-    return true;
-  } else {
-    logger.info("No updates to send to telegram");
-    return false;
-  }
-};
-
 const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
-  const logger = globalLogger.child({ handler: req.url });
   try {
-    const servicesPlain = Object.values(services);
-    const prevDatabase = await getEntitiesDatabase(logger);
-    logger.info(`Fetch ${servicesPlain.length} services - started`);
-    const polygon = POLYGON as GeoJSON.MultiPolygon;
-    const nextEntitiesData = await Promise.all(
-      servicesPlain.map(async (service) => {
-        const id = service.id;
-        const nextEntities = await fetchLastPages(logger, service);
-        const prevEntitiesIds = prevDatabase.services[id].map(({ id }) => id);
-        const newEntities = nextEntities.filter((entity) => {
-          if (prevEntitiesIds.includes(entity.id)) {
-            return false;
+    await withLogger(getHandlerLogger(req), `Check handler`, async (logger) => {
+      const trackerRequests = await withLogger(
+        logger,
+        `Fetching tracker requests`,
+        (logger) => getTrackerRequests(logger),
+        { onSuccess: (requests) => `${requests.length} requests fetched` }
+      );
+      const minimalTimestamp = trackerRequests.reduce(
+        (minimalTimestamp, request) =>
+          Math.min(minimalTimestamp, request.notifiedTimestamp),
+        trackerRequests[0]?.notifiedTimestamp ?? 0
+      );
+      const entities = await withLogger(
+        logger,
+        `Fetching entities with minimal timestamp ${minimalTimestamp}`,
+        (logger) => getEntitiesWithTimestamp(logger, minimalTimestamp),
+        { onSuccess: (entities) => `${entities.length} entities fetched` }
+      );
+      const { add: addToQueue, getResolvePromise: getQueuePromise } =
+        createQueue(100);
+      for (const request of trackerRequests) {
+        if (!request.enabled) {
+          logger.info(`Request ${request._id} is disabled`);
+          return false;
+        }
+        let matchedIds: string[] = [];
+        for (const entity of entities) {
+          if (entity.scrapedTimestamp < request.notifiedTimestamp) {
+            continue;
           }
-          return service.filterByPolygon(entity, polygon);
-        });
-        return {
-          id,
-          entities: newEntities.map(service.getCommonEntity),
-        };
-      })
-    );
-    logger.info(`Fetch ${servicesPlain.length} services - succeed`);
-
-    const nextDatabase = mergeWithDb(prevDatabase, nextEntitiesData);
-
-    if (!NO_UPDATE && !isDeepStrictEqual(prevDatabase, nextDatabase)) {
-      await putEntitiesDatabase(logger, nextDatabase);
-    }
-    const updateHappened = await sendEntitiesToTelegram(
-      logger,
-      nextEntitiesData.map((nextEntitiesDatum) => nextEntitiesDatum.entities)
-    );
-
-    res.status(200).send({
-      success: updateHappened
-        ? "Successfully updated data"
-        : "Nothing to update",
+          const matches = doesEntityMatchRequest(entity, request);
+          if (matches) {
+            if (matchedIds.length < 10) {
+              addToQueue(() =>
+                notifyRequest(logger, formatScrapedEntity(entity), request)
+              );
+            } else if (matchedIds.length === 10) {
+              addToQueue(() =>
+                notifyRequest(
+                  logger,
+                  "У тебя больше 10 сообщений за одну проверку, кажется, надо сузить критерии",
+                  request
+                )
+              );
+            }
+            matchedIds.push(entity._id);
+          }
+        }
+        void withLogger(
+          logger,
+          `Put ${matchedIds.length} entities for request ${request._id}`,
+          async () => {
+            if (matchedIds.length !== 0) {
+              return putMatchedEntities(logger, request._id, matchedIds);
+            }
+          }
+        );
+        void withLogger(
+          logger,
+          `Update request ${request._id} with current timestamp`,
+          () => updateTrackerRequestWithTimestamp(logger, request._id)
+        );
+      }
+      await getQueuePromise();
+      res.status(200).send({ success: "Everything is verified" });
     });
   } catch (e) {
     res.status(500).send({

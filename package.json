@@ -1,21 +1,29 @@
 {
   "name": "homes-tracker",
-  "version": "0.1.0",
+  "version": "0.1.24",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docker:build": "docker build -t homes-tracker .",
+    "docker:publish": "docker tag homes-tracker:latest $DOCKER_PREFIX/homes-tracker:$(node -p -e \"require('./package.json').version\") && docker push $DOCKER_PREFIX/homes-tracker:$(node -p -e \"require('./package.json').version\")",
+    "bot:dev": "nodemon bot/index.ts",
+    "bot:docker:build": "docker build -t homes-tracker-bot -f bot/Dockerfile .",
+    "bot:docker:publish": "docker tag homes-tracker-bot:latest $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\") && docker push $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\")"
   },
   "dependencies": {
     "@stitches/react": "^1.2.7",
     "@turf/boolean-point-in-polygon": "^6.5.0",
     "aws-sdk": "^2.1100.0",
     "axios": "^0.26.1",
+    "dotenv": "^16.0.0",
+    "mongodb": "^4.4.1",
     "next": "12.1.0",
     "node-html-parser": "^5.3.3",
     "node-telegram-bot-api": "^0.56.0",
+    "queue-promise": "^2.2.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-query": "^3.34.19",
@@ -28,6 +36,8 @@
     "@types/react": "17.0.43",
     "eslint": "8.11.0",
     "eslint-config-next": "12.1.0",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.7.0",
     "typescript": "4.6.3"
   }
 }

@@ -1,21 +1,14 @@
 import TelegramBot from "node-telegram-bot-api";
 import winston from "winston";
+import { withLogger } from "../utils/logging";
 
 const token = process.env.TELEGRAM_TOKEN || "";
-const chatId = process.env.TELEGRAM_CHAT_ID || "";
 
-// Create a bot that uses 'polling' to fetch new updates
-const bot = new TelegramBot(token);
-
-const getTelegramLogger = (logger: winston.Logger): winston.Logger => {
-  return logger.child({ service: "teleram" });
-};
+export const bot = new TelegramBot(token);
 
 const verifyCredentials = () => {
-  if (!token || !chatId) {
-    throw new Error(
-      "Please provider TELEGRAM_TOKEN and TELEGRAM_CHAT_ID environment variables"
-    );
+  if (!token) {
+    throw new Error("Please provider TELEGRAM_TOKEN environment variables");
   }
 };
 
@@ -23,22 +16,20 @@ const MAX_TELEGRAM_CHARS = 4096;
 
 export const sendToTelegram = async (
   logger: winston.Logger,
+  chatId: string,
   message: string
 ): Promise<void> => {
-  logger = getTelegramLogger(logger);
-  const name = `Send message (starts with ${message.slice(0, 50)}...)`;
-  try {
-    verifyCredentials();
-    logger.info(`${name} started`);
-    while (message.length > 0) {
-      await bot.sendMessage(chatId, message.slice(0, MAX_TELEGRAM_CHARS), {
-        disable_web_page_preview: true,
-      });
-      message = message.slice(MAX_TELEGRAM_CHARS + 1);
+  verifyCredentials();
+  return withLogger(
+    logger.child({ service: "teleram" }),
+    `Send message (size ${message.length}) to ${chatId}`,
+    async () => {
+      while (message.length > 0) {
+        await bot.sendMessage(chatId, message.slice(0, MAX_TELEGRAM_CHARS), {
+          disable_web_page_preview: true,
+        });
+        message = message.slice(MAX_TELEGRAM_CHARS + 1);
+      }
     }
-    logger.info(`${name} succeed`);
-  } catch (error) {
-    logger.error(`${name} failed`, error);
-    throw error;
-  }
+  );
 };
