@@ -1,7 +1,7 @@
 import winston from "winston";
 import { TrackerRequest } from "../types/request";
 import { ScrapedEntity, Scraper } from "../types/scraper";
-import { sendToTelegram } from "./telegram";
+import { sendToTelegram, TelegramError } from "./telegram";
 import { scraper as myHomeScraper } from "../scrapers/myhome";
 import { scraper as ssScraper } from "../scrapers/ss";
 
@@ -56,11 +56,11 @@ export const notifyRequest = async (
   logger: winston.Logger,
   message: string,
   request: TrackerRequest
-): Promise<void> => {
+): Promise<TelegramError | undefined> => {
   for (const notifier of request.notifiers) {
     switch (notifier.type) {
       case "telegram":
-        await sendToTelegram(logger, notifier.chatId, message);
+        return sendToTelegram(logger, notifier.chatId, message);
     }
   }
 };

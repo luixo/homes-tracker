@@ -1,7 +1,9 @@
 import TelegramBot from "node-telegram-bot-api";
 import winston from "winston";
 import { TrackerRequest } from "../server/types/request";
+import { getTrackerRequestToChatLinkByChatId } from "../server/utils/db/request-chat-links";
 import {
+  getTrackerRequest,
   upsertTrackerRequest,
   upsertTrackerRequestEnabledStatus,
 } from "../server/utils/db/requests";
@@ -13,11 +15,14 @@ import { createRequestByChatId, getExistingRequestByChatId } from "./utils";
 
 export type BotContext = {
   respond: (message: string) => Promise<TelegramBot.Message>;
+  sendCard: (chatId: string) => Promise<TelegramBot.Message>;
   logger: winston.Logger;
   chatId: string;
 };
 
-type BotHandler = (context: BotContext, match: string) => Promise<void>;
+type BotHandler = ((context: BotContext, match: string) => Promise<void>) & {
+  adminOnly?: boolean;
+};
 
 const requestHelpResponse = [
   'Чтобы создать или изменить запрос - напиши его в виде фильтров разделенных символом ";", например:',
@@ -28,8 +33,8 @@ const requestHelpResponse = [
   "- По цене (можно выбрать один):",
   "-- По цене за всё: price-total",
   "-- По цене за м2: price-per-meter",
-  "-- По цене за всё: price-per-room",
-  "-- По цене за всё: price-per-bedroom",
+  "-- По цене за комнату: price-per-room",
+  "-- По цене за спальню: price-per-bedroom",
   "- По площади: area",
   "- По количеству комнат или спален (ожно выбрать один):",
   "-- По количеству комнат: rooms",
@@ -48,6 +53,11 @@ const helpResponse = [
   "/enable - включить уведомления",
   "/help - эта подсказка",
 ].join("\n");
+
+const restrictAdmin = (handler: BotHandler): BotHandler => {
+  handler.adminOnly = true;
+  return handler;
+};
 
 export const handlers: Record<string, BotHandler> = {
   help: async (context) => {
@@ -198,4 +208,30 @@ export const handlers: Record<string, BotHandler> = {
     );
     context.respond(`Запрос теперь выключен`);
   },
+  getUserRequest: restrictAdmin(async (context, lookupChatId) => {
+    const maybeRequestLink = await getTrackerRequestToChatLinkByChatId(
+      context.logger,
+      lookupChatId
+    );
+    if (!maybeRequestLink) {
+      context.respond(`Для пользователя ${lookupChatId} нет запроса`);
+    } else {
+      const request = await getTrackerRequest(
+        context.logger,
+        maybeRequestLink._id
+      );
+      if (!request) {
+        context.respond(
+          `Для пользователя обнаружена связь с запросом ${maybeRequestLink._id}, но сам запрос не обнаружен`
+        );
+      } else {
+        context.respond(
+          `Запрос пользователя ${lookupChatId} выглядит так:\n${formatRequest(
+            request
+          )}`
+        );
+      }
+    }
+    context.sendCard(lookupChatId);
+  }),
 };

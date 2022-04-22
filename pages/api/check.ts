@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import {
   getTrackerRequests,
   updateTrackerRequestWithTimestamp,
+  upsertTrackerRequestEnabledStatus,
 } from "../../server/utils/db/requests";
 import { getEntitiesWithTimestamp } from "../../server/utils/db/entities";
 import {
@@ -12,12 +13,27 @@ import { verifyEntityOverRequest as doesEntityMatchRequest } from "../../server/
 import { putMatchedEntities } from "../../server/utils/db/request-matches";
 import { createQueue, getHandlerLogger } from "../../server/utils";
 import { withLogger } from "../../server/utils/logging";
+import { TelegramError } from "../../server/services/telegram";
+import winston from "winston";
 
 type Response =
   | {
       success: string;
     }
   | { error: string; stack?: string };
+
+const checkTelegramError = async (
+  logger: winston.Logger,
+  requestId: string,
+  maybeError: TelegramError | undefined
+) => {
+  if (maybeError?.message.includes("blocked by the user")) {
+    logger.info(
+      `Tracker request ${requestId} has been stopped because user blocked bot`
+    );
+    await upsertTrackerRequestEnabledStatus(logger, requestId, false);
+  }
+};
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
   try {
@@ -44,40 +60,55 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
       for (const request of trackerRequests) {
         if (!request.enabled) {
           logger.info(`Request ${request._id} is disabled`);
-          return false;
-        }
-        let matchedIds: string[] = [];
-        for (const entity of entities) {
-          if (entity.scrapedTimestamp < request.notifiedTimestamp) {
-            continue;
-          }
-          const matches = doesEntityMatchRequest(entity, request);
-          if (matches) {
-            if (matchedIds.length < 10) {
-              addToQueue(() =>
-                notifyRequest(logger, formatScrapedEntity(entity), request)
-              );
-            } else if (matchedIds.length === 10) {
-              addToQueue(() =>
-                notifyRequest(
-                  logger,
-                  "У тебя больше 10 сообщений за одну проверку, кажется, надо сузить критерии",
-                  request
-                )
-              );
+        } else {
+          logger.info(
+            `Looking up request ${request._id} with notified timestamp ${request.notifiedTimestamp}`
+          );
+          let matchedIds: string[] = [];
+          for (const entity of entities) {
+            if (entity.scrapedTimestamp < request.notifiedTimestamp) {
+              continue;
             }
-            matchedIds.push(entity._id);
-          }
-        }
-        void withLogger(
-          logger,
-          `Put ${matchedIds.length} entities for request ${request._id}`,
-          async () => {
-            if (matchedIds.length !== 0) {
-              return putMatchedEntities(logger, request._id, matchedIds);
+            const matches = doesEntityMatchRequest(entity, request);
+            if (matches) {
+              if (matchedIds.length < 10) {
+                addToQueue(() =>
+                  notifyRequest(
+                    logger,
+                    formatScrapedEntity(entity),
+                    request
+                  ).then((maybeError) =>
+                    checkTelegramError(logger, request._id, maybeError)
+                  )
+                );
+              } else if (matchedIds.length === 10) {
+                addToQueue(() =>
+                  notifyRequest(
+                    logger,
+                    "У тебя больше 10 сообщений за одну проверку, кажется, надо сузить критерии",
+                    request
+                  ).then((maybeError) =>
+                    checkTelegramError(logger, request._id, maybeError)
+                  )
+                );
+              }
+              matchedIds.push(entity._id);
             }
           }
-        );
+          if (matchedIds.length === 0) {
+            logger.info(`No new matched ids for request ${request._id}`);
+          } else {
+            void withLogger(
+              logger,
+              `Put ${matchedIds.length} entities for request ${request._id}`,
+              async () => {
+                if (matchedIds.length !== 0) {
+                  return putMatchedEntities(logger, request._id, matchedIds);
+                }
+              }
+            );
+          }
+        }
         void withLogger(
           logger,
           `Update request ${request._id} with current timestamp`,

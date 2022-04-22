@@ -14,21 +14,33 @@ const verifyCredentials = () => {
 
 const MAX_TELEGRAM_CHARS = 4096;
 
+export type TelegramError = {
+  code: "ETELEGRAM";
+  message: string;
+};
+
 export const sendToTelegram = async (
   logger: winston.Logger,
   chatId: string,
   message: string
-): Promise<void> => {
+): Promise<TelegramError | undefined> => {
   verifyCredentials();
   return withLogger(
     logger.child({ service: "teleram" }),
-    `Send message (size ${message.length}) to ${chatId}`,
+    `Send message (size ${message.length}, starts with "${message.slice(
+      0,
+      10
+    )}..") to ${chatId}`,
     async () => {
-      while (message.length > 0) {
-        await bot.sendMessage(chatId, message.slice(0, MAX_TELEGRAM_CHARS), {
-          disable_web_page_preview: true,
-        });
-        message = message.slice(MAX_TELEGRAM_CHARS + 1);
+      try {
+        while (message.length > 0) {
+          await bot.sendMessage(chatId, message.slice(0, MAX_TELEGRAM_CHARS), {
+            disable_web_page_preview: true,
+          });
+          message = message.slice(MAX_TELEGRAM_CHARS + 1);
+        }
+      } catch (e) {
+        return e as TelegramError;
       }
     }
   );

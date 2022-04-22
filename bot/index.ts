@@ -5,6 +5,8 @@ import { BotContext, handlers } from "./handlers";
 
 dotenv.config({ path: "./.env.local" });
 
+const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS ?? "").split(",");
+
 const getContext = (
   bot: TelegramBot,
   message: TelegramBot.Message
@@ -19,6 +21,17 @@ const getContext = (
   }
   return {
     respond: (message) => bot.sendMessage(chatId, message),
+    sendCard: async (chatId) => {
+      const chat = await bot.getChat(chatId);
+      return bot.sendContact(
+        chatId,
+        chat.username || chat.title || "unknown",
+        chat.first_name || "unknown",
+        {
+          last_name: chat.last_name,
+        }
+      );
+    },
     logger: globalLogger.child({ service: "bot" }),
     chatId,
   };
@@ -38,7 +51,20 @@ const main = async () => {
       context.logger.info(
         `Got message with handler ${key} from ${context.chatId}`
       );
-      return handler(context, match ? match[1] : "");
+      try {
+        if (handler.adminOnly && !ADMIN_USER_IDS.includes(context.chatId)) {
+          bot.sendMessage(
+            context.chatId,
+            "Это действие может делать только администратор!"
+          );
+          return;
+        }
+        return handler(context, match ? match[1] : "");
+      } catch (e) {
+        context.logger.error(
+          `Error happened on message with handler ${key} from ${context.chatId}:\n${message.text}\n${e}`
+        );
+      }
     });
   });
   const initLogger = globalLogger.child({ handler: "init" });
