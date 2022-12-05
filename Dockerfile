@@ -47,6 +47,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 RUN wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" -O /app/.next/root.crt
 RUN chmod 0444 /app/.next/root.crt
 
+RUN npm install nodemon
+
 USER nextjs
 
 EXPOSE 443
@@ -54,4 +56,4 @@ EXPOSE 80
 
 ENV PORT 80
 
-CMD ["node", "server.js"]
+CMD ["node_modules/.bin/nodemon", "server.js"]
