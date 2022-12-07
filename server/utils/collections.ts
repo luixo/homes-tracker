@@ -1,4 +1,4 @@
-import { Collection } from "mongodb";
+import { Collection, Document } from "mongodb";
 import winston from "winston";
 import { withMongo } from "../services/mongodb";
 import {
@@ -10,7 +10,7 @@ import { ScrapedEntity } from "../types/scraper";
 import { withLogger } from "./logging";
 
 const withCollection =
-  <C>(collectionName: string) =>
+  <C extends Document>(collectionName: string) =>
   async <T>(
     logger: winston.Logger,
     action: string,

@@ -106,6 +106,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
                   return putMatchedEntities(logger, request._id, matchedIds);
                 }
               }
+            ).catch((error) =>
+              logger.error(
+                `Error while putting ${matchedIds.length} entities for request ${request._id}: ${error}`
+              )
             );
           }
         }
@@ -113,6 +117,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
           logger,
           `Update request ${request._id} with current timestamp`,
           () => updateTrackerRequestWithTimestamp(logger, request._id)
+        ).catch((error) =>
+          logger.error(
+            `Error while updating request ${request._id} with current timestamp: ${error}`
+          )
         );
       }
       await getQueuePromise();

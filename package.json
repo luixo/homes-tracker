@@ -1,6 +1,6 @@
 {
   "name": "homes-tracker",
-  "version": "0.1.30",
+  "version": "0.1.33",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,6 +11,7 @@
     "docker:publish": "docker tag homes-tracker:latest $DOCKER_PREFIX/homes-tracker:$(node -p -e \"require('./package.json').version\") && docker push $DOCKER_PREFIX/homes-tracker:$(node -p -e \"require('./package.json').version\")",
     "update:patch": "npm version --no-git-tag-version patch",
     "bot:dev": "nodemon bot/index.ts",
+    "bot:prod": "forever -v -c ts-node bot/index.ts",
     "bot:docker:build": "docker build -t homes-tracker-bot -f bot/Dockerfile .",
     "bot:docker:publish": "docker tag homes-tracker-bot:latest $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\") && docker push $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\")"
   },
@@ -20,11 +21,11 @@
     "aws-sdk": "^2.1100.0",
     "axios": "^0.26.1",
     "dotenv": "^16.0.0",
+    "forever": "^4.0.3",
     "mongodb": "^4.4.1",
     "next": "12.1.0",
     "node-html-parser": "^5.3.3",
     "node-telegram-bot-api": "^0.56.0",
-    "nodemon": "^2.0.15",
     "queue-promise": "^2.2.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
@@ -38,6 +39,7 @@
     "@types/react": "17.0.43",
     "eslint": "8.11.0",
     "eslint-config-next": "12.1.0",
+    "nodemon": "^2.0.15",
     "ts-node": "^10.7.0",
     "typescript": "4.6.3"
   }

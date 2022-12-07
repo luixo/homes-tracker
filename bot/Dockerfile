@@ -17,4 +17,4 @@ ENV NODE_ENV production
 RUN wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" -O /app/root.crt
 RUN chmod 0444 /app/root.crt
 
-CMD ["npm", "run", "bot:dev"]
+CMD ["npm", "run", "bot:prod"]
