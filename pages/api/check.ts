@@ -4,7 +4,7 @@ import {
   updateTrackerRequestWithTimestamp,
   upsertTrackerRequestEnabledStatus,
 } from "../../server/utils/db/requests";
-import { getEntitiesWithTimestamp } from "../../server/utils/db/entities";
+import { getEntitiesWithScrapedTimestampGt } from "../../server/utils/db/entities";
 import {
   notifyRequest,
   formatScrapedEntity,
@@ -52,7 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
       const entities = await withLogger(
         logger,
         `Fetching entities with minimal timestamp ${minimalTimestamp}`,
-        (logger) => getEntitiesWithTimestamp(logger, minimalTimestamp),
+        (logger) => getEntitiesWithScrapedTimestampGt(logger, minimalTimestamp),
         { onSuccess: (entities) => `${entities.length} entities fetched` }
       );
       const { add: addToQueue, getResolvePromise: getQueuePromise } =

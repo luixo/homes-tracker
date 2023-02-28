@@ -35,13 +35,23 @@ export const getEntitiesIds = async (
   );
 };
 
-export const getEntitiesWithTimestamp = async (
+export const getEntitiesWithScrapedTimestampGt = async (
   logger: winston.Logger,
   timestamp: number
 ): Promise<ScrapedEntity[]> => {
   return withEntities(logger, `Get greater than timestamp`, (collection) =>
     collection.find({ scrapedTimestamp: { $gte: timestamp } }).toArray()
   );
+};
+
+export const removeEntitiesWithPostedTimestampLt = async (
+  logger: winston.Logger,
+  timestamp: number
+): Promise<number> => {
+  return withEntities(logger, `Get less than timestamp`, async (collection) => {
+    const result = await collection.deleteMany({ postedTimestamp: { $lte: timestamp } })
+    return result.deletedCount;
+  });
 };
 
 export const putEntity = async (
