@@ -11,12 +11,11 @@ export const putMatchedEntities = async (
     logger,
     `Put match ids (${ids.length})`,
     async (collection) => {
-      const match = await collection.findOne({ _id: requestId });
-      if (match) {
-        const nextIds = Array.from(new Set([...match.matchIds, ...ids]));
+      const amount = await collection.countDocuments({ _id: requestId });
+      if (amount !== 0) {
         return collection.updateOne(
           { _id: requestId },
-          { $set: { matchIds: nextIds } }
+          { $push: { matchIds: { $each: ids } } }
         );
       } else {
         return collection.insertOne({ _id: requestId, matchIds: ids });
