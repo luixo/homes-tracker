@@ -28,5 +28,5 @@ export const withEntities = withCollection<ScrapedEntity>("entities");
 export const withTrackerRequests = withCollection<TrackerRequest>("requests");
 export const withChatRequestLinks =
   withCollection<RequestChatLink>("request-links");
-export const withRequestMatches =
-  withCollection<RequestMatch>("request-matches");
+// export const withRequestMatches =
+//   withCollection<RequestMatch>("request-matches");

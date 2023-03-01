@@ -10,7 +10,6 @@ import {
   formatScrapedEntity,
 } from "../../server/services/scrapers";
 import { verifyEntityOverRequest as doesEntityMatchRequest } from "../../server/utils/filters";
-import { putMatchedEntities } from "../../server/utils/db/request-matches";
 import { createQueue, getHandlerLogger } from "../../server/utils";
 import { withLogger } from "../../server/utils/logging";
 import { TelegramError } from "../../server/services/telegram";
@@ -103,7 +102,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
               `Put ${matchedIds.length} entities for request ${request._id}`,
               async () => {
                 if (matchedIds.length !== 0) {
-                  return putMatchedEntities(logger, request._id, matchedIds);
+                  // We used to put entities here, but it took too much CPU
+                  // return putMatchedEntities(logger, request._id, matchedIds);
                 }
               }
             ).catch((error) =>

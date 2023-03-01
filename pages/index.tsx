@@ -5,7 +5,6 @@ import * as ReactQuery from "react-query";
 import { getQueryKeyEntities } from "../client/queries";
 import { ENTITIES_FETCH_AMOUNT, Service } from "../client/service";
 import { styled } from "../client/styles";
-import { getMatchedEntities } from "../server/utils/db/request-matches";
 import { getEntitiesByIds } from "../server/utils/db/entities";
 import { ScrapedEntity } from "../server/types/scraper";
 import { globalLogger } from "../server/logger";
@@ -62,7 +61,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     };
   }
   try {
-    const entityIds = await getMatchedEntities(logger, trackerId);
+    const entityIds: string[] = [];
+    // We used to put entities here, but it took too much CPU
+    // const entityIds = await getMatchedEntities(logger, trackerId);
     const queryClient = new ReactQuery.QueryClient({
       defaultOptions: {
         queries: {
