@@ -56,7 +56,7 @@ const mapFullElementToEntity = (id: string, html: string): ScrapedEntity => {
   const addressBlock = htmlDoc.querySelector("span.address");
   const mapFullElementToEntity = htmlDoc.querySelector("#map");
 
-  const dateBlock = htmlDoc.querySelector(".date span");
+  const dateBlock = htmlDoc.querySelector(".date.d-flex span");
   const price = Number(fbTrackObject.preferred_price_range[0]);
   const currency = fbTrackObject.currency === "USD" ? "$" : "₾";
   const realtyType = getRealtyType(trackingDataObject.prtype_id);
