@@ -40,3 +40,7 @@ export const getStopSignal = () => {
 
 export const getHandlerLogger = (req: NextApiRequest) =>
   globalLogger.child({ handler: req.url?.replace("/api", "") });
+
+export const nonNullishGuard = <T>(
+  arg: T
+): arg is Exclude<T, null | undefined> => arg !== null && arg !== undefined;

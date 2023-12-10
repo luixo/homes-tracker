@@ -1,18 +1,85 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import * as nodeHtmlParser from "node-html-parser";
-import { RealtyType, ScrapedEntity, Scraper } from "../types/scraper";
+import { Currency, RealtyType, ScrapedEntity, Scraper } from "../types/scraper";
 import { withLogger } from "../utils/logging";
-import { DAY } from "../utils/time";
+
+type CurrencyId =
+  // USD
+  | "1"
+  // EURO
+  | "2"
+  // GEL
+  | "3";
+
+type Model = {
+  product_id: string;
+  user_id: string;
+  parent_id: string | null;
+  makler_id: string | null;
+  has_logo: null | "1";
+  makler_name: string | null;
+  loc_id: string;
+  street_address: string;
+  yard_size: string; // int look-a-like
+  yard_size_type_id: "0" | "1";
+  // {"FOR_SALE":1,"FOR_BAIL":2,"FOR_RENT":3,"DAILY_RENT":7,"FOR_LEASE":8};
+  adtype_id: "1" | "2" | "3" | "7" | "8";
+  // {"FLAT":1,"HOUSE":2,"COMMERCIAL":4,"LAND":5,"HOTELS":7}
+  product_type_id: "1" | "2" | "4" | "5" | "7";
+  price: string; // int look-a-like
+  photo: string; // "9/2/5/6/9"
+  photo_ver: string; // int look-a-like
+  photos_count: string; // int look-a-like
+  area_size_value: string; // int look-a-like
+  currency_id: CurrencyId;
+  order_date: string; // date look-a-like
+  price_type_id: "0";
+  // {"20":"SUPER VIP","15":"VIP +","10":"VIP"}
+  vip: "0" | "10" | "15" | "20";
+  color: string;
+  // 3 - older, 1 - newly, 14 - non agirucultural land, 18 - country house, 17 - house, 13 - land
+  estate_type_id: "0" | "1" | "2" | "3" | "14" | "18" | "17" | "13";
+  area_size: string; // float look-a-like
+  area_size_type_id: "1" | "3"; // 3 - hectare, 1 - m^2
+  comment: null | string;
+  map_lat: string; // float look-a-like
+  map_lon: string; // float look-a-like
+  l_living: "0";
+  special_persons: "0" | "1";
+  rooms: string; // float look-a-like
+  bedrooms: string; // int look-a-like
+  floor: string; // int look-a-like
+  parking_id: "0" | "1" | "2" | "3"; // 1 - garage, 2 - parking place
+  canalization: "0" | "1"; // needed in land
+  water: "0" | "1"; // needed in land
+  road: "0" | "1"; // needed in land
+  electricity: "0" | "1"; // needed in land
+  // {"PRIVATE":1,"AGENCY":2,"DEVELOPER":3}
+  owner_type_id: "1" | "2" | "3";
+  osm_id: string;
+  name_json: string;
+  pathway_json: string;
+  homeselfie: "0";
+  Currencies: Record<
+    CurrencyId,
+    {
+      currency_id: CurrencyId;
+      currency_symbol: string;
+      currency_rate: string; // int look-a-like
+      title: string; // like GEL
+    }
+  >;
+  name: string;
+  pathway: string;
+};
 
 const buildParams = (page: number): AxiosRequestConfig["params"] => {
   return {
     Keyword: "Tbilisi",
     AdTypeID: "3",
     PrTypeID: "1.2",
-    cities: "1996871",
-    GID: "1996871",
-    Ajax: "1",
-    Page: (page + 1).toString(),
+    cities: "1",
+    // Nothing above doesn't work on this old API :(
+    Page: page + 1,
   };
 };
 
@@ -33,81 +100,37 @@ const getRealtyType = (input: string): RealtyType => {
   }
 };
 
-const mapFullElementToEntity = (id: string, html: string): ScrapedEntity => {
-  const htmlDoc = nodeHtmlParser.parse(html);
-  const scripts = htmlDoc.querySelectorAll("script");
-  const fbTrackMatch = scripts
-    .map((script) => script.innerText.match(/var fbPixelData = (.*?);/))
-    .find((x): x is RegExpMatchArray => Boolean(x));
-  const fbTrackObject = fbTrackMatch ? JSON.parse(fbTrackMatch[1]) : 0;
-
-  const trackingDataMatch = scripts
-    .map((script) => script.innerText.match(/var TrackingData = (.*?);/))
-    .find((x): x is RegExpMatchArray => Boolean(x));
-  const trackingDataObject = trackingDataMatch
-    ? JSON.parse(trackingDataMatch[1])
-    : 0;
-
-  const dBlocks = htmlDoc.querySelectorAll(".amenities-ul .d-block");
-  const yardSizeMatch = dBlocks.find((block) =>
-    block.innerText.includes("Yard area")
-  );
-
-  const addressBlock = htmlDoc.querySelector("span.address");
-  const mapFullElementToEntity = htmlDoc.querySelector("#map");
-
-  const dateBlock = htmlDoc.querySelector(".date.d-flex span");
-  const price = Number(fbTrackObject.preferred_price_range[0]);
-  const currency = fbTrackObject.currency === "USD" ? "$" : "₾";
-  const realtyType = getRealtyType(trackingDataObject.prtype_id);
-  const meters = Number(trackingDataObject.area_size);
-  const yardSize = yardSizeMatch
-    ? Number(yardSizeMatch.innerText.trim().split(": ")[1].split(" ")[0])
-    : null;
-  const rooms = Number(trackingDataObject.rooms);
-  const bedrooms = Number(trackingDataObject.bedrooms);
-  const address = addressBlock ? addressBlock.innerText.trim() : "unknown";
-  const coordinates = mapFullElementToEntity
-    ? [
-        Number(mapFullElementToEntity.getAttribute("data-lng")),
-        Number(mapFullElementToEntity.getAttribute("data-lat")),
-      ]
-    : null;
-
-  let postedTimestamp = 0;
-  if (dateBlock) {
-    let now = new Date();
-    let [date, time] = dateBlock.innerText.split(" ");
-    if (date === "Today" || date === "Yesterday") {
-      if (date === "Yesterday") {
-        now = new Date(now.valueOf() - DAY);
-      }
-      date = now.toISOString().slice(0, 10);
-    } else {
-      date = new Date().getFullYear() + " " + date;
-    }
-    postedTimestamp = new Date([date, time].join("T")).valueOf();
+const getModelCurrency = (currencyId: CurrencyId): Currency => {
+  switch (currencyId) {
+    case "1":
+      return "$";
+    case "3":
+      return "₾";
+    default:
+      return "?";
   }
+};
 
+const mapModelToEntity = (model: Model): ScrapedEntity => {
   return {
     version: "v1",
-    _id: `${ID}:${id}`,
+    _id: `${ID}:${model.product_id}`,
     scraperId: ID,
-    entityId: id,
-    price,
-    currency: currency === "$" ? "$" : "₾",
-    areaSize: meters,
-    yardAreaSize: yardSize,
-    realtyType,
-    rooms,
-    bedrooms,
+    entityId: model.product_id,
+    price: Number(model.price),
+    currency: getModelCurrency(model.currency_id),
+    areaSize: Number(model.area_size),
+    yardAreaSize: Number(model.yard_size),
+    realtyType: getRealtyType(model.product_type_id),
+    rooms: Number(model.rooms),
+    bedrooms: Number(model.bedrooms),
     location: {
-      address,
+      address: [model.street_address, model.name].join(" / "),
       district: null,
       subdistrict: null,
-      coordinates,
+      coordinates: [Number(model.map_lat), Number(model.map_lon)],
     },
-    postedTimestamp,
+    postedTimestamp: new Date(model.order_date).valueOf(),
     scrapedTimestamp: Date.now(),
   };
 };
@@ -115,42 +138,37 @@ const mapFullElementToEntity = (id: string, html: string): ScrapedEntity => {
 const getUrl = (id: string): string => `https://www.myhome.ge/en/pr/${id}/`;
 const ID = "myhome.ge";
 
-export const scraper: Scraper = {
+export const scraper: Scraper<ScrapedEntity, null> = {
   id: ID,
+  prepare: async () => null,
   pageFetchers: [
-    (logger, page) =>
+    (logger, _prepareResult, page) =>
       withLogger(
         logger,
         `Fetching ${ID} page #${page}`,
         async () => {
           const response: AxiosResponse<{
-            Data: { Prs: { product_id: string; vip: string }[] };
-          }> = await axios("https://www.myhome.ge/en/s/", {
-            params: buildParams(page),
+            Prs: { Prs: Model[] };
+          }> = await axios("https://api.myhome.ge/en/products/", {
+            method: "POST",
+            data: buildParams(page),
           });
-          const ids = response.data.Data.Prs.map(
-            (element) => element.product_id
-          );
-          const nonVipAdsFound = response.data.Data.Prs.some(
-            (element) => element.vip === "0"
-          );
+          const models = response.data.Prs.Prs;
+          const results = models.map(mapModelToEntity);
           return {
-            ids,
-            nonVipAdsFound,
+            results: results,
+            nonVipAdsFound: models.some((model) => model.vip === "0"),
           };
         },
         {
           onSuccess: (response) =>
-            `${response.ids.length} elements fetched (${
+            `${response.results.length} elements fetched (${
               response.nonVipAdsFound ? "non-vips found" : "non-vips not found"
             })`,
         }
       ),
   ],
-  fetchEntity: async (logger, id) =>
-    withLogger(logger, `Fetching ${ID} id #${id}`, async () => {
-      const response: AxiosResponse<string> = await axios(getUrl(id));
-      return mapFullElementToEntity(id, response.data);
-    }),
+  getEntityId: (model) => model.entityId,
+  fetchEntity: async (_logger, _prepareResult, result) => result,
   getUrl,
 };

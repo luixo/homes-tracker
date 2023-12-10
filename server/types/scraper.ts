@@ -34,16 +34,20 @@ type ScrapedEntityV1 = {
 
 export type ScrapedEntity = ScrapedEntityV1;
 
-export type Scraper = {
+export type Scraper<T, P> = {
   id: string;
+  prepare: (logger: winston.Logger) => Promise<P>;
   pageFetchers: ((
     logger: winston.Logger,
+    prepareResult: P,
     page: number
-  ) => Promise<{ ids: string[]; nonVipAdsFound: boolean }>)[];
+  ) => Promise<{ results: T[]; nonVipAdsFound: boolean }>)[];
   fetchEntity: (
     logger: winston.Logger,
-    id: string
+    prepareResult: P,
+    result: T
   ) => Promise<ScrapedEntity | null>;
+  getEntityId: (result: T) => string;
   getUrl: (id: string) => string;
 };
 

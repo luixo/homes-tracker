@@ -5,35 +5,42 @@ import { putEntity, removeEntity } from "../utils/db/entities";
 import { withLogger } from "./logging";
 import { MINUTE, SECOND } from "./time";
 
-export const fetchAndPutIds = async (
+const fetchAndPutIds = async <T, P>(
   logger: winston.Logger,
-  ids: string[],
-  scraper: Scraper
+  results: T[],
+  prepareResult: P,
+  scraper: Scraper<T, P>
 ): Promise<string[]> => {
   let entityIds: string[] = [];
-  for (const id of ids) {
-    const entity = await scraper.fetchEntity(logger, id);
+  for (const result of results) {
+    const entity = await scraper.fetchEntity(logger, prepareResult, result);
     // We're not filthy scraperers, aren't we?
-    let promises: Promise<unknown>[] = [wait(250)];
+    let promises: Promise<unknown>[] = [];
     if (entity) {
       promises.push(putEntity(logger, entity));
       entityIds.push(entity._id);
     } else {
-      promises.push(removeEntity(logger, id));
+      promises.push(removeEntity(logger, scraper.getEntityId(result)));
     }
     await Promise.all(promises);
   }
   return entityIds;
 };
 
-const MAX_PAGES = process.env.MAX_PAGES || Infinity;
+const maxPagesRaw = Number(process.env.MAX_PAGES);
+const MAX_PAGES = Number.isNaN(maxPagesRaw) ? Infinity : maxPagesRaw;
 
-export const scrapeEntities = async (
+export const scrapeEntities = async <T, P>(
   logger: winston.Logger,
-  scraper: Scraper,
+  scraper: Scraper<T, P>,
   existingIds: string[],
   shouldBailOutOnNoNewIds: boolean
 ): Promise<string[]> => {
+  const prepareResult = await withLogger(
+    logger.child({ scraper: `${scraper.id}` }),
+    `Scraping preparation`,
+    scraper.prepare
+  );
   let entityIds: string[] = [];
   for (const [index, fetcher] of Object.entries(scraper.pageFetchers)) {
     const { ids: newEntityIds } = await withLogger(
@@ -47,31 +54,35 @@ export const scrapeEntities = async (
           }
           page++;
 
+          // We're not filthy scraperers, aren't we?
+          await wait(250);
           const pageResult = await withLogger(
             logger,
             `Fetch page #${page}`,
             async () => {
               const pageResult = await timeout(
-                fetcher(logger, page),
+                fetcher(logger, prepareResult, page),
                 5 * SECOND
               );
               if (!pageResult) {
                 return null;
               }
               return {
-                ids: pageResult.ids,
+                results: pageResult.results,
                 nonVipAdsFound: pageResult.nonVipAdsFound,
-                filteredIds: pageResult.ids.filter(
-                  (id) => !existingIds.includes(id)
+                filteredResults: pageResult.results.filter(
+                  (result) => !existingIds.includes(scraper.getEntityId(result))
                 ),
               };
             },
             {
               onSuccess: (response) =>
                 response
-                  ? `${response.filteredIds.length} new ids found${
-                      response.filteredIds.length
-                        ? ` : ${response.filteredIds.join(", ")}`
+                  ? `${response.filteredResults.length} new ids found${
+                      response.filteredResults.length
+                        ? ` : ${response.filteredResults
+                            .map(scraper.getEntityId)
+                            .join(", ")}`
                         : ""
                     }`
                   : undefined,
@@ -81,17 +92,24 @@ export const scrapeEntities = async (
           if (!pageResult) {
             continue;
           }
-          if (pageResult.filteredIds.length !== 0) {
+          if (pageResult.filteredResults.length !== 0) {
             const elementsResult = await timeout(
-              fetchAndPutIds(logger, pageResult.filteredIds, scraper),
+              fetchAndPutIds(
+                logger,
+                pageResult.filteredResults,
+                prepareResult,
+                scraper
+              ),
               10 * MINUTE
             );
             if (elementsResult) {
               entityIds.push(...elementsResult);
-              existingIds = existingIds.concat(pageResult.filteredIds);
+              existingIds = existingIds.concat(
+                pageResult.filteredResults.map(scraper.getEntityId)
+              );
             }
           } else if (
-            pageResult.ids.length === 0 ||
+            pageResult.results.length === 0 ||
             (shouldBailOutOnNoNewIds && pageResult.nonVipAdsFound)
           ) {
             break;

@@ -1,200 +1,218 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import winston from "winston";
-import * as nodeHtmlParser from "node-html-parser";
 
-import streets from "./location-data/streets.json";
-import subdistricts from "./location-data/subdistricts.json";
-import districts from "./location-data/districts.json";
-import { Currency, RealtyType, ScrapedEntity, Scraper } from "../types/scraper";
+import { ScrapedEntity, Scraper } from "../types/scraper";
 import { withLogger } from "../utils/logging";
+import { nonNullishGuard } from "../utils";
 
-const clearNumbers = (input: string): number =>
-  Number(
-    input
-      .split("")
-      .map((char) => (/\d/.test(char) ? char : ""))
-      .join("")
-  );
+type RealStateItemModel = {
+  applicationId: number;
+  status: 0; // ??
+  address: {
+    municipalityId: null;
+    municipalityTitle: null;
+    cityId: number;
+    cityTitle: string;
+    districtId: number;
+    districtTitle: string;
+    subdistrictId: number;
+    subdistrictTitle: string;
+    streetId: number;
+    streetTitle: string;
+    streetNumber: string | null;
+  };
+  price: {
+    priceGeo: number | null;
+    unitPriceGeo: number | null;
+    priceUsd: number | null;
+    unitPriceUsd: number | null;
+    currencyType: number;
+  };
+  appImages: {
+    fileName: string;
+    isMain: boolean;
+    is360: boolean;
+    orderNo: number | null;
+    imageType: number;
+  }[];
+  imageCount: number;
+  title: string;
+  shortTitle: string;
+  description: string | null;
+  totalArea: number;
+  totalAmountOfFloor: number | null;
+  floorNumber: string;
+  numberOfBedrooms: number;
+  type: 4 | 5 | 6; // ??
+  dealType: 1; // ??
+  isMovedUp: boolean;
+  isHighlighted: boolean;
+  isUrgent: boolean;
+  vipStatus: 0 | 2 | 3; // ??
+  hasRemoteViewing: boolean;
+  videoLink: null;
+  commercialRealEstateType: 0 | 31; // ??
+  orderDate: string;
+  createDate: string;
+  userId: string;
+  isFavorite: boolean;
+  isForUkraine: boolean;
+  isHidden: boolean;
+  isUserHidden: boolean;
+  isConfirmed: boolean;
+  detailUrl: string;
+  homeId: null;
+  userInfo: null | {
+    name: string;
+    image: string;
+    userType: 2;
+  };
+  similarityGroup: null;
+};
 
-const buildParams = (page: number): AxiosRequestConfig["params"] => {
+const buildParams = (
+  realEstateType: number,
+  page: number
+): AxiosRequestConfig["params"] => {
   return {
-    MunicipalityId: "95",
-    CityIdList: "95",
-    "StatusField.FieldId": "34",
-    "StatusField.Type": "SingleSelect",
-    "StatusField.StandardField": "Status",
-    PriceType: false,
-    CurrencyId: "2",
-    "Sort.SortExpression": '"OrderDate"+DESC',
-    Page: page + 1,
+    cityIdList: [95],
+    currencyId: 1,
+    page: page + 1,
+    pageSize: 20,
+    realEstateDealType: 1,
+    order: 1, // Order by date desc.
+    realEstateType,
   };
 };
 
-const mapFullElementToEntity = (id: string, rawHtml: string): ScrapedEntity => {
-  const html = nodeHtmlParser.parse(rawHtml);
-  const scripts = html
-    .querySelectorAll("script")
-    .map((script) => script.innerText);
-
-  const areaSizeBlock = html.querySelector(".WholeFartBlock text");
-  const yardSizeBlock = [...html.querySelectorAll(".ProjBotEach")]
-    .map((x) => x.innerText)
-    .find((x) => x.includes("yard"));
-  const roomsOrBedroomsBlocks = [
-    ...html.querySelectorAll(".RoomsParBlock"),
-  ].map((x) => x.innerText);
-  const roomsBlock = roomsOrBedroomsBlocks.find((x) => x.includes("Rooms"));
-  const bedroomsBlock = roomsOrBedroomsBlocks.find((x) =>
-    x.includes("Bedrooms")
-  );
-  const navList = html.querySelector(".detailed_page_navlist ul")!;
-  const rentTypeNavItem = navList.querySelector("li:nth-child(2)");
-  const lastNavItem = navList.querySelector("li:last-child a");
-  const timestampBlock = html.querySelector(".add_date_block");
-
-  const meters = areaSizeBlock
-    ? clearNumbers(areaSizeBlock.innerText.split("m")[0]) ?? 0
-    : 0;
-  const yardSize = yardSizeBlock
-    ? clearNumbers(yardSizeBlock.split("m")[0])
-    : null;
-  const rooms = roomsBlock ? clearNumbers(roomsBlock) : 0;
-  const bedrooms = bedroomsBlock ? clearNumbers(bedroomsBlock) : 0;
-
-  let realtyType: RealtyType = "unknown";
-  if (rentTypeNavItem) {
-    const trimmedType = rentTypeNavItem.innerText.trim();
-    if (trimmedType === "Flat") {
-      realtyType = "apartment";
-    }
-    if (trimmedType === "Private House") {
-      realtyType = "house";
-    }
+const mapModalToEntity = (model: RealStateItemModel): ScrapedEntity | null => {
+  if (!model.price.priceGeo || !model.price.priceUsd) {
+    return null;
   }
-
-  const priceScript = scripts.find((script) =>
-    script.includes("sourceCurrencyId")
-  );
-
-  let price = 0;
-  let currency: Currency = "?";
-  if (priceScript) {
-    const currencyMatch = priceScript.match(
-      /var sourceCurrencyId = (\d+);/
-    )?.[1];
-    const priceMatch = priceScript.match(/var price = (\d+);/)?.[1];
-    if (currencyMatch && priceMatch) {
-      if (currencyMatch === "1") {
-        currency = "₾";
-      }
-      if (currencyMatch === "2") {
-        currency = "$";
-      }
-      price = Number(priceMatch);
-    }
-  }
-
-  const elementLocationQuery = lastNavItem
-    ? lastNavItem
-        .getAttribute("href")!
-        .split("?")[1]
-        .split("&")
-        .map((element) => {
-          const [key, value] = element.split("=");
-          return { key, value };
-        })
-    : undefined;
-  const streetId = elementLocationQuery?.find(
-    (element) => element.key === "stId"
-  )?.value;
-  const subdistrictId = elementLocationQuery?.find(
-    (element) => element.key === "subdistr"
-  )?.value;
-  const subdistrictObject = subdistricts.find(
-    (subdistrict) => subdistrict.id.toString() === subdistrictId
-  );
-  const districtObject = districts.find(
-    (district) =>
-      district.id.toString() === subdistrictObject?.parentId.toString()
-  );
-  const streetObject = streets.find(
-    (street) => street.id.toString() === streetId
-  );
-
-  let postedTimestamp = 0;
-  if (timestampBlock) {
-    const [date, time] = timestampBlock.innerText.trim().split(" / ");
-    const posted = new Date(
-      date.split(".").reverse().join("-") + "T" + time
-    ).valueOf();
-    if (!isNaN(posted)) {
-      postedTimestamp = posted;
-    }
-  }
-
   return {
     version: "v1",
-    _id: `${ID}:${id}`,
-    entityId: id,
+    _id: `${ID}:${model.applicationId}`,
+    entityId: model.applicationId.toString(),
     scraperId: ID,
-    price,
-    currency,
-    realtyType,
-    areaSize: meters,
-    yardAreaSize: yardSize,
-    rooms,
-    bedrooms,
+    postedTimestamp: new Date(model.createDate).valueOf(),
+    scrapedTimestamp: Date.now(),
+    price:
+      model.price.currencyType === 1
+        ? model.price.priceGeo
+        : model.price.priceUsd,
+    currency: model.price.currencyType === 1 ? "₾" : "$",
+    realtyType:
+      model.type === 4
+        ? "house"
+        : model.type === 5
+        ? "apartment"
+        : model.type === 6
+        ? "commercial"
+        : "unknown",
+    areaSize: model.totalArea,
+    yardAreaSize: null,
+    rooms: model.numberOfBedrooms,
+    bedrooms: model.numberOfBedrooms,
     location: {
-      address: streetObject?.title.trim() ?? "unknown",
-      district: districtObject?.title.trim() ?? null,
-      subdistrict: subdistrictObject?.title.trim() ?? null,
+      address: `${model.address.streetTitle}${
+        model.address.streetNumber === null
+          ? ""
+          : ` ${model.address.streetNumber}`
+      }`,
+      district: model.address.districtTitle,
+      subdistrict: model.address.subdistrictTitle,
       coordinates: null,
     },
-    postedTimestamp,
-    scrapedTimestamp: Date.now(),
   };
 };
 
-const getUrl = (id: string) => `https://ss.ge/en/real-estate/${id}`;
+type PrepareResult = { token: string };
+
+const getUrl = (id: string) => `https://home.ss.ge/en/real-estate/${id}`;
 const ID = "ss.ge";
 
+const COOKIE_KEY = "ss-session-token";
+
+const extractToken = (cookie?: string | string[]) => {
+  //ss-session-token
+  if (cookie === undefined) {
+    throw new Error("Expected to have cookie!");
+  }
+  const getCookieFromString = (str: string) => {
+    const keyPart = str.split(";").map((s) => s.trim())[0];
+    if (!keyPart.startsWith(`${COOKIE_KEY}=`)) {
+      throw new Error(`Expected to have ${COOKIE_KEY} cookie key!`);
+    }
+    return keyPart.replace(`${COOKIE_KEY}=`, "");
+  };
+  if (typeof cookie === "string") {
+    return getCookieFromString(cookie);
+  }
+  const matchedCookie = cookie.find((element) => element.includes(COOKIE_KEY));
+  if (!matchedCookie) {
+    throw new Error(`Expected to have cookie with key ${COOKIE_KEY}!`);
+  }
+  return getCookieFromString(matchedCookie);
+};
+
+const prepare = (logger: winston.Logger) => {
+  return withLogger(
+    logger,
+    `Fetching ${ID} cookie token`,
+    async () => {
+      const response = await axios("https://home.ss.ge/ka/udzravi-qoneba");
+      return { token: extractToken(response.headers["set-cookie"]) };
+    },
+    {
+      onSuccess: () => `Token was fetched from ss.ge`,
+    }
+  );
+};
+
 const fetchPageByType =
-  (type: "house" | "flat") => async (logger: winston.Logger, page: number) => {
+  (type: "house" | "flat") =>
+  async (
+    logger: winston.Logger,
+    prepareResult: PrepareResult,
+    page: number
+  ) => {
     return withLogger(
       logger,
       `Fetching ${ID} page #${page} of type ${type}`,
       async () => {
-        const typePart = type === "house" ? "Private-House" : "Flat";
-        const response = await axios(
-          `https://ss.ge/en/real-estate/l/${typePart}/For-Rent`,
+        const realEstateType = type === "house" ? 4 : 5;
+        const response: AxiosResponse<{
+          realStateItemModel: RealStateItemModel[];
+        }> = await axios(
+          `https://api-gateway.ss.ge/v1/RealEstate/LegendSearch`,
           {
-            params: buildParams(page),
+            method: "POST",
+            headers: {
+              authorization: `Bearer ${prepareResult.token}`,
+              "content-type": "application/json",
+            },
+            data: buildParams(realEstateType, page),
           }
         );
-        const data = response.data;
+        const data = response.data.realStateItemModel
+          .map(mapModalToEntity)
+          .filter(nonNullishGuard);
         return {
-          ids: nodeHtmlParser
-            .parse(data)
-            .querySelectorAll(".latest_article_each")
-            .map((element) => {
-              return element.getAttribute("data-id")!;
-            }),
+          results: data,
           nonVipAdsFound: true,
         };
       },
       {
-        onSuccess: (response) => `${response.ids.length} elements fetched`,
+        onSuccess: (response) => `${response.results.length} elements fetched`,
       }
     );
   };
 
-export const scraper: Scraper = {
+export const scraper: Scraper<ScrapedEntity, PrepareResult> = {
   id: ID,
+  prepare,
   pageFetchers: [fetchPageByType("house"), fetchPageByType("flat")],
-  fetchEntity: async (logger, id) =>
-    withLogger(logger, `Fetching ${ID} id #${id}`, async () => {
-      const response: AxiosResponse<string> = await axios(getUrl(id));
-      return mapFullElementToEntity(id, response.data);
-    }),
+  getEntityId: (result) => result.entityId,
+  fetchEntity: async (_logger, _prepareResult, entity) => entity,
   getUrl,
 };

@@ -5,7 +5,7 @@ import { sendToTelegram, TelegramError } from "./telegram";
 import { scraper as myHomeScraper } from "../scrapers/myhome";
 import { scraper as ssScraper } from "../scrapers/ss";
 
-export const scrapers: Scraper[] = [myHomeScraper, ssScraper];
+export const scrapers: Scraper<any, any>[] = [ssScraper, myHomeScraper];
 
 const getUrlById = (scraperId: string, id: string): string => {
   const matchedScraper = scrapers.find((scraper) => scraper.id === scraperId);
