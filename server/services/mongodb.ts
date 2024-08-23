@@ -10,24 +10,10 @@ const baseDir = path.join(__dirname, "../../");
 let client: mongo.MongoClient;
 const getClient = () => {
   if (!client) {
-    if (
-      !process.env.MONGO_USER ||
-      !process.env.MONGO_PASSWORD ||
-      !process.env.MONGO_DATABASE
-    ) {
-      throw new Error(
-        "Env variables MONGO_USER, MONGO_PASSWORD and MONGO_DATABASE should be set"
-      );
+    const url = process.env.MONGO_CONN_STRING;
+    if (!url) {
+      throw new Error("Env variable MONGO_CONN_STRING should be set");
     }
-
-    const url = util.format(
-      "mongodb://%s:%s@%s/?replicaSet=%s&authSource=%s&ssl=true",
-      process.env.MONGO_USER,
-      process.env.MONGO_PASSWORD,
-      ["rc1b-h3onmg2pozqsdzo0.mdb.yandexcloud.net:27018"].join(","),
-      "rs01",
-      process.env.MONGO_DATABASE
-    );
 
     client = new mongo.MongoClient(url, {
       sslCA:
@@ -53,7 +39,7 @@ export const withMongo = async <T>(
   }
   const mongoClient = getClient();
   await mongoClient.connect();
-  const db = mongoClient.db(process.env.MONGO_DATABASE);
+  const db = mongoClient.db();
   const result = await run(db);
   return result;
 };

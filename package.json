@@ -1,6 +1,6 @@
 {
   "name": "homes-tracker",
-  "version": "0.1.37",
+  "version": "0.1.38",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,6 +16,7 @@
     "bot:docker:publish": "docker tag homes-tracker-bot:latest $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\") && docker push $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\")"
   },
   "dependencies": {
+    "@sindresorhus/transliterate": "^1.6.0",
     "@stitches/react": "^1.2.7",
     "@turf/boolean-point-in-polygon": "^6.5.0",
     "aws-sdk": "^2.1100.0",

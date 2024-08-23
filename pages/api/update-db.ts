@@ -20,6 +20,7 @@ type Response =
 type UpdateOptions = {
   shouldWipe: boolean;
   selectedScraperIds?: string[];
+  maxPages?: number;
   dryRun: boolean;
   keepRunningOnKnownIds: boolean;
 };
@@ -34,6 +35,7 @@ const getOptions = (query: NextApiRequest["query"]): UpdateOptions => {
       selectedScraperIds.length === 0 ? undefined : selectedScraperIds,
     dryRun: Boolean(NO_DB_UPDATE),
     keepRunningOnKnownIds: query.full === "true",
+    maxPages: query.maxPages ? Number(query.maxPages) : undefined,
   };
 };
 
@@ -70,14 +72,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
         }
 
         const maybeEntities: (string[] | undefined)[] = await Promise.all(
-          scrapers.map((scraper) =>
+          filteredScrapers.map((scraper) =>
             scrapeEntities(
               logger,
               scraper,
               existingIds
                 .filter(({ scraperId }) => scraperId === scraper.id)
                 .map(({ entityId }) => entityId),
-              !options.keepRunningOnKnownIds
+              {
+                shouldBailOutOnNoNewIds: !options.keepRunningOnKnownIds,
+                maxPages: options.maxPages,
+              }
             )
           )
         );

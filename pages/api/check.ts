@@ -15,6 +15,8 @@ import { withLogger } from "../../server/utils/logging";
 import { TelegramError } from "../../server/services/telegram";
 import winston from "winston";
 
+const MAX_MATCHED_ENTITIES = 10;
+
 type Response =
   | {
       success: string;
@@ -26,11 +28,18 @@ const checkTelegramError = async (
   requestId: string,
   maybeError: TelegramError | undefined
 ) => {
+  if (!maybeError) {
+    return;
+  }
   if (maybeError?.message.includes("blocked by the user")) {
     logger.info(
       `Tracker request ${requestId} has been stopped because user blocked bot`
     );
     await upsertTrackerRequestEnabledStatus(logger, requestId, false);
+  } else {
+    logger.info(
+      `Tracker request ${requestId} got telegram error: [${maybeError.code}]: ${maybeError.message}`
+    );
   }
 };
 
@@ -70,22 +79,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
             }
             const matches = doesEntityMatchRequest(entity, request);
             if (matches) {
-              if (matchedIds.length < 10) {
+              if (matchedIds.length < MAX_MATCHED_ENTITIES) {
                 addToQueue(() =>
                   notifyRequest(
                     logger,
+                    request,
                     formatScrapedEntity(entity),
-                    request
+                    entity.images
                   ).then((maybeError) =>
                     checkTelegramError(logger, request._id, maybeError)
                   )
                 );
-              } else if (matchedIds.length === 10) {
+              } else if (matchedIds.length === MAX_MATCHED_ENTITIES) {
                 addToQueue(() =>
                   notifyRequest(
                     logger,
-                    "У тебя больше 10 сообщений за одну проверку, кажется, надо сузить критерии",
-                    request
+                    request,
+                    `У тебя больше ${MAX_MATCHED_ENTITIES} сообщений за одну проверку, кажется, надо сузить критерии`
                   ).then((maybeError) =>
                     checkTelegramError(logger, request._id, maybeError)
                   )

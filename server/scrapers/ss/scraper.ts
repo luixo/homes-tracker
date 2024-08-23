@@ -1,74 +1,11 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import winston from "winston";
 
-import { ScrapedEntity, Scraper } from "../types/scraper";
-import { withLogger } from "../utils/logging";
-import { nonNullishGuard } from "../utils";
-
-type RealStateItemModel = {
-  applicationId: number;
-  status: 0; // ??
-  address: {
-    municipalityId: null;
-    municipalityTitle: null;
-    cityId: number;
-    cityTitle: string;
-    districtId: number;
-    districtTitle: string;
-    subdistrictId: number;
-    subdistrictTitle: string;
-    streetId: number;
-    streetTitle: string;
-    streetNumber: string | null;
-  };
-  price: {
-    priceGeo: number | null;
-    unitPriceGeo: number | null;
-    priceUsd: number | null;
-    unitPriceUsd: number | null;
-    currencyType: number;
-  };
-  appImages: {
-    fileName: string;
-    isMain: boolean;
-    is360: boolean;
-    orderNo: number | null;
-    imageType: number;
-  }[];
-  imageCount: number;
-  title: string;
-  shortTitle: string;
-  description: string | null;
-  totalArea: number;
-  totalAmountOfFloor: number | null;
-  floorNumber: string;
-  numberOfBedrooms: number;
-  type: 4 | 5 | 6; // ??
-  dealType: 1; // ??
-  isMovedUp: boolean;
-  isHighlighted: boolean;
-  isUrgent: boolean;
-  vipStatus: 0 | 2 | 3; // ??
-  hasRemoteViewing: boolean;
-  videoLink: null;
-  commercialRealEstateType: 0 | 31; // ??
-  orderDate: string;
-  createDate: string;
-  userId: string;
-  isFavorite: boolean;
-  isForUkraine: boolean;
-  isHidden: boolean;
-  isUserHidden: boolean;
-  isConfirmed: boolean;
-  detailUrl: string;
-  homeId: null;
-  userInfo: null | {
-    name: string;
-    image: string;
-    userType: 2;
-  };
-  similarityGroup: null;
-};
+import { ScrapedEntity, Scraper } from "../../types/scraper";
+import { withLogger } from "../../utils/logging";
+import transliterate from "@sindresorhus/transliterate";
+import { PageModel } from "./page-types";
+import { Model } from "./types";
 
 const buildParams = (
   realEstateType: number,
@@ -85,7 +22,7 @@ const buildParams = (
   };
 };
 
-const mapModalToEntity = (model: RealStateItemModel): ScrapedEntity | null => {
+const mapModalToEntity = (model: Model): ScrapedEntity | null => {
   if (!model.price.priceGeo || !model.price.priceUsd) {
     return null;
   }
@@ -94,7 +31,7 @@ const mapModalToEntity = (model: RealStateItemModel): ScrapedEntity | null => {
     _id: `${ID}:${model.applicationId}`,
     entityId: model.applicationId.toString(),
     scraperId: ID,
-    postedTimestamp: new Date(model.createDate).valueOf(),
+    postedTimestamp: new Date(model.orderDate).valueOf(),
     scrapedTimestamp: Date.now(),
     price:
       model.price.currencyType === 1
@@ -102,27 +39,35 @@ const mapModalToEntity = (model: RealStateItemModel): ScrapedEntity | null => {
         : model.price.priceUsd,
     currency: model.price.currencyType === 1 ? "₾" : "$",
     realtyType:
-      model.type === 4
+      model.realEstateTypeId === 4
         ? "house"
-        : model.type === 5
+        : model.realEstateTypeId === 5
         ? "apartment"
-        : model.type === 6
+        : model.realEstateTypeId === 6
         ? "commercial"
         : "unknown",
-    areaSize: model.totalArea,
-    yardAreaSize: null,
-    rooms: model.numberOfBedrooms,
-    bedrooms: model.numberOfBedrooms,
+    areaSize: model.areaOfHouse
+      ? Number(model.areaOfHouse)
+      : Number(model.totalArea),
+    yardAreaSize: model.areaOfYard ? Number(model.areaOfYard) : null,
+    rooms: model.rooms ? Number(model.rooms) : 0,
+    bedrooms: model.bedrooms,
     location: {
-      address: `${model.address.streetTitle}${
-        model.address.streetNumber === null
-          ? ""
-          : ` ${model.address.streetNumber}`
-      }`,
+      address: transliterate(
+        `${model.address.streetTitle}${
+          model.address.streetNumber === null
+            ? ""
+            : ` ${model.address.streetNumber}`
+        }`
+      ),
       district: model.address.districtTitle,
       subdistrict: model.address.subdistrictTitle,
-      coordinates: null,
+      coordinates: [model.locationLatitude, model.locationLongitude],
     },
+    images: model.appImages
+      .sort((a, b) => (a.isMain ? -1 : b.isMain ? 1 : 0))
+      .slice(0, 10)
+      .map((image) => image.fileNameThumb),
   };
 };
 
@@ -169,6 +114,30 @@ const prepare = (logger: winston.Logger) => {
   );
 };
 
+const fetchEntity = (
+  logger: winston.Logger,
+  prepareResult: PrepareResult,
+  entityId: number
+) => {
+  return withLogger(logger, `Fetching ${ID} element #${entityId}`, async () => {
+    const response: AxiosResponse<Model> = await axios(
+      `https://api-gateway.ss.ge/v1/RealEstate/details`,
+      {
+        method: "PUT",
+        params: {
+          applicationId: entityId,
+        },
+        headers: {
+          "accept-language": "en",
+          authorization: `Bearer ${prepareResult.token}`,
+          "content-type": "application/json",
+        },
+      }
+    );
+    return mapModalToEntity(response.data);
+  });
+};
+
 const fetchPageByType =
   (type: "house" | "flat") =>
   async (
@@ -182,7 +151,7 @@ const fetchPageByType =
       async () => {
         const realEstateType = type === "house" ? 4 : 5;
         const response: AxiosResponse<{
-          realStateItemModel: RealStateItemModel[];
+          realStateItemModel: PageModel[];
         }> = await axios(
           `https://api-gateway.ss.ge/v1/RealEstate/LegendSearch`,
           {
@@ -195,24 +164,29 @@ const fetchPageByType =
           }
         );
         const data = response.data.realStateItemModel
-          .map(mapModalToEntity)
-          .filter(nonNullishGuard);
+          .filter((model) => model.price.priceGeo && model.price.priceUsd)
+          .map((model) => model.applicationId);
         return {
           results: data,
-          nonVipAdsFound: true,
+          nonVipAdsFound: response.data.realStateItemModel.some(
+            (model) => model.vipStatus === 0
+          ),
         };
       },
       {
-        onSuccess: (response) => `${response.results.length} elements fetched`,
+        onSuccess: (response) =>
+          `${response.results.length} elements fetched (${
+            response.nonVipAdsFound ? "non-vips found" : "non-vips not found"
+          })`,
       }
     );
   };
 
-export const scraper: Scraper<ScrapedEntity, PrepareResult> = {
+export const scraper: Scraper<number, PrepareResult> = {
   id: ID,
   prepare,
   pageFetchers: [fetchPageByType("house"), fetchPageByType("flat")],
-  getEntityId: (result) => result.entityId,
-  fetchEntity: async (_logger, _prepareResult, entity) => entity,
+  getEntityId: (entityId) => entityId.toString(),
+  fetchEntity,
   getUrl,
 };

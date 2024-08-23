@@ -1,6 +1,6 @@
 import winston from "winston";
 
-export type Currency = "$" | "₾" | "?";
+export type Currency = "$" | "₾" | "€" | "?";
 
 export type RealtyType =
   | "apartment"
@@ -30,6 +30,7 @@ type ScrapedEntityV1 = {
     subdistrict: string | null;
     coordinates: GeoJSON.Position | null;
   };
+  images?: string[];
 };
 
 export type ScrapedEntity = ScrapedEntityV1;

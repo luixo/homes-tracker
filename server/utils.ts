@@ -18,7 +18,14 @@ export const createQueue = (
   });
   return {
     add: (...args) => queue.enqueue(...args),
-    getResolvePromise: () => new Promise((resolve) => queue.on("end", resolve)),
+    getResolvePromise: () =>
+      new Promise((resolve) => {
+        if (queue.size === 0) {
+          resolve();
+        } else {
+          queue.on("end", resolve);
+        }
+      }),
   };
 };
 

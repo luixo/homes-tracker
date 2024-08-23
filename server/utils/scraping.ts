@@ -27,14 +27,16 @@ const fetchAndPutIds = async <T, P>(
   return entityIds;
 };
 
-const maxPagesRaw = Number(process.env.MAX_PAGES);
-const MAX_PAGES = Number.isNaN(maxPagesRaw) ? Infinity : maxPagesRaw;
+type ScrapeOptions = {
+  maxPages?: number;
+  shouldBailOutOnNoNewIds?: boolean;
+};
 
 export const scrapeEntities = async <T, P>(
   logger: winston.Logger,
   scraper: Scraper<T, P>,
   existingIds: string[],
-  shouldBailOutOnNoNewIds: boolean
+  { maxPages = Infinity, shouldBailOutOnNoNewIds }: ScrapeOptions
 ): Promise<string[]> => {
   const prepareResult = await withLogger(
     logger.child({ scraper: `${scraper.id}` }),
@@ -48,7 +50,7 @@ export const scrapeEntities = async <T, P>(
       `Scraping`,
       async (logger) => {
         let page = 0;
-        while (page < MAX_PAGES) {
+        while (page < maxPages) {
           if (getStopSignal()) {
             break;
           }
