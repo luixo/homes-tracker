@@ -4,6 +4,7 @@ import { TrackerRequest } from "../server/types/request";
 import { getTrackerRequestToChatLinkByChatId } from "../server/utils/db/request-chat-links";
 import {
   getTrackerRequest,
+  getTrackerRequests,
   upsertTrackerRequest,
   upsertTrackerRequestEnabledStatus,
 } from "../server/utils/db/requests";
@@ -13,8 +14,11 @@ import { formatRequest } from "./formatters";
 import { parseRequest } from "./parsers";
 import { createRequestByChatId, getExistingRequestByChatId } from "./utils";
 import { unparseRequest } from "./unparsers";
+import { createQueue } from "../server/utils";
+import { notifyRequest } from "../server/services/request";
 
 export type BotContext = {
+  bot: TelegramBot;
   respond: (message: string) => Promise<TelegramBot.Message>;
   sendCard: (chatId: string) => Promise<TelegramBot.Message>;
   logger: winston.Logger;
@@ -238,5 +242,37 @@ export const handlers: Record<string, BotHandler> = {
       }
     }
     context.sendCard(lookupChatId);
+  }),
+  announce: restrictAdmin(async (context, match) => {
+    const trackerRequests = await withLogger(
+      context.logger,
+      `Fetching tracker requests`,
+      (logger) => getTrackerRequests(logger),
+      { onSuccess: (requests) => `${requests.length} requests fetched` }
+    );
+    const { add: addToQueue, getResolvePromise: getQueuePromise } =
+      createQueue(100);
+    const enabledRequests = trackerRequests.filter(
+      (request) => request.enabled
+    );
+    for (const request of enabledRequests) {
+      addToQueue(async () => {
+        const error = await notifyRequest(
+          context.bot,
+          context.logger,
+          request,
+          match
+        );
+        if (error) {
+          context.logger.warn(
+            `Tracker request ${request._id} got telegram error: [${error.code}]: ${error.message}`
+          );
+        }
+      });
+    }
+    await getQueuePromise();
+    await context.respond(
+      `Отправил сообщение "${match}" ${enabledRequests.length} пользователям!`
+    );
   }),
 };

@@ -1,7 +1,4 @@
-import winston from "winston";
-import { TrackerRequest } from "../types/request";
 import { Currency, ScrapedEntity, Scraper } from "../types/scraper";
-import { sendToTelegram, TelegramError } from "./telegram";
 import { scraper as myHomeScraper } from "../scrapers/myhome/scraper";
 import { scraper as ssScraper } from "../scrapers/ss/scraper";
 import { escapeMarkdown } from "../utils/markdown";
@@ -80,18 +77,4 @@ export const formatScrapedEntity = (entity: ScrapedEntity): string => {
         : address
     }`,
   ].join("\n");
-};
-
-export const notifyRequest = async (
-  logger: winston.Logger,
-  request: TrackerRequest,
-  message: string,
-  images?: string[]
-): Promise<TelegramError | undefined> => {
-  for (const notifier of request.notifiers) {
-    switch (notifier.type) {
-      case "telegram":
-        return sendToTelegram(logger, notifier.chatId, message, images);
-    }
-  }
 };

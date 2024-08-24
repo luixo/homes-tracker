@@ -5,15 +5,14 @@ import {
   upsertTrackerRequestEnabledStatus,
 } from "../../server/utils/db/requests";
 import { getEntitiesWithScrapedTimestampGt } from "../../server/utils/db/entities";
-import {
-  notifyRequest,
-  formatScrapedEntity,
-} from "../../server/services/scrapers";
+import { formatScrapedEntity } from "../../server/services/scrapers";
+import { notifyRequest } from "../../server/services/request";
 import { verifyEntityOverRequest as doesEntityMatchRequest } from "../../server/utils/filters";
 import { createQueue, getHandlerLogger } from "../../server/utils";
 import { withLogger } from "../../server/utils/logging";
 import { TelegramError } from "../../server/services/telegram";
 import winston from "winston";
+import TelegramBot from "node-telegram-bot-api";
 
 const MAX_MATCHED_ENTITIES = 10;
 
@@ -45,6 +44,12 @@ const checkTelegramError = async (
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
   try {
+    const token = process.env.TELEGRAM_TOKEN || "";
+    if (!token) {
+      throw new Error("Please provider TELEGRAM_TOKEN environment variables");
+    }
+
+    const bot = new TelegramBot(token);
     await withLogger(getHandlerLogger(req), `Check handler`, async (logger) => {
       const trackerRequests = await withLogger(
         logger,
@@ -82,6 +87,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
               if (matchedIds.length < MAX_MATCHED_ENTITIES) {
                 addToQueue(() =>
                   notifyRequest(
+                    bot,
                     logger,
                     request,
                     formatScrapedEntity(entity),
@@ -93,6 +99,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
               } else if (matchedIds.length === MAX_MATCHED_ENTITIES) {
                 addToQueue(() =>
                   notifyRequest(
+                    bot,
                     logger,
                     request,
                     `У тебя больше ${MAX_MATCHED_ENTITIES} сообщений за одну проверку, кажется, надо сузить критерии`

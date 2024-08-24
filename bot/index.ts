@@ -20,6 +20,7 @@ const getContext = (
     throw new Error("Bot in group");
   }
   return {
+    bot,
     respond: (message) => bot.sendMessage(chatId, message),
     sendCard: async (chatId) => {
       const chat = await bot.getChat(chatId);
