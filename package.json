@@ -1,6 +1,6 @@
 {
   "name": "homes-tracker",
-  "version": "0.1.40",
+  "version": "0.1.42",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -21,6 +21,7 @@
     "@turf/boolean-point-in-polygon": "^6.5.0",
     "aws-sdk": "^2.1100.0",
     "axios": "^0.26.1",
+    "date-fns": "^3.6.0",
     "dotenv": "^16.0.0",
     "forever": "^4.0.3",
     "mongodb": "^4.4.1",

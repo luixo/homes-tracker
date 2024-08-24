@@ -47,7 +47,7 @@ const main = async () => {
   const bot = new TelegramBot(token, { polling: true });
 
   Object.entries(handlers).forEach(([key, handler]) => {
-    bot.onText(new RegExp(`/${key} ?(.*)`), async (message, match) => {
+    bot.onText(new RegExp(`/${key} ?(.*)`, "ms"), async (message, match) => {
       const context = getContext(bot, message);
       context.logger.info(
         `Got message with handler ${key} from ${context.chatId}`
