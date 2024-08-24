@@ -91,7 +91,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
                     logger,
                     request,
                     formatScrapedEntity(entity),
-                    entity.images
+                    entity.images?.slice(0, 3)
                   ).then((maybeError) =>
                     checkTelegramError(logger, request._id, maybeError)
                   )
