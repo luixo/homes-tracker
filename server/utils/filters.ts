@@ -1,13 +1,15 @@
 import {
+  AddressFilter,
   AreaFilter,
   LocationFilter,
   PriceFilter,
+  RegexFilter,
   RoomsFilter,
   TrackerRequest,
 } from "../types/request";
 import { ScrapedEntity } from "../types/scraper";
 
-const APPROXIMATE_LARI_RATE = 3.1;
+const APPROXIMATE_LARI_RATE = 2.7;
 
 const inRange = (value: number, min?: number, max?: number): boolean => {
   if (min !== undefined && value < min) {
@@ -61,6 +63,29 @@ const filterRooms = (entity: ScrapedEntity, filter?: RoomsFilter): boolean => {
   }
 };
 
+const filterRegex = (input: string, filter: RegexFilter): boolean => {
+  return new RegExp(filter.regex).test(input);
+};
+
+const filterAddress = (
+  entity: ScrapedEntity,
+  filter?: AddressFilter
+): boolean => {
+  if (!filter) {
+    return true;
+  }
+  switch (filter.type) {
+    case "regex":
+      return [
+        entity.location.address,
+        entity.location.district,
+        entity.location.subdistrict,
+      ]
+        .filter((value) => value !== null)
+        .some((value) => filterRegex(value!, filter));
+  }
+};
+
 const filterLocation = (
   entity: ScrapedEntity,
   filter?: LocationFilter
@@ -97,6 +122,7 @@ export const verifyEntityOverRequest = (
     filterPrice(entity, request.filter.price) &&
     filterArea(entity, request.filter.area) &&
     filterRooms(entity, request.filter.rooms) &&
-    filterLocation(entity, request.filter.location)
+    filterLocation(entity, request.filter.location) &&
+    filterAddress(entity, request.filter.address)
   );
 };

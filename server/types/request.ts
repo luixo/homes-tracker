@@ -48,6 +48,13 @@ export type RoomsFilter =
       max?: number;
     };
 
+export type RegexFilter = {
+  type: "regex";
+  regex: string;
+};
+
+export type AddressFilter = RegexFilter;
+
 export type TelegramNotifier = {
   type: "telegram";
   chatId: string;
@@ -66,6 +73,7 @@ export type TrackerRequestV1 = {
     location?: LocationFilter;
     area?: AreaFilter;
     rooms?: RoomsFilter;
+    address?: AddressFilter;
   };
   notifiedTimestamp: number;
 };

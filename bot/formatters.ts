@@ -1,4 +1,5 @@
 import {
+  AddressFilter,
   AreaFilter,
   LocationFilter,
   PriceFilter,
@@ -77,6 +78,16 @@ const formatRooms = (filter?: RoomsFilter): string | undefined => {
   }
 };
 
+const formatAddress = (filter?: AddressFilter): string | undefined => {
+  if (!filter) {
+    return;
+  }
+  switch (filter.type) {
+    case "regex":
+      return `поиск по адресу: /${filter.regex}/`;
+  }
+};
+
 export const formatRequest = (request: TrackerRequest): string => {
   if (!request.enabled) {
     return `отключен`;
@@ -86,6 +97,7 @@ export const formatRequest = (request: TrackerRequest): string => {
     formatArea(request.filter.area),
     formatLocation(request.filter.location),
     formatRooms(request.filter.rooms),
+    formatAddress(request.filter.address),
   ]
     .filter(Boolean)
     .join("; ");

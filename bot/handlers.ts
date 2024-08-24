@@ -12,6 +12,7 @@ import { MINUTE } from "../server/utils/time";
 import { formatRequest } from "./formatters";
 import { parseRequest } from "./parsers";
 import { createRequestByChatId, getExistingRequestByChatId } from "./utils";
+import { unparseRequest } from "./unparsers";
 
 export type BotContext = {
   respond: (message: string) => Promise<TelegramBot.Message>;
@@ -26,8 +27,9 @@ type BotHandler = ((context: BotContext, match: string) => Promise<void>) & {
 
 const requestHelpResponse = [
   'Чтобы создать или изменить запрос - напиши его в виде фильтров разделенных символом ";", например:',
-  "/request price-total min:200 max:300; area max:500; rooms min:5",
-  "/request area min:100; bedrooms min:5",
+  "/request price-total 200-300; area <500; rooms >5",
+  "/request area >100; bedrooms >5",
+  "/request area >100; address Vake",
   "",
   "Какие есть фильтры?",
   "- По цене (можно выбрать один):",
@@ -39,6 +41,8 @@ const requestHelpResponse = [
   "- По количеству комнат или спален (ожно выбрать один):",
   "-- По количеству комнат: rooms",
   "-- По количеству спален: bedrooms",
+  "- По адресу: address",
+  "-- Используй регулярное выражение: (Vake|Saburtalo)",
   "",
   "Для каждого запроса можно указать min и max",
   "В запросах с ценами цена указывается в долларах, площадь указывается в квадратных метрах, комнаты - в штуках :)",
@@ -114,6 +118,7 @@ export const handlers: Record<string, BotHandler> = {
           [
             "Твой текущий запрос:",
             formatRequest(existingRequest),
+            `(${unparseRequest(existingRequest)})`,
             "",
             requestHelpResponse,
           ].join("\n")
