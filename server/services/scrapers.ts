@@ -2,6 +2,8 @@ import { Currency, ScrapedEntity, Scraper } from "../types/scraper";
 import { scraper as myHomeScraper } from "../scrapers/myhome/scraper";
 import { scraper as ssScraper } from "../scrapers/ss/scraper";
 import { escapeMarkdown } from "../utils/markdown";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale/ru";
 
 export const scrapers: Scraper<any, any>[] = [ssScraper, myHomeScraper];
 
@@ -76,5 +78,8 @@ export const formatScrapedEntity = (entity: ScrapedEntity): string => {
           ].join(",")}&whatshere[zoom]=16)`
         : address
     }`,
+    `🕘 Выложили: ${format(new Date(entity.postedTimestamp), "d/MM/yy hh:mm", {
+      locale: ru,
+    })} назад`,
   ].join("\n");
 };
