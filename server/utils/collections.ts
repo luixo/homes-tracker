@@ -1,12 +1,10 @@
-import { Collection, Document } from "mongodb";
-import winston from "winston";
+import type { Collection, Document } from "mongodb";
+import type winston from "winston";
+
 import { withMongo } from "../services/mongodb";
-import {
-  TrackerRequest,
-  RequestChatLink,
-  RequestMatch,
-} from "../types/request";
-import { ScrapedEntity } from "../types/scraper";
+import type { RequestChatLink, TrackerRequest } from "../types/request";
+import type { ScrapedEntity } from "../types/scraper";
+
 import { withLogger } from "./logging";
 
 const withCollection =

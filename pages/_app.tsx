@@ -1,6 +1,8 @@
-import type { AppProps } from "next/app";
 import React from "react";
+
 import * as ReactQuery from "@tanstack/react-query";
+import type { AppProps } from "next/app";
+
 import { globalCss } from "../client/styles";
 
 const globalStyles = globalCss({

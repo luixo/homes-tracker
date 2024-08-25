@@ -1,10 +1,11 @@
-import winston from "winston";
-
-import { ScrapedEntity, Scraper } from "../../types/scraper";
-import { withLogger } from "../../utils/logging";
 import transliterate from "@sindresorhus/transliterate";
-import { PageModel } from "./page-types";
-import { Model } from "./types";
+import type winston from "winston";
+
+import type { ScrapedEntity, Scraper } from "../../types/scraper";
+import { withLogger } from "../../utils/logging";
+
+import type { PageModel } from "./page-types";
+import type { Model } from "./types";
 
 const buildParams = (realEstateType: number, page: number) => {
   return {

@@ -1,10 +1,11 @@
 import type { NextApiHandler } from "next";
-import { TrackerRequest } from "../../server/types/request";
-import { upsertTrackerRequest } from "../../server/utils/db/requests";
-import { getTrackerRequestToChatLinkByRequestId } from "../../server/utils/db/request-chat-links";
-import { DAY, MINUTE } from "../../server/utils/time";
-import { withLogger } from "../../server/utils/logging";
+
+import type { TrackerRequest } from "../../server/types/request";
 import { getHandlerLogger } from "../../server/utils";
+import { getTrackerRequestToChatLinkByRequestId } from "../../server/utils/db/request-chat-links";
+import { upsertTrackerRequest } from "../../server/utils/db/requests";
+import { withLogger } from "../../server/utils/logging";
+import { DAY, MINUTE } from "../../server/utils/time";
 
 type Response =
   | {

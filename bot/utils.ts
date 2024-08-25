@@ -1,6 +1,7 @@
-import winston from "winston";
-import crypto from "crypto";
-import { TrackerRequest } from "../server/types/request";
+import crypto from "node:crypto";
+import type winston from "winston";
+
+import type { TrackerRequest } from "../server/types/request";
 import {
   getTrackerRequestToChatLinkByChatId,
   insertTrackerRequestToChatLink,

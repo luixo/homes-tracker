@@ -1,7 +1,9 @@
-import winston from "winston";
-import { Scraper } from "../types/scraper";
+import type winston from "winston";
+
+import type { Scraper } from "../types/scraper";
 import { getStopSignal, timeout, wait } from "../utils";
-import { putEntity, removeEntity } from "../utils/db/entities";
+
+import { putEntity, removeEntity } from "./db/entities";
 import { withLogger } from "./logging";
 import { MINUTE, SECOND } from "./time";
 

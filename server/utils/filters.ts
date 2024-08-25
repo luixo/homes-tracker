@@ -1,4 +1,4 @@
-import {
+import type {
   AddressFilter,
   AreaFilter,
   LocationFilter,
@@ -7,7 +7,7 @@ import {
   RoomsFilter,
   TrackerRequest,
 } from "../types/request";
-import { ScrapedEntity } from "../types/scraper";
+import type { ScrapedEntity } from "../types/scraper";
 
 const APPROXIMATE_LARI_RATE = 2.7;
 

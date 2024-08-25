@@ -1,13 +1,15 @@
+import React from "react";
+
+import * as ReactQuery from "@tanstack/react-query";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import React from "react";
-import * as ReactQuery from "@tanstack/react-query";
+
 import { getQueryKeyEntities } from "../client/queries";
 import { ENTITIES_FETCH_AMOUNT, Service } from "../client/service";
 import { styled } from "../client/styles";
-import { getEntitiesByIds } from "../server/utils/db/entities";
-import { ScrapedEntity } from "../server/types/scraper";
 import { globalLogger } from "../server/logger";
+import type { ScrapedEntity } from "../server/types/scraper";
+import { getEntitiesByIds } from "../server/utils/db/entities";
 
 const Wrapper = styled("div", {
   padding: "0 1rem",

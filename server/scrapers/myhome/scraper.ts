@@ -1,13 +1,14 @@
 import transliterate from "@sindresorhus/transliterate";
 
-import {
+import type {
   Currency,
   RealtyType,
   ScrapedEntity,
   Scraper,
 } from "../../types/scraper";
 import { withLogger } from "../../utils/logging";
-import { Model, CurrencyId } from "./types";
+
+import type { CurrencyId, Model } from "./types";
 
 const getRealtyType = (input: Model["real_estate_type_id"]): RealtyType => {
   switch (input) {

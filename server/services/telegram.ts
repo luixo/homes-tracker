@@ -1,5 +1,6 @@
-import TelegramBot from "node-telegram-bot-api";
-import winston from "winston";
+import type TelegramBot from "node-telegram-bot-api";
+import type winston from "winston";
+
 import { withLogger } from "../utils/logging";
 
 const MAX_TELEGRAM_CHARS = 4096;

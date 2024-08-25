@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
 import TelegramBot from "node-telegram-bot-api";
+
 import { globalLogger } from "../server/logger";
-import { BotContext, handlers } from "./handlers";
+
+import type { BotContext} from "./handlers";
+import { handlers } from "./handlers";
 
 dotenv.config({ path: "./.env.local" });
 

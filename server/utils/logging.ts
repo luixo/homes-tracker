@@ -1,4 +1,4 @@
-import winston from "winston";
+import type winston from "winston";
 
 export type ActionFn<T> = (logger: winston.Logger) => Promise<T>;
 export type WithLoggerOptions<T> = {

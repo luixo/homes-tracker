@@ -1,4 +1,4 @@
-import {
+import type {
   AddressFilter,
   AreaFilter,
   LocationFilter,

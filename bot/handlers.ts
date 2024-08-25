@@ -1,6 +1,9 @@
-import TelegramBot from "node-telegram-bot-api";
-import winston from "winston";
-import { TrackerRequest } from "../server/types/request";
+import type TelegramBot from "node-telegram-bot-api";
+import type winston from "winston";
+
+import { notifyRequest } from "../server/services/request";
+import type { TrackerRequest } from "../server/types/request";
+import { createQueue } from "../server/utils";
 import { getTrackerRequestToChatLinkByChatId } from "../server/utils/db/request-chat-links";
 import {
   getTrackerRequest,
@@ -10,12 +13,11 @@ import {
 } from "../server/utils/db/requests";
 import { withLogger } from "../server/utils/logging";
 import { MINUTE } from "../server/utils/time";
+
 import { formatRequest } from "./formatters";
 import { parseRequest } from "./parsers";
-import { createRequestByChatId, getExistingRequestByChatId } from "./utils";
 import { unparseRequest } from "./unparsers";
-import { createQueue } from "../server/utils";
-import { notifyRequest } from "../server/services/request";
+import { createRequestByChatId, getExistingRequestByChatId } from "./utils";
 
 export type BotContext = {
   bot: TelegramBot;

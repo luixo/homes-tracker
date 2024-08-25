@@ -131,7 +131,6 @@ const disabledRules = {
 };
 
 const temporaryDisabledRules = {
-  "@typescript-eslint/consistent-type-imports": "off",
   "@typescript-eslint/no-dynamic-delete": "off",
   "@typescript-eslint/no-explicit-any": "off",
   "@typescript-eslint/no-floating-promises": "off",
@@ -151,10 +150,6 @@ const temporaryDisabledRules = {
   "@typescript-eslint/restrict-template-expressions": "off",
   "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
   "arrow-body-style": "off",
-  "import/no-cycle": "off",
-  "import/no-extraneous-dependencies": "off",
-  "import/no-useless-path-segments": "off",
-  "import/order": "off",
   "no-await-in-loop": "off",
   "no-case-declarations": "off",
   "no-continue": "off",
@@ -169,7 +164,6 @@ const temporaryDisabledRules = {
   "prefer-destructuring": "off",
   "react/destructuring-assignment": "off",
   "react/prop-types": "off",
-  "sort-imports": "off",
   "spaced-comment": "off",
 };
 
@@ -271,6 +265,17 @@ export default ts.config(
       // remove compat on resolution: https://github.com/gund/eslint-plugin-deprecation/issues/78
       "deprecation/deprecation": "off",
       ...ts.configs.disableTypeChecked.rules,
+    },
+  },
+  {
+    files: ["eslint.config.mjs"],
+    rules: {
+      "import/no-extraneous-dependencies": [
+        "error",
+        {
+          devDependencies: true,
+        },
+      ],
     },
   },
   includeIgnoreFile(path.join(import.meta.dirname, ".gitignore")),

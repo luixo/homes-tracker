@@ -1,9 +1,11 @@
-import { Currency, ScrapedEntity, Scraper } from "../types/scraper";
-import { scraper as myHomeScraper } from "../scrapers/myhome/scraper";
-import { scraper as ssScraper } from "../scrapers/ss/scraper";
-import { escapeMarkdown } from "../utils/markdown";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale/ru";
+
+import { scraper as myHomeScraper } from "../scrapers/myhome/scraper";
+import { scraper as ssScraper } from "../scrapers/ss/scraper";
+import type { Currency, ScrapedEntity, Scraper } from "../types/scraper";
+import { escapeMarkdown } from "../utils/markdown";
+
 
 export const scrapers: Scraper<any, any>[] = [ssScraper, myHomeScraper];
 

@@ -1,5 +1,6 @@
-import { NextApiRequest } from "next";
+import type { NextApiRequest } from "next";
 import Queue from "queue-promise";
+
 import { globalLogger } from "./logger";
 
 export const wait = (ms: number): Promise<void> =>

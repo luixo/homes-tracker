@@ -1,6 +1,7 @@
-import { InsertOneResult } from "mongodb";
-import winston from "winston";
-import { RequestChatLink } from "../../types/request";
+import type { InsertOneResult } from "mongodb";
+import type winston from "winston";
+
+import type { RequestChatLink } from "../../types/request";
 import { withChatRequestLinks } from "../collections";
 
 export const init = async (logger: winston.Logger): Promise<string[]> => {

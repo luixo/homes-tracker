@@ -1,9 +1,5 @@
-import util from "util";
-import path from "path";
 import * as mongo from "mongodb";
-import { init as entitiesInit } from "../utils/db/entities";
-import { init as requestLinksInit } from "../utils/db/request-chat-links";
-import { globalLogger } from "../logger";
+import path from "node:path";
 
 const baseDir = path.join(__dirname, "../../");
 
@@ -23,17 +19,9 @@ const getClient = () => {
   return client;
 };
 
-let initialized = false;
 export const withMongo = async <T>(
   run: (db: mongo.Db) => Promise<T>
 ): Promise<T> => {
-  if (!initialized) {
-    initialized = true;
-    const initLogger = globalLogger.child({ handler: "init" });
-    await Promise.all(
-      [entitiesInit, requestLinksInit].map((init) => init(initLogger))
-    );
-  }
   const mongoClient = getClient();
   await mongoClient.connect();
   const db = mongoClient.db();

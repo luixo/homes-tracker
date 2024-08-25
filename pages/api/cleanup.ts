@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { removeEntitiesWithPostedTimestampLt } from "../../server/utils/db/entities";
+
 import { getHandlerLogger } from "../../server/utils";
+import { removeEntitiesWithPostedTimestampLt } from "../../server/utils/db/entities";
 import { withLogger } from "../../server/utils/logging";
 import { DAY } from "../../server/utils/time";
 

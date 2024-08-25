@@ -1,6 +1,9 @@
-import React from "react";
+import type React from "react";
+
 import * as ReactQuery from "@tanstack/react-query";
-import { ScrapedEntity } from "../server/types/scraper";
+
+import type { ScrapedEntity } from "../server/types/scraper";
+
 import { Entity } from "./entity";
 import { getQueryKeyEntities } from "./queries";
 import { styled } from "./styles";

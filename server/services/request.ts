@@ -1,7 +1,10 @@
-import winston from "winston";
-import { TrackerRequest } from "../types/request";
-import { sendToTelegram, TelegramError } from "./telegram";
-import TelegramBot from "node-telegram-bot-api";
+import type TelegramBot from "node-telegram-bot-api";
+import type winston from "winston";
+
+import type { TrackerRequest } from "../types/request";
+
+import type { TelegramError } from "./telegram";
+import { sendToTelegram } from "./telegram";
 
 export const notifyRequest = async (
   bot: TelegramBot,

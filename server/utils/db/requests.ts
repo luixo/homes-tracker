@@ -1,6 +1,7 @@
-import { ModifyResult, UpdateResult, WithId } from "mongodb";
-import winston from "winston";
-import { TrackerRequest } from "../../types/request";
+import type { UpdateResult, WithId } from "mongodb";
+import type winston from "winston";
+
+import type { TrackerRequest } from "../../types/request";
 import { withTrackerRequests } from "../collections";
 
 export const getTrackerRequests = async (

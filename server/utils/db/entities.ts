@@ -1,6 +1,7 @@
-import { DeleteResult, InsertOneResult } from "mongodb";
-import winston from "winston";
-import { EntityIdentification, ScrapedEntity } from "../../types/scraper";
+import type { DeleteResult, InsertOneResult } from "mongodb";
+import type winston from "winston";
+
+import type { EntityIdentification, ScrapedEntity } from "../../types/scraper";
 import { withEntities } from "../collections";
 
 export const init = async (logger: winston.Logger): Promise<string[]> => {

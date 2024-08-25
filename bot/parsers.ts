@@ -1,4 +1,4 @@
-import { CurrentTrackerRequest } from "./types";
+import type { CurrentTrackerRequest } from "./types";
 
 const parseRange = (input: string): { min?: number; max?: number } | null => {
   const rangeMatch = /(\d+)-(\d+)/.exec(input);

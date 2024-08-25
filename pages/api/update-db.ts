@@ -1,13 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+
+import { scrapers } from "../../server/services/scrapers";
+import type { EntityIdentification } from "../../server/types/scraper";
+import { getHandlerLogger } from "../../server/utils";
 import {
   deleteAllEntities,
   getEntitiesIds,
 } from "../../server/utils/db/entities";
-import { scrapers } from "../../server/services/scrapers";
-import { scrapeEntities } from "../../server/utils/scraping";
-import { EntityIdentification } from "../../server/types/scraper";
 import { withLogger } from "../../server/utils/logging";
-import { getHandlerLogger } from "../../server/utils";
+import { scrapeEntities } from "../../server/utils/scraping";
 
 const NO_DB_UPDATE = Boolean(process.env.NO_DB_UPDATE);
 

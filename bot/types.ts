@@ -1,4 +1,4 @@
-import { TrackerRequest } from "../server/types/request";
+import type { TrackerRequest } from "../server/types/request";
 
 export type CurrentTrackerRequest = Omit<
   TrackerRequest,

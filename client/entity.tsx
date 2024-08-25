@@ -1,5 +1,7 @@
-import React from "react";
-import { ScrapedEntity } from "../server/types/scraper";
+import type React from "react";
+
+import type { ScrapedEntity } from "../server/types/scraper";
+
 import { styled } from "./styles";
 
 type Props = ScrapedEntity;
