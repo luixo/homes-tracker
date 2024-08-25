@@ -28,7 +28,9 @@ type UpdateOptions = {
 const getOptions = (query: NextApiRequest["query"]): UpdateOptions => {
   const selectedScraperIds = Array.isArray(query.id)
     ? query.id
-    : [query.id].filter(Boolean);
+    : query.id
+    ? [query.id]
+    : [];
   return {
     shouldWipe: query.wipe === "true",
     selectedScraperIds:

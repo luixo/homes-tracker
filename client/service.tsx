@@ -1,6 +1,5 @@
-import axios, { AxiosResponse } from "axios";
 import React from "react";
-import * as ReactQuery from "react-query";
+import * as ReactQuery from "@tanstack/react-query";
 import { ScrapedEntity } from "../server/types/scraper";
 import { Entity } from "./entity";
 import { getQueryKeyEntities } from "./queries";
@@ -12,10 +11,6 @@ type Props = {
 
 type GetItemsResponse = {
   items: ScrapedEntity[];
-};
-
-type PageParam = {
-  offset: number;
 };
 
 const Wrapper = styled("div", {});
@@ -31,35 +26,28 @@ const NextButton = styled("button", {
 export const ENTITIES_FETCH_AMOUNT = 10;
 
 export const Service: React.FC<Props> = (props) => {
-  const queryResult = ReactQuery.useInfiniteQuery<ScrapedEntity[]>(
-    getQueryKeyEntities(),
-    async (
-      context: ReactQuery.QueryFunctionContext<ReactQuery.QueryKey, PageParam>
-    ) => {
-      const response: AxiosResponse<GetItemsResponse> = await axios(
-        `/api/entities`,
-        {
-          params: {
-            trackerId: props.trackerId,
-            limit: ENTITIES_FETCH_AMOUNT,
-            offset: context.pageParam?.offset,
-          },
-        }
-      );
-      return response.data.items;
+  const queryResult = ReactQuery.useInfiniteQuery({
+    queryKey: getQueryKeyEntities(),
+    queryFn: async ({ pageParam }) => {
+      const params = new URLSearchParams();
+      for (let [key, value] of Object.entries({
+        trackerId: props.trackerId,
+        limit: ENTITIES_FETCH_AMOUNT,
+        offset: pageParam.offset,
+      })) {
+        params.set(key, value.toString());
+      }
+      const response = await fetch(`/api/entities?${params.toString()}`);
+      const { items }: GetItemsResponse = await response.json();
+      return items;
     },
-    {
-      getNextPageParam: (
-        _lastPage: ScrapedEntity[],
-        allPages: ScrapedEntity[][]
-      ): PageParam => ({
-        offset: allPages.reduce((acc, page) => acc + page.length, 0),
-      }),
-    }
-  );
+    initialPageParam: { offset: 0 },
+    getNextPageParam: (_lastPage, allPages) => ({
+      offset: allPages.reduce((acc, page) => acc + page.length, 0),
+    }),
+  });
   switch (queryResult.status) {
-    case "idle":
-    case "loading":
+    case "pending":
       return <div>Loading...</div>;
     case "error":
       return <div>Error</div>;

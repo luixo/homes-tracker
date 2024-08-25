@@ -1,4 +1,4 @@
-import { ModifyResult, UpdateResult } from "mongodb";
+import { ModifyResult, UpdateResult, WithId } from "mongodb";
 import winston from "winston";
 import { TrackerRequest } from "../../types/request";
 import { withTrackerRequests } from "../collections";
@@ -62,7 +62,7 @@ export const upsertTrackerRequestEnabledStatus = async (
 export const updateTrackerRequestWithTimestamp = async (
   logger: winston.Logger,
   id: string
-): Promise<ModifyResult<TrackerRequest>> => {
+): Promise<WithId<TrackerRequest> | null> => {
   return withTrackerRequests(
     logger,
     `Update "${id}" with timestamp`,

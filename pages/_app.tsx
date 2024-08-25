@@ -1,7 +1,6 @@
 import type { AppProps } from "next/app";
 import React from "react";
-import * as ReactQuery from "react-query";
-import { Hydrate } from "react-query";
+import * as ReactQuery from "@tanstack/react-query";
 import { globalCss } from "../client/styles";
 
 const globalStyles = globalCss({
@@ -41,9 +40,9 @@ const MyApp: React.FC<AppProps> = ({
   );
   return (
     <ReactQuery.QueryClientProvider client={queryClient}>
-      <Hydrate state={dehydratedState}>
+      <ReactQuery.HydrationBoundary state={dehydratedState}>
         <Component {...pageProps} />
-      </Hydrate>
+      </ReactQuery.HydrationBoundary>
     </ReactQuery.QueryClientProvider>
   );
 };

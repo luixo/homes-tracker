@@ -16,11 +16,8 @@ const getClient = () => {
     }
 
     client = new mongo.MongoClient(url, {
-      sslCA:
-        process.env.NODE_ENV === "production"
-          ? path.join(baseDir, "./root.crt")
-          : undefined,
-      rejectUnauthorized: process.env.NODE_ENV === "production",
+      tls: process.env.NODE_ENV === "production",
+      tlsCAFile: path.join(baseDir, "./root.crt"),
     });
   }
   return client;

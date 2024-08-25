@@ -1,7 +1,7 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import React from "react";
-import * as ReactQuery from "react-query";
+import * as ReactQuery from "@tanstack/react-query";
 import { getQueryKeyEntities } from "../client/queries";
 import { ENTITIES_FETCH_AMOUNT, Service } from "../client/service";
 import { styled } from "../client/styles";

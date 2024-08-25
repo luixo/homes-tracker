@@ -1,4 +1,3 @@
-import axios, { AxiosResponse } from "axios";
 import transliterate from "@sindresorhus/transliterate";
 
 import {
@@ -73,24 +72,32 @@ export const scraper: Scraper<ScrapedEntity, null> = {
         logger,
         `Fetching ${ID} page #${page}`,
         async () => {
-          const response: AxiosResponse<{
+          const params = new URLSearchParams("");
+          for (let [key, value] of Object.entries({
+            deal_types: 2, // rent
+            cities: 1, // Tbilisi
+            real_estate_types: "1,2,3", // apartments, houses, country houses
+            page,
+          })) {
+            params.set(key, value.toString());
+          }
+          const response = await fetch(
+            `https://api-statements.tnet.ge/v1/statements?${params.toString()}`,
+            {
+              headers: {
+                locale: "en",
+                "x-website-key": "myhome",
+              },
+            }
+          );
+          const {
+            data: { data: models },
+          }: {
             result: boolean;
             data: {
               data: Model[];
             };
-          }> = await axios(`https://api-statements.tnet.ge/v1/statements`, {
-            params: {
-              deal_types: 2, // rent
-              cities: 1, // Tbilisi
-              real_estate_types: "1,2,3", // apartments, houses, country houses
-              page,
-            },
-            headers: {
-              locale: "en",
-              "x-website-key": "myhome",
-            },
-          });
-          const models = response.data.data.data;
+          } = await response.json();
           const results = models.map(mapModelToEntity);
           return {
             results: results,

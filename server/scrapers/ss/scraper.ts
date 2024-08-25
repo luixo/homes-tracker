@@ -1,4 +1,3 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import winston from "winston";
 
 import { ScrapedEntity, Scraper } from "../../types/scraper";
@@ -7,10 +6,7 @@ import transliterate from "@sindresorhus/transliterate";
 import { PageModel } from "./page-types";
 import { Model } from "./types";
 
-const buildParams = (
-  realEstateType: number,
-  page: number
-): AxiosRequestConfig["params"] => {
+const buildParams = (realEstateType: number, page: number) => {
   return {
     cityIdList: [95],
     currencyId: 1,
@@ -105,8 +101,10 @@ const prepare = (logger: winston.Logger) => {
     logger,
     `Fetching ${ID} cookie token`,
     async () => {
-      const response = await axios("https://home.ss.ge/ka/udzravi-qoneba");
-      return { token: extractToken(response.headers["set-cookie"]) };
+      const response = await fetch("https://home.ss.ge/ka/udzravi-qoneba");
+      return {
+        token: extractToken(response.headers.get("set-cookie") ?? undefined),
+      };
     },
     {
       onSuccess: () => `Token was fetched from ss.ge`,
@@ -120,13 +118,10 @@ const fetchEntity = (
   entityId: number
 ) => {
   return withLogger(logger, `Fetching ${ID} element #${entityId}`, async () => {
-    const response: AxiosResponse<Model> = await axios(
-      `https://api-gateway.ss.ge/v1/RealEstate/details`,
+    const response = await fetch(
+      `https://api-gateway.ss.ge/v1/RealEstate/details?applicationId=${entityId}}`,
       {
         method: "PUT",
-        params: {
-          applicationId: entityId,
-        },
         headers: {
           "accept-language": "en",
           authorization: `Bearer ${prepareResult.token}`,
@@ -134,7 +129,8 @@ const fetchEntity = (
         },
       }
     );
-    return mapModalToEntity(response.data);
+    const data: Model = await response.json();
+    return mapModalToEntity(data);
   });
 };
 
@@ -150,9 +146,8 @@ const fetchPageByType =
       `Fetching ${ID} page #${page} of type ${type}`,
       async () => {
         const realEstateType = type === "house" ? 4 : 5;
-        const response: AxiosResponse<{
-          realStateItemModel: PageModel[];
-        }> = await axios(
+        //
+        const response = await fetch(
           `https://api-gateway.ss.ge/v1/RealEstate/LegendSearch`,
           {
             method: "POST",
@@ -160,15 +155,16 @@ const fetchPageByType =
               authorization: `Bearer ${prepareResult.token}`,
               "content-type": "application/json",
             },
-            data: buildParams(realEstateType, page),
+            body: JSON.stringify(buildParams(realEstateType, page)),
           }
         );
-        const data = response.data.realStateItemModel
+        const data: { realStateItemModel: PageModel[] } = await response.json();
+        const results = data.realStateItemModel
           .filter((model) => model.price.priceGeo && model.price.priceUsd)
           .map((model) => model.applicationId);
         return {
-          results: data,
-          nonVipAdsFound: response.data.realStateItemModel.some(
+          results,
+          nonVipAdsFound: data.realStateItemModel.some(
             (model) => model.vipStatus === 0
           ),
         };
