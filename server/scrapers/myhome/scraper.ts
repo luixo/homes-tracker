@@ -36,30 +36,28 @@ const getModelCurrency = (currencyId: CurrencyId): Currency => {
   }
 };
 
-const mapModelToEntity = (model: Model): ScrapedEntity => {
-  return {
-    version: "v1",
-    _id: `${ID}:${model.id}`,
-    scraperId: ID,
-    entityId: model.id.toString(),
-    price: model.price[2].price_total,
-    currency: getModelCurrency(model.currency_id),
-    areaSize: model.area,
-    yardAreaSize: model.yard_area,
-    realtyType: getRealtyType(model.real_estate_type_id),
-    rooms: model.room === "10+" ? 10 : Number(model.room),
-    bedrooms: model.bedroom === null ? 0 : Number(model.bedroom),
-    location: {
-      address: transliterate(model.address),
-      district: model.district_name,
-      subdistrict: model.urban_name,
-      coordinates: [model.lat, model.lng],
-    },
-    images: model.images.slice(0, 10).map((image) => image.thumb),
-    postedTimestamp: new Date(model.last_updated).valueOf(),
-    scrapedTimestamp: Date.now(),
-  };
-};
+const mapModelToEntity = (model: Model): ScrapedEntity => ({
+  version: "v1",
+  _id: `${ID}:${model.id}`,
+  scraperId: ID,
+  entityId: model.id.toString(),
+  price: model.price[2].price_total,
+  currency: getModelCurrency(model.currency_id),
+  areaSize: model.area,
+  yardAreaSize: model.yard_area,
+  realtyType: getRealtyType(model.real_estate_type_id),
+  rooms: model.room === "10+" ? 10 : Number(model.room),
+  bedrooms: model.bedroom === null ? 0 : Number(model.bedroom),
+  location: {
+    address: transliterate(model.address),
+    district: model.district_name,
+    subdistrict: model.urban_name,
+    coordinates: [model.lat, model.lng],
+  },
+  images: model.images.slice(0, 10).map((image) => image.thumb),
+  postedTimestamp: new Date(model.last_updated).valueOf(),
+  scrapedTimestamp: Date.now(),
+});
 
 const getUrl = (id: string): string => `https://www.myhome.ge/en/pr/${id}/`;
 const ID = "myhome.ge";
@@ -74,7 +72,7 @@ export const scraper: Scraper<ScrapedEntity, null> = {
         `Fetching ${ID} page #${page}`,
         async () => {
           const params = new URLSearchParams("");
-          for (let [key, value] of Object.entries({
+          for (const [key, value] of Object.entries({
             deal_types: 2, // rent
             cities: 1, // Tbilisi
             real_estate_types: "1,2,3", // apartments, houses, country houses
@@ -101,7 +99,7 @@ export const scraper: Scraper<ScrapedEntity, null> = {
           } = await response.json();
           const results = models.map(mapModelToEntity);
           return {
-            results: results,
+            results,
             nonVipAdsFound: models.some(
               (model) =>
                 !model.is_vip && !model.is_vip_plus && !model.is_super_vip

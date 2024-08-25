@@ -25,7 +25,7 @@ const handler: NextApiHandler<Response> = async (req, res) => {
       error: `Method ${method} not allowed`,
     });
   }
-  const requestId = req.query.requestId;
+  const { requestId } = req.query;
   if (!requestId || Array.isArray(requestId)) {
     return res.status(400).send({
       error: 'No "requestId" in query or wrong format',

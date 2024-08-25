@@ -15,7 +15,6 @@ import {
 import { verifyEntityOverRequest as doesEntityMatchRequest } from "../../server/utils/filters";
 import { withLogger } from "../../server/utils/logging";
 
-
 const MAX_MATCHED_ENTITIES = 10;
 
 type Response =
@@ -32,7 +31,7 @@ const checkTelegramError = async (
   if (!maybeError) {
     return;
   }
-  if (maybeError?.message.includes("blocked by the user")) {
+  if (maybeError.message.includes("blocked by the user")) {
     logger.info(
       `Tracker request ${requestId} has been stopped because user blocked bot`
     );
@@ -79,7 +78,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
           logger.info(
             `Looking up request ${request._id} with notified timestamp ${request.notifiedTimestamp}`
           );
-          let matchedIds: string[] = [];
+          const matchedIds: string[] = [];
           for (const entity of entities) {
             if (entity.scrapedTimestamp < request.notifiedTimestamp) {
               continue;

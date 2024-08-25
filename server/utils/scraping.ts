@@ -13,11 +13,11 @@ const fetchAndPutIds = async <T, P>(
   prepareResult: P,
   scraper: Scraper<T, P>
 ): Promise<string[]> => {
-  let entityIds: string[] = [];
+  const entityIds: string[] = [];
   for (const result of results) {
     const entity = await scraper.fetchEntity(logger, prepareResult, result);
     // We're not filthy scraperers, aren't we?
-    let promises: Promise<unknown>[] = [];
+    const promises: Promise<unknown>[] = [];
     if (entity) {
       promises.push(putEntity(logger, entity));
       entityIds.push(entity._id);
@@ -41,7 +41,7 @@ export const scrapeEntities = async <T, P>(
   { maxPages = Infinity, shouldBailOutOnNoNewIds }: ScrapeOptions
 ): Promise<string[]> => {
   const prepareResult = await withLogger(
-    logger.child({ scraper: `${scraper.id}` }),
+    logger.child({ scraper: scraper.id }),
     `Scraping preparation`,
     scraper.prepare
   );

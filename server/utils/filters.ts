@@ -63,9 +63,8 @@ const filterRooms = (entity: ScrapedEntity, filter?: RoomsFilter): boolean => {
   }
 };
 
-const filterRegex = (input: string, filter: RegexFilter): boolean => {
-  return new RegExp(filter.regex).test(input);
-};
+const filterRegex = (input: string, filter: RegexFilter): boolean =>
+  new RegExp(filter.regex).test(input);
 
 const filterAddress = (
   entity: ScrapedEntity,
@@ -100,29 +99,25 @@ const filterLocation = (
     case "district":
       if (entity.location.district) {
         return filter.districts.includes(entity.location.district);
-      } else {
-        // TODO
-        return true;
       }
+      // TODO
+      return true;
+
     case "subdistrict":
       if (entity.location.subdistrict) {
         return filter.subdistricts.includes(entity.location.subdistrict);
-      } else {
-        // TODO
-        return true;
       }
+      // TODO
+      return true;
   }
 };
 
 export const verifyEntityOverRequest = (
   entity: ScrapedEntity,
   request: TrackerRequest
-): boolean => {
-  return (
-    filterPrice(entity, request.filter.price) &&
-    filterArea(entity, request.filter.area) &&
-    filterRooms(entity, request.filter.rooms) &&
-    filterLocation(entity, request.filter.location) &&
-    filterAddress(entity, request.filter.address)
-  );
-};
+): boolean =>
+  filterPrice(entity, request.filter.price) &&
+  filterArea(entity, request.filter.area) &&
+  filterRooms(entity, request.filter.rooms) &&
+  filterLocation(entity, request.filter.location) &&
+  filterAddress(entity, request.filter.address);

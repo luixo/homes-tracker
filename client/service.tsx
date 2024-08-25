@@ -33,7 +33,7 @@ export const Service: React.FC<Props> = (props) => {
     queryKey: getQueryKeyEntities(),
     queryFn: async ({ pageParam }) => {
       const params = new URLSearchParams();
-      for (let [key, value] of Object.entries({
+      for (const [key, value] of Object.entries({
         trackerId: props.trackerId,
         limit: ENTITIES_FETCH_AMOUNT,
         offset: pageParam.offset,
@@ -55,7 +55,7 @@ export const Service: React.FC<Props> = (props) => {
     case "error":
       return <div>Error</div>;
     case "success":
-      const pages = queryResult.data.pages;
+      const { pages } = queryResult.data;
       const elements = pages.reduce<ScrapedEntity[]>(
         (acc, page) => [...acc, ...page],
         []

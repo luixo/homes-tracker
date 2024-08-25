@@ -13,14 +13,13 @@ const withCollection =
     logger: winston.Logger,
     action: string,
     run: (collection: Collection<C>, logger: winston.Logger) => Promise<T>
-  ): Promise<T> => {
-    return withLogger(
+  ): Promise<T> =>
+    withLogger(
       logger.child({ service: "mongodb", collection: collectionName }),
       action,
       (logger) =>
         withMongo((db) => run(db.collection<C>(collectionName), logger))
     );
-  };
 
 export const withEntities = withCollection<ScrapedEntity>("entities");
 export const withTrackerRequests = withCollection<TrackerRequest>("requests");

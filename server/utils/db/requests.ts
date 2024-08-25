@@ -6,26 +6,24 @@ import { withTrackerRequests } from "../collections";
 
 export const getTrackerRequests = async (
   logger: winston.Logger
-): Promise<TrackerRequest[]> => {
-  return withTrackerRequests(logger, `Fetch all`, (collection) =>
+): Promise<TrackerRequest[]> =>
+  withTrackerRequests(logger, `Fetch all`, (collection) =>
     collection.find({}).toArray()
   );
-};
 
 export const getTrackerRequest = async (
   logger: winston.Logger,
   requestId: string
-): Promise<TrackerRequest | null> => {
-  return withTrackerRequests(logger, `Fetch all`, (collection) =>
+): Promise<TrackerRequest | null> =>
+  withTrackerRequests(logger, `Fetch all`, (collection) =>
     collection.findOne({ _id: requestId })
   );
-};
 
 export const upsertTrackerRequest = async (
   logger: winston.Logger,
   request: TrackerRequest
-): Promise<string> => {
-  return withTrackerRequests(
+): Promise<string> =>
+  withTrackerRequests(
     logger,
     `Upsert id ${request._id}`,
     async (collection) => {
@@ -33,23 +31,21 @@ export const upsertTrackerRequest = async (
       if (!matched) {
         const response = await collection.insertOne(request);
         return response.insertedId;
-      } else {
-        const response = await collection.replaceOne(
-          { _id: request._id },
-          request
-        );
-        return request._id;
       }
+      const response = await collection.replaceOne(
+        { _id: request._id },
+        request
+      );
+      return request._id;
     }
   );
-};
 
 export const upsertTrackerRequestEnabledStatus = async (
   logger: winston.Logger,
   requestId: string,
   nextStatus: boolean
-): Promise<UpdateResult> => {
-  return withTrackerRequests(
+): Promise<UpdateResult> =>
+  withTrackerRequests(
     logger,
     `Update id ${requestId} enabled status`,
     (collection) =>
@@ -58,19 +54,14 @@ export const upsertTrackerRequestEnabledStatus = async (
         { $set: { enabled: nextStatus } }
       )
   );
-};
 
 export const updateTrackerRequestWithTimestamp = async (
   logger: winston.Logger,
   id: string
-): Promise<WithId<TrackerRequest> | null> => {
-  return withTrackerRequests(
-    logger,
-    `Update "${id}" with timestamp`,
-    (collection) =>
-      collection.findOneAndUpdate(
-        { _id: id },
-        { $set: { notifiedTimestamp: Date.now() } }
-      )
+): Promise<WithId<TrackerRequest> | null> =>
+  withTrackerRequests(logger, `Update "${id}" with timestamp`, (collection) =>
+    collection.findOneAndUpdate(
+      { _id: id },
+      { $set: { notifiedTimestamp: Date.now() } }
+    )
   );
-};

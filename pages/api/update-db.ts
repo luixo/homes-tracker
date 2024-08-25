@@ -90,7 +90,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
           )
         );
         return maybeEntities.reduce<string[]>(
-          (acc, elements) => (elements ? acc?.concat(elements) : acc),
+          (acc, elements) => (elements ? acc.concat(elements) : acc),
           []
         );
       }

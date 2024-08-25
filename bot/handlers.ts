@@ -102,7 +102,7 @@ export const handlers: Record<string, BotHandler> = {
       context.logger,
       context.chatId
     );
-    if (!existingRequest || !existingRequest.enabled) {
+    if (!existingRequest?.enabled) {
       context.respond(`Пока!`);
       return;
     }
@@ -114,7 +114,7 @@ export const handlers: Record<string, BotHandler> = {
     context.respond(`Пока! Твой запрос пока выключаю`);
   },
   request: async (context, match) => {
-    let existingRequest = await getExistingRequestByChatId(
+    const existingRequest = await getExistingRequestByChatId(
       context.logger,
       context.chatId
     );

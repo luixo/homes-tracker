@@ -19,9 +19,5 @@ const escapeChars = [
   "!",
 ];
 
-export const escapeMarkdown = (input: string) => {
-  return input.replaceAll(
-    new RegExp(`([${escapeChars.join("")}])`, "g"),
-    "\\$1"
-  );
-};
+export const escapeMarkdown = (input: string) =>
+  input.replaceAll(new RegExp(`([${escapeChars.join("")}])`, "g"), "\\$1");

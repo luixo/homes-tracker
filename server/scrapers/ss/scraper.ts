@@ -7,17 +7,15 @@ import { withLogger } from "../../utils/logging";
 import type { PageModel } from "./page-types";
 import type { Model } from "./types";
 
-const buildParams = (realEstateType: number, page: number) => {
-  return {
-    cityIdList: [95],
-    currencyId: 1,
-    page: page + 1,
-    pageSize: 20,
-    realEstateDealType: 1,
-    order: 1, // Order by date desc.
-    realEstateType,
-  };
-};
+const buildParams = (realEstateType: number, page: number) => ({
+  cityIdList: [95],
+  currencyId: 1,
+  page: page + 1,
+  pageSize: 20,
+  realEstateDealType: 1,
+  order: 1, // Order by date desc.
+  realEstateType,
+});
 
 const mapModalToEntity = (model: Model): ScrapedEntity | null => {
   if (!model.price.priceGeo || !model.price.priceUsd) {
@@ -76,7 +74,7 @@ const ID = "ss.ge";
 const COOKIE_KEY = "ss-session-token";
 
 const extractToken = (cookie?: string | string[]) => {
-  //ss-session-token
+  // ss-session-token
   if (cookie === undefined) {
     throw new Error("Expected to have cookie!");
   }
@@ -97,8 +95,8 @@ const extractToken = (cookie?: string | string[]) => {
   return getCookieFromString(matchedCookie);
 };
 
-const prepare = (logger: winston.Logger) => {
-  return withLogger(
+const prepare = (logger: winston.Logger) =>
+  withLogger(
     logger,
     `Fetching ${ID} cookie token`,
     async () => {
@@ -111,14 +109,13 @@ const prepare = (logger: winston.Logger) => {
       onSuccess: () => `Token was fetched from ss.ge`,
     }
   );
-};
 
 const fetchEntity = (
   logger: winston.Logger,
   prepareResult: PrepareResult,
   entityId: number
-) => {
-  return withLogger(logger, `Fetching ${ID} element #${entityId}`, async () => {
+) =>
+  withLogger(logger, `Fetching ${ID} element #${entityId}`, async () => {
     const response = await fetch(
       `https://api-gateway.ss.ge/v1/RealEstate/details?applicationId=${entityId}}`,
       {
@@ -133,16 +130,11 @@ const fetchEntity = (
     const data: Model = await response.json();
     return mapModalToEntity(data);
   });
-};
 
 const fetchPageByType =
   (type: "house" | "flat") =>
-  async (
-    logger: winston.Logger,
-    prepareResult: PrepareResult,
-    page: number
-  ) => {
-    return withLogger(
+  async (logger: winston.Logger, prepareResult: PrepareResult, page: number) =>
+    withLogger(
       logger,
       `Fetching ${ID} page #${page} of type ${type}`,
       async () => {
@@ -177,7 +169,6 @@ const fetchPageByType =
           })`,
       }
     );
-  };
 
 export const scraper: Scraper<number, PrepareResult> = {
   id: ID,

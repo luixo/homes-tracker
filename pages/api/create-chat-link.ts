@@ -16,7 +16,7 @@ type Response =
 
 const handler: NextApiHandler<Response> = async (req, res) => {
   const logger = getHandlerLogger(req);
-  const chatId = req.query.chatId;
+  const { chatId } = req.query;
   if (!chatId || Array.isArray(chatId)) {
     return res.status(400).send({
       error: 'No "chatId" in query or wrong format',

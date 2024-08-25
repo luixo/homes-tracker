@@ -124,7 +124,7 @@ const parsePart = (
 export const parseRequest = (
   message: string
 ): CurrentTrackerRequest | string[] => {
-  let errors: string[] = [];
+  const errors: string[] = [];
   const request = message
     .split(";")
     .map((x) => x.trim())
