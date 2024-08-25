@@ -54,7 +54,7 @@ export const Service: React.FC<Props> = (props) => {
       return <div>Loading...</div>;
     case "error":
       return <div>Error</div>;
-    case "success":
+    case "success": {
       const { pages } = queryResult.data;
       const elements = pages.reduce<ScrapedEntity[]>(
         (acc, page) => [...acc, ...page],
@@ -74,5 +74,6 @@ export const Service: React.FC<Props> = (props) => {
           ) : null}
         </Wrapper>
       );
+    }
   }
 };

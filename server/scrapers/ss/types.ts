@@ -119,7 +119,7 @@ export type Address = {
   subdistrictTitle: string;
   streetId: number;
   streetTitle: string;
-  streetNumber: string;
+  streetNumber: string | null;
 };
 
 export type AppImage = {

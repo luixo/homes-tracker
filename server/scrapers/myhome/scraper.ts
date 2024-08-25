@@ -10,6 +10,8 @@ import { withLogger } from "../../utils/logging";
 
 import type { CurrencyId, Model } from "./types";
 
+const ID = "myhome.ge";
+
 const getRealtyType = (input: Model["real_estate_type_id"]): RealtyType => {
   switch (input) {
     case 1:
@@ -60,7 +62,6 @@ const mapModelToEntity = (model: Model): ScrapedEntity => ({
 });
 
 const getUrl = (id: string): string => `https://www.myhome.ge/en/pr/${id}/`;
-const ID = "myhome.ge";
 
 export const scraper: Scraper<ScrapedEntity, null> = {
   id: ID,

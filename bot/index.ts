@@ -66,7 +66,9 @@ const main = async () => {
         await handler(context, match ? match[1] : "");
       } catch (e) {
         context.logger.error(
-          `Error happened on message with handler ${key} from ${context.chatId}:\n${message.text}\n${e}`
+          `Error happened on message with handler ${key} from ${
+            context.chatId
+          }:\n${message.text}\n${String(e)}`
         );
       }
     });

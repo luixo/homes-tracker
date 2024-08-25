@@ -5,7 +5,7 @@ import { getHandlerLogger } from "../../server/utils";
 import { getTrackerRequestToChatLinkByRequestId } from "../../server/utils/db/request-chat-links";
 import { upsertTrackerRequest } from "../../server/utils/db/requests";
 import { withLogger } from "../../server/utils/logging";
-import { DAY, MINUTE } from "../../server/utils/time";
+import { MINUTE } from "../../server/utils/time";
 
 type Response =
   | {

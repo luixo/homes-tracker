@@ -7,6 +7,8 @@ import { withLogger } from "../../utils/logging";
 import type { PageModel } from "./page-types";
 import type { Model } from "./types";
 
+const ID = "ss.ge";
+
 const buildParams = (realEstateType: number, page: number) => ({
   cityIdList: [95],
   currencyId: 1,
@@ -69,7 +71,6 @@ const mapModalToEntity = (model: Model): ScrapedEntity | null => {
 type PrepareResult = { token: string };
 
 const getUrl = (id: string) => `https://home.ss.ge/en/real-estate/${id}`;
-const ID = "ss.ge";
 
 const COOKIE_KEY = "ss-session-token";
 

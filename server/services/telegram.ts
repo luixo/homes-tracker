@@ -31,6 +31,7 @@ export const sendToTelegram = async (
           if (hasImages && isFirstMessage) {
             await bot.sendMediaGroup(
               chatId,
+              // eslint-disable-next-line @typescript-eslint/no-loop-func
               images.map((image, index) => ({
                 type: "photo",
                 media: image,

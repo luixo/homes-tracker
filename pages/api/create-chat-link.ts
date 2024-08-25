@@ -39,7 +39,7 @@ const handler: NextApiHandler<Response> = async (req, res) => {
       insertTrackerRequestToChatLink(crypto.randomUUID(), chatId)
     );
     res.status(200).send({
-      success: `Chat link for chat "${chatId}" created: "${chatLinkResult.insertedId}"`,
+      success: `Chat link for chat "${chatId}" created: "${chatLinkResult.insertedId.toString()}"`,
     });
   } catch (e) {
     res.status(500).send({

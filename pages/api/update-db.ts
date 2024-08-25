@@ -63,7 +63,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
         options.shouldWipe ? " with total wipe" : ""
       }${
         options.selectedScraperIds
-          ? ` (only for ${options.selectedScraperIds})`
+          ? ` (only for ${options.selectedScraperIds.join(",")})`
           : ""
       }`,
       async (logger) => {

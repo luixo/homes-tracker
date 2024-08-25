@@ -1,7 +1,7 @@
 import winston from "winston";
 
 const getMessagePrefix =
-  <T>(prefix: string, transformer?: (value: T) => T) =>
+  <T = string>(prefix: string, transformer?: (value: T) => T) =>
   (info: winston.Logform.TransformableInfo) => {
     let messagePrefix: T | undefined;
     const rawInfo = info[prefix] as T | undefined;
@@ -15,7 +15,7 @@ const getMessagePrefix =
 
 const createFormat = winston.format((info) => {
   const prefixes = [
-    getMessagePrefix<string>("timestamp", (timestamp) =>
+    getMessagePrefix("timestamp", (timestamp) =>
       new Date(timestamp).toISOString().slice(11, 23)
     ),
     getMessagePrefix("handler"),

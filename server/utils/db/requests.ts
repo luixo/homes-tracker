@@ -31,10 +31,7 @@ export const upsertTrackerRequest = async (
         const response = await collection.insertOne(request);
         return response.insertedId;
       }
-      const response = await collection.replaceOne(
-        { _id: request._id },
-        request
-      );
+      await collection.replaceOne({ _id: request._id }, request);
       return request._id;
     }
   );

@@ -51,19 +51,22 @@ export const scrapeEntities = async <T, P>(
     const { ids: newEntityIds } = await withLogger(
       logger.child({ scraper: `${scraper.id} #${index}` }),
       `Scraping`,
+      // TODO: figure out why
+      // eslint-disable-next-line @typescript-eslint/no-loop-func
       async (scraperLogger) => {
         let page = 0;
         while (page < maxPages) {
           if (getStopSignal()) {
             break;
           }
-          page++;
+          page += 1;
 
           // We're not filthy scraperers, aren't we?
           await wait(250);
           const pageResult = await withLogger(
             scraperLogger,
             `Fetch page #${page}`,
+            // eslint-disable-next-line @typescript-eslint/no-loop-func
             async () => {
               const rawPageResult = await timeout(
                 fetcher(scraperLogger, prepareResult, page),

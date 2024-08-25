@@ -144,18 +144,6 @@ const disabledRules = {
   "@typescript-eslint/no-dynamic-delete": "off",
 };
 
-const temporaryDisabledRules = {
-  "@typescript-eslint/no-invalid-void-type": "off",
-  "@typescript-eslint/no-loop-func": "off",
-  "@typescript-eslint/no-unnecessary-condition": "off",
-  "@typescript-eslint/no-unused-vars": "off",
-  "@typescript-eslint/no-use-before-define": "off",
-  "@typescript-eslint/restrict-template-expressions": "off",
-  "no-case-declarations": "off",
-  "no-plusplus": "off",
-  "no-promise-executor-return": "off",
-};
-
 export default ts.config(
   { files: ["**/*.{js,jsx,ts,tsx}"] },
   {
@@ -246,7 +234,6 @@ export default ts.config(
   ...compat.config(importPlugin.configs.typescript).map(withoutPlugins),
   { rules: overridenRules },
   { rules: disabledRules },
-  { rules: temporaryDisabledRules },
   {
     files: ["**/*.{mjs,js,jsx}"],
     ...ts.configs.disableTypeChecked,

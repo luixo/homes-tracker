@@ -3,8 +3,11 @@ import Queue from "queue-promise";
 
 import { globalLogger } from "./logger";
 
-export const wait = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+export const wait = async (ms: number): Promise<undefined> => {
+  await new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+};
 
 export const createQueue = (
   interval: number,
@@ -33,7 +36,7 @@ export const createQueue = (
 export const timeout = <T>(
   promise: Promise<T>,
   ms: number
-): Promise<T | void> => Promise.race<T | void>([promise, wait(ms)]);
+): Promise<T | undefined> => Promise.race<T | undefined>([promise, wait(ms)]);
 
 let STOP_SIGNAL = false;
 export const changeStopSignal = (nextSignal: boolean) => {

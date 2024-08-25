@@ -45,8 +45,5 @@ export const createRequestByChatId = async (
     `Creating link for chat id ${chatId}`,
     insertTrackerRequestToChatLink(crypto.randomUUID(), chatId)
   );
-  if (!creationResponse) {
-    throw new Error(`Cannot create link for chat id ${chatId}`);
-  }
   return creationResponse.insertedId.toString();
 };

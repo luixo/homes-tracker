@@ -3,19 +3,20 @@ import path from "node:path";
 
 const baseDir = path.join(__dirname, "../../");
 
-let client: mongo.MongoClient;
+let client: mongo.MongoClient | undefined;
 const getClient = () => {
-  if (!client) {
-    const url = process.env.MONGO_CONN_STRING;
-    if (!url) {
-      throw new Error("Env variable MONGO_CONN_STRING should be set");
-    }
-
-    client = new mongo.MongoClient(url, {
-      tls: process.env.NODE_ENV === "production",
-      tlsCAFile: path.join(baseDir, "./root.crt"),
-    });
+  if (client) {
+    return client;
   }
+  const url = process.env.MONGO_CONN_STRING;
+  if (!url) {
+    throw new Error("Env variable MONGO_CONN_STRING should be set");
+  }
+
+  client = new mongo.MongoClient(url, {
+    tls: process.env.NODE_ENV === "production",
+    tlsCAFile: path.join(baseDir, "./root.crt"),
+  });
   return client;
 };
 
