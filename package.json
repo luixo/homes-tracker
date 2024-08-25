@@ -1,19 +1,22 @@
 {
   "name": "homes-tracker",
-  "version": "0.1.42",
+  "version": "0.1.43",
   "private": true,
+  "packageManager": "pnpm@9.8.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "docker:build": "docker build -t homes-tracker .",
-    "docker:publish": "docker tag homes-tracker:latest $DOCKER_PREFIX/homes-tracker:$(node -p -e \"require('./package.json').version\") && docker push $DOCKER_PREFIX/homes-tracker:$(node -p -e \"require('./package.json').version\")",
-    "update:patch": "npm version --no-git-tag-version patch",
+    "docker:tag": "docker tag homes-tracker:latest $DOCKER_PREFIX/homes-tracker:$(node -p -e \"require('./package.json').version\")",
+    "docker:publish": "pnpm run docker:tag && docker push $DOCKER_PREFIX/homes-tracker:$(node -p -e \"require('./package.json').version\")",
+    "update:patch": "pnpm version --no-git-tag-version patch",
     "bot:dev": "nodemon bot/index.ts",
-    "bot:prod": "forever -v -c ts-node bot/index.ts",
+    "bot:prod": "tsx bot/index.ts",
     "bot:docker:build": "docker build -t homes-tracker-bot -f bot/Dockerfile .",
-    "bot:docker:publish": "docker tag homes-tracker-bot:latest $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\") && docker push $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\")"
+    "bot:docker:tag": "docker tag homes-tracker-bot:latest $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\")",
+    "bot:docker:publish": "pnpm run bot:docker:tag && docker push $DOCKER_PREFIX/homes-tracker-bot:$(node -p -e \"require('./package.json').version\")"
   },
   "dependencies": {
     "@sindresorhus/transliterate": "^1.6.0",
@@ -31,6 +34,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-query": "^3.34.19",
+    "tsx": "^4.18.0",
     "winston": "^3.6.0"
   },
   "devDependencies": {
@@ -41,7 +45,6 @@
     "eslint": "8.11.0",
     "eslint-config-next": "12.1.0",
     "nodemon": "^2.0.15",
-    "ts-node": "^10.7.0",
     "typescript": "4.6.3"
   }
 }

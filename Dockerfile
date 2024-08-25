@@ -1,53 +1,39 @@
-# Install dependencies only when needed
-FROM amd64/node:22-alpine AS deps
+FROM node:22-alpine AS base
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+COPY . /app
 WORKDIR /app
 
-COPY package.json package-lock.json ./ 
-RUN npm ci
+FROM base AS deps
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-# Rebuild the source code only when needed
-FROM amd64/node:22-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED 1
-
-RUN npm run build
+FROM base AS builder
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm build
 
 # Production image, copy all the files and run next
-FROM amd64/node:22-alpine AS runner
-WORKDIR /app
-
+FROM base AS runner
 RUN apk add --no-cache libcap
 RUN setcap cap_net_bind_service=+ep `readlink -f \`which node\``
 
 ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# You only need to copy next.config.js if you are NOT using the default configuration
-# COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
+COPY --from=deps /app/node_modules ./node_modules
 
 # Automatically leverage output traces to reduce image size 
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/ ./.next/
 
 RUN wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" -O /app/.next/root.crt
 RUN chmod 0444 /app/.next/root.crt
-
-RUN npm install forever
 
 USER nextjs
 
@@ -56,4 +42,4 @@ EXPOSE 80
 
 ENV PORT 80
 
-CMD ["node_modules/.bin/forever", "server.js"]
+CMD ["pnpm", "start"]
