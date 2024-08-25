@@ -55,19 +55,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
       const trackerRequests = await withLogger(
         logger,
         `Fetching tracker requests`,
-        (logger) => getTrackerRequests(logger),
+        getTrackerRequests,
         { onSuccess: (requests) => `${requests.length} requests fetched` }
       );
       const minimalTimestamp = trackerRequests.reduce(
-        (minimalTimestamp, request) =>
-          Math.min(minimalTimestamp, request.notifiedTimestamp),
+        (acc, request) => Math.min(acc, request.notifiedTimestamp),
         trackerRequests[0]?.notifiedTimestamp ?? 0
       );
       const entities = await withLogger(
         logger,
         `Fetching entities with minimal timestamp ${minimalTimestamp}`,
-        (logger) => getEntitiesWithScrapedTimestampGt(logger, minimalTimestamp),
-        { onSuccess: (entities) => `${entities.length} entities fetched` }
+        getEntitiesWithScrapedTimestampGt(minimalTimestamp),
+        { onSuccess: (result) => `${result.length} entities fetched` }
       );
       const { add: addToQueue, getResolvePromise: getQueuePromise } =
         createQueue(100);
@@ -134,7 +133,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
         void withLogger(
           logger,
           `Update request ${request._id} with current timestamp`,
-          () => updateTrackerRequestWithTimestamp(logger, request._id)
+          updateTrackerRequestWithTimestamp(request._id)
         ).catch((error) =>
           logger.error(
             `Error while updating request ${request._id} with current timestamp: ${error}`

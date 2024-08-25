@@ -32,24 +32,22 @@ export const getEntitiesIds = async (
     collection.find({}, { projection: { entityId: 1, scraperId: 1 } }).toArray()
   );
 
-export const getEntitiesWithScrapedTimestampGt = async (
-  logger: winston.Logger,
-  timestamp: number
-): Promise<ScrapedEntity[]> =>
-  withEntities(logger, `Get greater than timestamp`, (collection) =>
-    collection.find({ scrapedTimestamp: { $gte: timestamp } }).toArray()
-  );
+export const getEntitiesWithScrapedTimestampGt =
+  (timestamp: number) =>
+  async (logger: winston.Logger): Promise<ScrapedEntity[]> =>
+    withEntities(logger, `Get greater than timestamp`, (collection) =>
+      collection.find({ scrapedTimestamp: { $gte: timestamp } }).toArray()
+    );
 
-export const removeEntitiesWithPostedTimestampLt = async (
-  logger: winston.Logger,
-  timestamp: number
-): Promise<number> =>
-  withEntities(logger, `Get less than timestamp`, async (collection) => {
-    const result = await collection.deleteMany({
-      postedTimestamp: { $lte: timestamp },
+export const removeEntitiesWithPostedTimestampLt =
+  (timestamp: number) =>
+  async (logger: winston.Logger): Promise<number> =>
+    withEntities(logger, `Get less than timestamp`, async (collection) => {
+      const result = await collection.deleteMany({
+        postedTimestamp: { $lte: timestamp },
+      });
+      return result.deletedCount;
     });
-    return result.deletedCount;
-  });
 
 export const putEntity = async (
   logger: winston.Logger,

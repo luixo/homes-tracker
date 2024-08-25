@@ -7,6 +7,14 @@ import type { ScrapedEntity } from "../types/scraper";
 
 import { withLogger } from "./logging";
 
+const runOnCollection =
+  <C extends Document>(
+    collectionName: string,
+    run: (collection: Collection<C>, logger: winston.Logger) => Promise<T>
+  ) =>
+  (logger: winston.Logger) =>
+    withMongo((db) => run(db.collection<C>(collectionName), logger));
+
 const withCollection =
   <C extends Document>(collectionName: string) =>
   async <T>(
@@ -17,8 +25,7 @@ const withCollection =
     withLogger(
       logger.child({ service: "mongodb", collection: collectionName }),
       action,
-      (logger) =>
-        withMongo((db) => run(db.collection<C>(collectionName), logger))
+      runOnCollection(collectionName, run)
     );
 
 export const withEntities = withCollection<ScrapedEntity>("entities");

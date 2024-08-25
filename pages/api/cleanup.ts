@@ -13,17 +13,25 @@ type Response =
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<Response>) => {
   try {
-    await withLogger(getHandlerLogger(req), `Cleanup handler`, async (logger) => {
-      const today = Date.now();
-      const maximumTimestamp = today - 30 * DAY;
-      const entitiesRemoved = await withLogger(
-        logger,
-        `Fetching tracker requests`,
-        (logger) => removeEntitiesWithPostedTimestampLt(logger, maximumTimestamp),
-        { onSuccess: (entitiesRemoved) => `${entitiesRemoved} entities removed` }
-      );
-      res.status(200).send({ success: `${entitiesRemoved} entities removed` });
-    });
+    await withLogger(
+      getHandlerLogger(req),
+      `Cleanup handler`,
+      async (logger) => {
+        const today = Date.now();
+        const maximumTimestamp = today - 30 * DAY;
+        const entitiesRemoved = await withLogger(
+          logger,
+          `Fetching tracker requests`,
+          removeEntitiesWithPostedTimestampLt(maximumTimestamp),
+          {
+            onSuccess: (result) => `${result} entities removed`,
+          }
+        );
+        res
+          .status(200)
+          .send({ success: `${entitiesRemoved} entities removed` });
+      }
+    );
   } catch (e) {
     res.status(500).send({
       error: String(e),

@@ -16,8 +16,7 @@ export const getExistingRequestByChatId = async (
   const existingLink = await withLogger(
     logger,
     `Fetching existing link for chat id ${chatId}`,
-    async (logger) =>
-      getTrackerRequestToChatLinkByChatId(logger, chatId.toString())
+    getTrackerRequestToChatLinkByChatId(chatId.toString())
   );
   if (!existingLink) {
     return null;
@@ -25,7 +24,7 @@ export const getExistingRequestByChatId = async (
   return withLogger(
     logger,
     `Fetching existing request for request id ${existingLink._id}`,
-    async (logger) => getTrackerRequest(logger, existingLink._id)
+    getTrackerRequest(existingLink._id)
   );
 };
 
@@ -36,7 +35,7 @@ export const createRequestByChatId = async (
   const existingLink = await withLogger(
     logger,
     `Fetching existing link for chat id ${chatId}`,
-    async (logger) => getTrackerRequestToChatLinkByChatId(logger, chatId)
+    getTrackerRequestToChatLinkByChatId(chatId)
   );
   if (existingLink) {
     return existingLink._id;
@@ -44,8 +43,7 @@ export const createRequestByChatId = async (
   const creationResponse = await withLogger(
     logger,
     `Creating link for chat id ${chatId}`,
-    async (logger) =>
-      insertTrackerRequestToChatLink(logger, crypto.randomUUID(), chatId)
+    insertTrackerRequestToChatLink(crypto.randomUUID(), chatId)
   );
   if (!creationResponse) {
     throw new Error(`Cannot create link for chat id ${chatId}`);

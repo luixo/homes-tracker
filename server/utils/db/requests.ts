@@ -11,13 +11,12 @@ export const getTrackerRequests = async (
     collection.find({}).toArray()
   );
 
-export const getTrackerRequest = async (
-  logger: winston.Logger,
-  requestId: string
-): Promise<TrackerRequest | null> =>
-  withTrackerRequests(logger, `Fetch all`, (collection) =>
-    collection.findOne({ _id: requestId })
-  );
+export const getTrackerRequest =
+  (requestId: string) =>
+  async (logger: winston.Logger): Promise<TrackerRequest | null> =>
+    withTrackerRequests(logger, `Fetch all`, (collection) =>
+      collection.findOne({ _id: requestId })
+    );
 
 export const upsertTrackerRequest = async (
   logger: winston.Logger,
@@ -55,13 +54,12 @@ export const upsertTrackerRequestEnabledStatus = async (
       )
   );
 
-export const updateTrackerRequestWithTimestamp = async (
-  logger: winston.Logger,
-  id: string
-): Promise<WithId<TrackerRequest> | null> =>
-  withTrackerRequests(logger, `Update "${id}" with timestamp`, (collection) =>
-    collection.findOneAndUpdate(
-      { _id: id },
-      { $set: { notifiedTimestamp: Date.now() } }
-    )
-  );
+export const updateTrackerRequestWithTimestamp =
+  (id: string) =>
+  async (logger: winston.Logger): Promise<WithId<TrackerRequest> | null> =>
+    withTrackerRequests(logger, `Update "${id}" with timestamp`, (collection) =>
+      collection.findOneAndUpdate(
+        { _id: id },
+        { $set: { notifiedTimestamp: Date.now() } }
+      )
+    );

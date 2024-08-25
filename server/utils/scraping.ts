@@ -50,7 +50,7 @@ export const scrapeEntities = async <T, P>(
     const { ids: newEntityIds } = await withLogger(
       logger.child({ scraper: `${scraper.id} #${index}` }),
       `Scraping`,
-      async (logger) => {
+      async (scraperLogger) => {
         let page = 0;
         while (page < maxPages) {
           if (getStopSignal()) {
@@ -61,20 +61,20 @@ export const scrapeEntities = async <T, P>(
           // We're not filthy scraperers, aren't we?
           await wait(250);
           const pageResult = await withLogger(
-            logger,
+            scraperLogger,
             `Fetch page #${page}`,
             async () => {
-              const pageResult = await timeout(
-                fetcher(logger, prepareResult, page),
+              const rawPageResult = await timeout(
+                fetcher(scraperLogger, prepareResult, page),
                 5 * SECOND
               );
-              if (!pageResult) {
+              if (!rawPageResult) {
                 return null;
               }
               return {
-                results: pageResult.results,
-                nonVipAdsFound: pageResult.nonVipAdsFound,
-                filteredResults: pageResult.results.filter(
+                results: rawPageResult.results,
+                nonVipAdsFound: rawPageResult.nonVipAdsFound,
+                filteredResults: rawPageResult.results.filter(
                   (result) => !existingIds.includes(scraper.getEntityId(result))
                 ),
               };
@@ -99,7 +99,7 @@ export const scrapeEntities = async <T, P>(
           if (pageResult.filteredResults.length !== 0) {
             const elementsResult = await timeout(
               fetchAndPutIds(
-                logger,
+                scraperLogger,
                 pageResult.filteredResults,
                 prepareResult,
                 scraper

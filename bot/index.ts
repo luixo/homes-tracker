@@ -12,23 +12,23 @@ const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS ?? "").split(",");
 
 const getContext = async (
   bot: TelegramBot,
-  message: TelegramBot.Message
+  inMessage: TelegramBot.Message
 ): Promise<BotContext> => {
-  const chatId = message.chat.id.toString();
-  if (Number(chatId) < 0) {
+  const inChatId = inMessage.chat.id.toString();
+  if (Number(inChatId) < 0) {
     await bot.sendMessage(
-      chatId,
+      inChatId,
       "К сожалению, добавление бота в группы на данный момент недоступно"
     );
     throw new Error("Bot in group");
   }
   return {
     bot,
-    respond: (message) => bot.sendMessage(chatId, message),
-    sendCard: async (chatId) => {
-      const chat = await bot.getChat(chatId);
+    respond: (outMessage) => bot.sendMessage(inChatId, outMessage),
+    sendCard: async (outChatId) => {
+      const chat = await bot.getChat(outChatId);
       return bot.sendContact(
-        chatId,
+        outChatId,
         chat.username || chat.title || "unknown",
         chat.first_name || "unknown",
         {
@@ -37,7 +37,7 @@ const getContext = async (
       );
     },
     logger: globalLogger.child({ service: "bot" }),
-    chatId,
+    chatId: inChatId,
   };
 };
 

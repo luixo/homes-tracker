@@ -221,15 +221,13 @@ export const handlers: Record<string, BotHandler> = {
   },
   getUserRequest: restrictAdmin(async (context, lookupChatId) => {
     const maybeRequestLink = await getTrackerRequestToChatLinkByChatId(
-      context.logger,
       lookupChatId
-    );
+    )(context.logger);
     if (!maybeRequestLink) {
       await context.respond(`Для пользователя ${lookupChatId} нет запроса`);
     } else {
-      const request = await getTrackerRequest(
-        context.logger,
-        maybeRequestLink._id
+      const request = await getTrackerRequest(maybeRequestLink._id)(
+        context.logger
       );
       if (!request) {
         await context.respond(
@@ -249,7 +247,7 @@ export const handlers: Record<string, BotHandler> = {
     const trackerRequests = await withLogger(
       context.logger,
       `Fetching tracker requests`,
-      (logger) => getTrackerRequests(logger),
+      getTrackerRequests,
       { onSuccess: (requests) => `${requests.length} requests fetched` }
     );
     const { add: addToQueue, getResolvePromise: getQueuePromise } =

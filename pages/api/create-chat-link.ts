@@ -26,7 +26,7 @@ const handler: NextApiHandler<Response> = async (req, res) => {
     const existingId = await withLogger(
       logger,
       `Get existing request id with ${chatId} chat id`,
-      async (logger) => getTrackerRequestToChatLinkByChatId(logger, chatId)
+      getTrackerRequestToChatLinkByChatId(chatId)
     );
     if (existingId) {
       return res.status(400).send({
@@ -36,8 +36,7 @@ const handler: NextApiHandler<Response> = async (req, res) => {
     const chatLinkResult = await withLogger(
       logger,
       `Create request id for chat id "${chatId}"`,
-      async (logger) =>
-        insertTrackerRequestToChatLink(logger, crypto.randomUUID(), chatId)
+      insertTrackerRequestToChatLink(crypto.randomUUID(), chatId)
     );
     res.status(200).send({
       success: `Chat link for chat "${chatId}" created: "${chatLinkResult.insertedId}"`,
