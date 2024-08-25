@@ -3,20 +3,20 @@ import TelegramBot from "node-telegram-bot-api";
 
 import { globalLogger } from "../server/logger";
 
-import type { BotContext} from "./handlers";
+import type { BotContext } from "./handlers";
 import { handlers } from "./handlers";
 
 dotenv.config({ path: "./.env.local" });
 
 const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS ?? "").split(",");
 
-const getContext = (
+const getContext = async (
   bot: TelegramBot,
   message: TelegramBot.Message
-): BotContext => {
+): Promise<BotContext> => {
   const chatId = message.chat.id.toString();
   if (Number(chatId) < 0) {
-    bot.sendMessage(
+    await bot.sendMessage(
       chatId,
       "К сожалению, добавление бота в группы на данный момент недоступно"
     );
@@ -51,13 +51,13 @@ const main = async () => {
 
   Object.entries(handlers).forEach(([key, handler]) => {
     bot.onText(new RegExp(`/${key} ?(.*)`, "ms"), async (message, match) => {
-      const context = getContext(bot, message);
+      const context = await getContext(bot, message);
       context.logger.info(
         `Got message with handler ${key} from ${context.chatId}`
       );
       try {
         if (handler.adminOnly && !ADMIN_USER_IDS.includes(context.chatId)) {
-          bot.sendMessage(
+          await bot.sendMessage(
             context.chatId,
             "Это действие может делать только администратор!"
           );
@@ -77,4 +77,4 @@ const main = async () => {
   );
 };
 
-main();
+void main();

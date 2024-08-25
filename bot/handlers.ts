@@ -71,7 +71,7 @@ const restrictAdmin = (handler: BotHandler): BotHandler => {
 
 export const handlers: Record<string, BotHandler> = {
   help: async (context) => {
-    context.respond(helpResponse);
+    await context.respond(helpResponse);
   },
   start: async (context) => {
     const existingRequest = await getExistingRequestByChatId(
@@ -79,7 +79,7 @@ export const handlers: Record<string, BotHandler> = {
       context.chatId
     );
     if (existingRequest) {
-      context.respond(
+      await context.respond(
         [
           `У нас уже есть твой запрос, он ${
             existingRequest.enabled ? "включен" : "выключен"
@@ -92,7 +92,7 @@ export const handlers: Record<string, BotHandler> = {
           .join("\n")
       );
     } else {
-      context.respond(
+      await context.respond(
         `У тебя сейчас нет запроса, создай его с помощью команды /request`
       );
     }
@@ -103,7 +103,7 @@ export const handlers: Record<string, BotHandler> = {
       context.chatId
     );
     if (!existingRequest?.enabled) {
-      context.respond(`Пока!`);
+      await context.respond(`Пока!`);
       return;
     }
     await upsertTrackerRequestEnabledStatus(
@@ -111,7 +111,7 @@ export const handlers: Record<string, BotHandler> = {
       existingRequest._id,
       false
     );
-    context.respond(`Пока! Твой запрос пока выключаю`);
+    await context.respond(`Пока! Твой запрос пока выключаю`);
   },
   request: async (context, match) => {
     const existingRequest = await getExistingRequestByChatId(
@@ -120,7 +120,7 @@ export const handlers: Record<string, BotHandler> = {
     );
     if (!match) {
       if (existingRequest) {
-        context.respond(
+        await context.respond(
           [
             "Твой текущий запрос:",
             formatRequest(existingRequest),
@@ -130,7 +130,7 @@ export const handlers: Record<string, BotHandler> = {
           ].join("\n")
         );
       } else {
-        context.respond(
+        await context.respond(
           ["У тебя нет запроса!", "", requestHelpResponse].join("\n")
         );
       }
@@ -138,7 +138,7 @@ export const handlers: Record<string, BotHandler> = {
     }
     const requestBody = parseRequest(match);
     if (Array.isArray(requestBody)) {
-      context.respond(
+      await context.respond(
         [
           "Я не понял твой запрос, а именно части:",
           ...requestBody,
@@ -171,7 +171,7 @@ export const handlers: Record<string, BotHandler> = {
       `Updating tracker request ${requestId}`,
       (logger) => upsertTrackerRequest(logger, nextRequest)
     );
-    context.respond(
+    await context.respond(
       `Твой запрос теперь:\n${formatRequest(nextRequest)}\nЖди уведомлений!`
     );
   },
@@ -181,13 +181,13 @@ export const handlers: Record<string, BotHandler> = {
       context.chatId
     );
     if (!existingRequest) {
-      context.respond(
+      await context.respond(
         `Невозможно включить запрос, его не существует. Создай запрос с помощью команды /request`
       );
       return;
     }
     if (existingRequest.enabled) {
-      context.respond(`Запрос уже включен`);
+      await context.respond(`Запрос уже включен`);
       return;
     }
     await upsertTrackerRequestEnabledStatus(
@@ -195,7 +195,7 @@ export const handlers: Record<string, BotHandler> = {
       existingRequest._id,
       true
     );
-    context.respond(`Запрос теперь включен`);
+    await context.respond(`Запрос теперь включен`);
   },
   disable: async (context) => {
     const existingRequest = await getExistingRequestByChatId(
@@ -203,13 +203,13 @@ export const handlers: Record<string, BotHandler> = {
       context.chatId
     );
     if (!existingRequest) {
-      context.respond(
+      await context.respond(
         `Невозможно выключить запрос, его не существует. Создай запрос с помощью команды /request`
       );
       return;
     }
     if (!existingRequest.enabled) {
-      context.respond(`Запрос уже выключен`);
+      await context.respond(`Запрос уже выключен`);
       return;
     }
     await upsertTrackerRequestEnabledStatus(
@@ -217,7 +217,7 @@ export const handlers: Record<string, BotHandler> = {
       existingRequest._id,
       false
     );
-    context.respond(`Запрос теперь выключен`);
+    await context.respond(`Запрос теперь выключен`);
   },
   getUserRequest: restrictAdmin(async (context, lookupChatId) => {
     const maybeRequestLink = await getTrackerRequestToChatLinkByChatId(
@@ -225,25 +225,25 @@ export const handlers: Record<string, BotHandler> = {
       lookupChatId
     );
     if (!maybeRequestLink) {
-      context.respond(`Для пользователя ${lookupChatId} нет запроса`);
+      await context.respond(`Для пользователя ${lookupChatId} нет запроса`);
     } else {
       const request = await getTrackerRequest(
         context.logger,
         maybeRequestLink._id
       );
       if (!request) {
-        context.respond(
+        await context.respond(
           `Для пользователя обнаружена связь с запросом ${maybeRequestLink._id}, но сам запрос не обнаружен`
         );
       } else {
-        context.respond(
+        await context.respond(
           `Запрос пользователя ${lookupChatId} выглядит так:\n${formatRequest(
             request
           )}`
         );
       }
     }
-    context.sendCard(lookupChatId);
+    await context.sendCard(lookupChatId);
   }),
   announce: restrictAdmin(async (context, match) => {
     const trackerRequests = await withLogger(
