@@ -1,12 +1,12 @@
 # Install dependencies only when needed
-FROM amd64/node:16-alpine AS deps
+FROM amd64/node:22-alpine AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./ 
 RUN npm ci
 
 # Production image, copy all the files and run next
-FROM amd64/node:16-alpine AS runner
+FROM amd64/node:22-alpine AS runner
 WORKDIR /app
 COPY --from=deps /app/package.json ./package.json
 COPY --from=deps /app/node_modules ./node_modules
