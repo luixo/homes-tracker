@@ -51,6 +51,7 @@ export const sendToTelegram = async (
               }
             );
           }
+          // eslint-disable-next-line no-param-reassign
           message = message.slice(MAX_TELEGRAM_CHARS + 1);
         }
       } catch (e) {

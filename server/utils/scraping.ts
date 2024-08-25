@@ -40,6 +40,7 @@ export const scrapeEntities = async <T, P>(
   existingIds: string[],
   { maxPages = Infinity, shouldBailOutOnNoNewIds }: ScrapeOptions
 ): Promise<string[]> => {
+  const localExistingIds = existingIds.concat();
   const prepareResult = await withLogger(
     logger.child({ scraper: scraper.id }),
     `Scraping preparation`,
@@ -75,7 +76,8 @@ export const scrapeEntities = async <T, P>(
                 results: rawPageResult.results,
                 nonVipAdsFound: rawPageResult.nonVipAdsFound,
                 filteredResults: rawPageResult.results.filter(
-                  (result) => !existingIds.includes(scraper.getEntityId(result))
+                  (result) =>
+                    !localExistingIds.includes(scraper.getEntityId(result))
                 ),
               };
             },
@@ -108,8 +110,8 @@ export const scrapeEntities = async <T, P>(
             );
             if (elementsResult) {
               entityIds.push(...elementsResult);
-              existingIds = existingIds.concat(
-                pageResult.filteredResults.map(scraper.getEntityId)
+              localExistingIds.push(
+                ...pageResult.filteredResults.map(scraper.getEntityId)
               );
             }
           } else if (

@@ -13,22 +13,22 @@ export const withLogger = async <T>(
   actionFn: ActionFn<T>,
   options: Partial<WithLoggerOptions<T>> = {}
 ): Promise<T> => {
-  logger = logger.child({ action });
+  const nextLogger = logger.child({ action });
   try {
     if (!options.skipStart) {
-      logger.info("", { status: ">" });
+      nextLogger.info("", { status: ">" });
     }
-    const result = await actionFn(logger);
+    const result = await actionFn(nextLogger);
     if (!options.skipSuccess) {
       const successMessage = options.onSuccess ? options.onSuccess(result) : "";
-      logger.info(successMessage || "", {
+      nextLogger.info(successMessage || "", {
         status: "<",
       });
     }
     return result;
   } catch (e) {
     if (!options.skipFail) {
-      logger.error("", {
+      nextLogger.error("", {
         status: "!",
         error: e,
       });

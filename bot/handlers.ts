@@ -65,6 +65,8 @@ const helpResponse = [
 ].join("\n");
 
 const restrictAdmin = (handler: BotHandler): BotHandler => {
+  // The simplest way to restrict handlers for admins
+  // eslint-disable-next-line no-param-reassign
   handler.adminOnly = true;
   return handler;
 };

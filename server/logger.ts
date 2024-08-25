@@ -7,6 +7,7 @@ const getMessagePrefix =
     const rawInfo = info[prefix] as T | undefined;
     if (rawInfo) {
       messagePrefix = transformer ? transformer(rawInfo) : rawInfo;
+      // eslint-disable-next-line no-param-reassign
       delete info[prefix];
     }
     return messagePrefix;
@@ -32,8 +33,7 @@ const createFormat = winston.format((info) => {
   const message = [actionMessagePrefix, info.message]
     .filter(Boolean)
     .join(": ");
-  info.message = `${filteredPrefixes} ${message}`;
-  return info;
+  return { ...info, message: `${filteredPrefixes} ${message}` };
 });
 
 export const globalLogger = winston.createLogger({

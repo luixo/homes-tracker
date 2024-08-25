@@ -152,7 +152,6 @@ const temporaryDisabledRules = {
   "@typescript-eslint/no-use-before-define": "off",
   "@typescript-eslint/restrict-template-expressions": "off",
   "no-case-declarations": "off",
-  "no-param-reassign": "off",
   "no-plusplus": "off",
   "no-promise-executor-return": "off",
 };
