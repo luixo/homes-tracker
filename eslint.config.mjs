@@ -31,6 +31,12 @@ const overridenRules = {
   "sort-imports": ["error", { ignoreDeclarationSort: true }],
   // `void foo` is a mark of deliberately floating promise
   "no-void": ["error", { allowAsStatement: true }],
+  // We use `_id` from mongodb
+  "no-underscore-dangle": ["error", { allow: ["_id"] }],
+  // We use await in loops
+  "no-await-in-loop": "off",
+  // We use continue in loops
+  "no-continue": "off",
 
   // Custom order
   "import/order": [
@@ -108,6 +114,8 @@ const disabledRules = {
   "consistent-return": "off",
   // Typescript version is `@typescript-eslint/switch-exhaustiveness-check`
   "default-case": "off",
+  // We use iterators/generators
+  "no-restricted-syntax": "off",
   // Rule is enabled by `eslint-config-airbnb-typescript`
   // it is deprecated by maintainer, see https://typescript-eslint.io/rules/no-throw-literal/
   "@typescript-eslint/no-throw-literal": "off",
@@ -115,6 +123,10 @@ const disabledRules = {
   "react/display-name": "off",
   // We extensively spread props: `<Foo {...props} />`
   "react/jsx-props-no-spreading": "off",
+  // We may want to use `props.foo`
+  "react/destructuring-assignment": "off",
+  // Rule doesn't seems to work properly
+  "react/prop-types": "off",
   // We use mostly named exports
   "import/prefer-default-export": "off",
   // `(object | undefined) || number` is assumed incorrect by this rule
@@ -128,19 +140,18 @@ const disabledRules = {
   // - returning `void` from a function, assigning that to a value and validating value is undefined
   // - shorthanding functions returns that don't matter (because they're void)
   "@typescript-eslint/no-confusing-void-expression": "off",
+  // That's a weird thing to forbid
+  "@typescript-eslint/no-dynamic-delete": "off",
 };
 
 const temporaryDisabledRules = {
-  "@typescript-eslint/no-dynamic-delete": "off",
   "@typescript-eslint/no-explicit-any": "off",
   "@typescript-eslint/no-floating-promises": "off",
   "@typescript-eslint/no-invalid-void-type": "off",
   "@typescript-eslint/no-loop-func": "off",
-  "@typescript-eslint/no-non-null-assertion": "off",
   "@typescript-eslint/no-shadow": "off",
   "@typescript-eslint/no-unnecessary-condition": "off",
   "@typescript-eslint/no-unnecessary-template-expression": "off",
-  "@typescript-eslint/no-unnecessary-type-assertion": "off",
   "@typescript-eslint/no-unsafe-argument": "off",
   "@typescript-eslint/no-unsafe-assignment": "off",
   "@typescript-eslint/no-unsafe-return": "off",
@@ -150,20 +161,14 @@ const temporaryDisabledRules = {
   "@typescript-eslint/restrict-template-expressions": "off",
   "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
   "arrow-body-style": "off",
-  "no-await-in-loop": "off",
   "no-case-declarations": "off",
-  "no-continue": "off",
   "no-else-return": "off",
   "no-param-reassign": "off",
   "no-plusplus": "off",
   "no-promise-executor-return": "off",
-  "no-restricted-syntax": "off",
-  "no-underscore-dangle": "off",
   "object-shorthand": "off",
   "prefer-const": "off",
   "prefer-destructuring": "off",
-  "react/destructuring-assignment": "off",
-  "react/prop-types": "off",
   "spaced-comment": "off",
 };
 

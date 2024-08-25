@@ -82,7 +82,7 @@ const filterAddress = (
         entity.location.subdistrict,
       ]
         .filter((value) => value !== null)
-        .some((value) => filterRegex(value!, filter));
+        .some((value) => filterRegex(value, filter));
   }
 };
 
