@@ -11,72 +11,72 @@ dotenv.config({ path: "./.env.local" });
 const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS ?? "").split(",");
 
 const getContext = async (
-  bot: TelegramBot,
-  inMessage: TelegramBot.Message
+	bot: TelegramBot,
+	inMessage: TelegramBot.Message,
 ): Promise<BotContext> => {
-  const inChatId = inMessage.chat.id.toString();
-  if (Number(inChatId) < 0) {
-    await bot.sendMessage(
-      inChatId,
-      "К сожалению, добавление бота в группы на данный момент недоступно"
-    );
-    throw new Error("Bot in group");
-  }
-  return {
-    bot,
-    respond: (outMessage) => bot.sendMessage(inChatId, outMessage),
-    sendCard: async (outChatId) => {
-      const chat = await bot.getChat(outChatId);
-      return bot.sendContact(
-        outChatId,
-        chat.username || chat.title || "unknown",
-        chat.first_name || "unknown",
-        {
-          last_name: chat.last_name,
-        }
-      );
-    },
-    logger: globalLogger.child({ service: "bot" }),
-    chatId: inChatId,
-  };
+	const inChatId = inMessage.chat.id.toString();
+	if (Number(inChatId) < 0) {
+		await bot.sendMessage(
+			inChatId,
+			"К сожалению, добавление бота в группы на данный момент недоступно",
+		);
+		throw new Error("Bot in group");
+	}
+	return {
+		bot,
+		respond: (outMessage) => bot.sendMessage(inChatId, outMessage),
+		sendCard: async (outChatId) => {
+			const chat = await bot.getChat(outChatId);
+			return bot.sendContact(
+				outChatId,
+				chat.username || chat.title || "unknown",
+				chat.first_name || "unknown",
+				{
+					last_name: chat.last_name,
+				},
+			);
+		},
+		logger: globalLogger.child({ service: "bot" }),
+		chatId: inChatId,
+	};
 };
 
 const main = async () => {
-  const token = process.env.TELEGRAM_TOKEN || "";
-  if (!token) {
-    throw new Error("Please provider TELEGRAM_TOKEN environment variables");
-  }
+	const token = process.env.TELEGRAM_TOKEN || "";
+	if (!token) {
+		throw new Error("Please provider TELEGRAM_TOKEN environment variables");
+	}
 
-  const bot = new TelegramBot(token, { polling: true });
+	const bot = new TelegramBot(token, { polling: true });
 
-  Object.entries(handlers).forEach(([key, handler]) => {
-    bot.onText(new RegExp(`/${key} ?(.*)`, "ms"), async (message, match) => {
-      const context = await getContext(bot, message);
-      context.logger.info(
-        `Got message with handler ${key} from ${context.chatId}`
-      );
-      try {
-        if (handler.adminOnly && !ADMIN_USER_IDS.includes(context.chatId)) {
-          await bot.sendMessage(
-            context.chatId,
-            "Это действие может делать только администратор!"
-          );
-          return;
-        }
-        await handler(context, match ? match[1] : "");
-      } catch (e) {
-        context.logger.error(
-          `Error happened on message with handler ${key} from ${
-            context.chatId
-          }:\n${message.text}\n${String(e)}`
-        );
-      }
-    });
-  });
-  const initLogger = globalLogger.child({ handler: "init" });
-  initLogger.info(
-    `Bot started with ${Object.keys(handlers).join(", ")} handlers connected`
-  );
+	Object.entries(handlers).forEach(([key, handler]) => {
+		bot.onText(new RegExp(`/${key} ?(.*)`, "ms"), async (message, match) => {
+			const context = await getContext(bot, message);
+			context.logger.info(
+				`Got message with handler ${key} from ${context.chatId}`,
+			);
+			try {
+				if (handler.adminOnly && !ADMIN_USER_IDS.includes(context.chatId)) {
+					await bot.sendMessage(
+						context.chatId,
+						"Это действие может делать только администратор!",
+					);
+					return;
+				}
+				await handler(context, match ? match[1] : "");
+			} catch (e) {
+				context.logger.error(
+					`Error happened on message with handler ${key} from ${
+						context.chatId
+					}:\n${message.text}\n${String(e)}`,
+				);
+			}
+		});
+	});
+	const initLogger = globalLogger.child({ handler: "init" });
+	initLogger.info(
+		`Bot started with ${Object.keys(handlers).join(", ")} handlers connected`,
+	);
 };
 
 void main();
