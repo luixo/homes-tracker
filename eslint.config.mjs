@@ -145,17 +145,12 @@ const disabledRules = {
 };
 
 const temporaryDisabledRules = {
-  "@typescript-eslint/no-explicit-any": "off",
   "@typescript-eslint/no-invalid-void-type": "off",
   "@typescript-eslint/no-loop-func": "off",
   "@typescript-eslint/no-unnecessary-condition": "off",
-  "@typescript-eslint/no-unsafe-argument": "off",
-  "@typescript-eslint/no-unsafe-assignment": "off",
-  "@typescript-eslint/no-unsafe-return": "off",
   "@typescript-eslint/no-unused-vars": "off",
   "@typescript-eslint/no-use-before-define": "off",
   "@typescript-eslint/restrict-template-expressions": "off",
-  "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
   "no-case-declarations": "off",
   "no-param-reassign": "off",
   "no-plusplus": "off",

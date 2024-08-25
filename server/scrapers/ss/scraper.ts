@@ -127,7 +127,7 @@ const fetchEntity = (
         },
       }
     );
-    const data: Model = await response.json();
+    const data = (await response.json()) as Model;
     return mapModalToEntity(data);
   });
 
@@ -151,7 +151,9 @@ const fetchPageByType =
             body: JSON.stringify(buildParams(realEstateType, page)),
           }
         );
-        const data: { realStateItemModel: PageModel[] } = await response.json();
+        const data = (await response.json()) as {
+          realStateItemModel: PageModel[];
+        };
         const results = data.realStateItemModel
           .filter((model) => model.price.priceGeo && model.price.priceUsd)
           .map((model) => model.applicationId);

@@ -91,12 +91,12 @@ export const scraper: Scraper<ScrapedEntity, null> = {
           );
           const {
             data: { data: models },
-          }: {
+          } = (await response.json()) as {
             result: boolean;
             data: {
               data: Model[];
             };
-          } = await response.json();
+          };
           const results = models.map(mapModelToEntity);
           return {
             results,

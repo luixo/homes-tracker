@@ -41,7 +41,7 @@ export const Service: React.FC<Props> = (props) => {
         params.set(key, value.toString());
       }
       const response = await fetch(`/api/entities?${params.toString()}`);
-      const { items }: GetItemsResponse = await response.json();
+      const { items } = (await response.json()) as GetItemsResponse;
       return items;
     },
     initialPageParam: { offset: 0 },

@@ -6,7 +6,7 @@ import { scraper as ssScraper } from "../scrapers/ss/scraper";
 import type { Currency, ScrapedEntity, Scraper } from "../types/scraper";
 import { escapeMarkdown } from "../utils/markdown";
 
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const scrapers: Scraper<any, any>[] = [ssScraper, myHomeScraper];
 
 const getUrlById = (scraperId: string, id: string): string => {

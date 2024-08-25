@@ -8,7 +8,7 @@ import type { ScrapedEntity } from "../types/scraper";
 import { withLogger } from "./logging";
 
 const runOnCollection =
-  <C extends Document>(
+  <C extends Document, T>(
     collectionName: string,
     run: (collection: Collection<C>, logger: winston.Logger) => Promise<T>
   ) =>

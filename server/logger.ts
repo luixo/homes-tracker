@@ -1,11 +1,12 @@
 import winston from "winston";
 
 const getMessagePrefix =
-  <T>(prefix: string, transformer?: (value: T) => string) =>
+  <T>(prefix: string, transformer?: (value: T) => T) =>
   (info: winston.Logform.TransformableInfo) => {
-    let messagePrefix;
-    if (info[prefix]) {
-      messagePrefix = transformer ? transformer(info[prefix]) : info[prefix];
+    let messagePrefix: T | undefined;
+    const rawInfo = info[prefix] as T | undefined;
+    if (rawInfo) {
+      messagePrefix = transformer ? transformer(rawInfo) : rawInfo;
       delete info[prefix];
     }
     return messagePrefix;

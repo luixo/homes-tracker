@@ -23,10 +23,9 @@ const globalStyles = globalCss({
   },
 });
 
-const MyApp: React.FC<AppProps> = ({
-  Component,
-  pageProps: { dehydratedState, ...pageProps },
-}) => {
+const MyApp: React.FC<
+  AppProps<{ dehydratedState: ReactQuery.DehydratedState }>
+> = ({ Component, pageProps: { dehydratedState, ...pageProps } }) => {
   globalStyles();
   const [queryClient] = React.useState(
     () =>
