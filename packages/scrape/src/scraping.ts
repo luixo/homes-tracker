@@ -1,0 +1,140 @@
+import { putEntity, removeEntity } from "@/db/entities";
+import type { Logger } from "@/utils/logger";
+import { withLogger } from "@/utils/logger";
+import { timeout, wait } from "@/utils/promise";
+import { getStopSignal } from "@/utils/signals";
+import { MINUTE, SECOND } from "@/utils/time";
+
+import type { Scraper } from "./types";
+
+const fetchAndPutIds = async <T, P>(
+	logger: Logger,
+	results: T[],
+	prepareResult: P,
+	scraper: Scraper<T, P>,
+): Promise<string[]> => {
+	const entityIds: string[] = [];
+	for (const result of results) {
+		const entity = await scraper.fetchEntity(logger, prepareResult, result);
+		// We're not filthy scraperers, aren't we?
+		const promises: Promise<unknown>[] = [];
+		if (entity) {
+			promises.push(putEntity(logger, entity));
+			entityIds.push(entity._id);
+		} else {
+			promises.push(removeEntity(logger, scraper.getEntityId(result)));
+		}
+		await Promise.all(promises);
+	}
+	return entityIds;
+};
+
+type ScrapeOptions = {
+	maxPages?: number;
+	shouldBailOutOnNoNewIds?: boolean;
+};
+
+export const scrapeEntities = async <T, P>(
+	logger: Logger,
+	scraper: Scraper<T, P>,
+	existingIds: string[],
+	{ maxPages = Infinity, shouldBailOutOnNoNewIds }: ScrapeOptions,
+): Promise<string[]> => {
+	const localExistingIds = existingIds.concat();
+	const prepareResult = await withLogger(
+		logger.child({ scraper: scraper.id }),
+		`Scraping preparation`,
+		scraper.prepare,
+	);
+	let entityIds: string[] = [];
+	for (const [index, fetcher] of Object.entries(scraper.pageFetchers)) {
+		const { ids: newEntityIds } = await withLogger(
+			logger.child({ scraper: `${scraper.id} #${index}` }),
+			`Scraping`,
+			// TODO: figure out why
+			// eslint-disable-next-line @typescript-eslint/no-loop-func
+			async (scraperLogger) => {
+				let page = 0;
+				while (page < maxPages) {
+					if (getStopSignal()) {
+						break;
+					}
+					page += 1;
+
+					// We're not filthy scraperers, aren't we?
+					await wait(250);
+					const pageResult = await withLogger(
+						scraperLogger,
+						`Fetch page #${page}`,
+						// eslint-disable-next-line @typescript-eslint/no-loop-func
+						async () => {
+							const rawPageResult = await timeout(
+								fetcher(scraperLogger, prepareResult, page),
+								5 * SECOND,
+							);
+							if (!rawPageResult) {
+								return null;
+							}
+							return {
+								results: rawPageResult.results,
+								nonVipAdsFound: rawPageResult.nonVipAdsFound,
+								filteredResults: rawPageResult.results.filter(
+									(result) =>
+										!localExistingIds.includes(scraper.getEntityId(result)),
+								),
+							};
+						},
+						{
+							onSuccess: (response) =>
+								response
+									? `${response.filteredResults.length} new ids found${
+											response.filteredResults.length
+												? ` : ${response.filteredResults
+														.map(scraper.getEntityId)
+														.join(", ")}`
+												: ""
+										}`
+									: undefined,
+						},
+					);
+
+					if (!pageResult) {
+						continue;
+					}
+					if (pageResult.filteredResults.length !== 0) {
+						const elementsResult = await timeout(
+							fetchAndPutIds(
+								scraperLogger,
+								pageResult.filteredResults,
+								prepareResult,
+								scraper,
+							),
+							10 * MINUTE,
+						);
+						if (elementsResult) {
+							entityIds.push(...elementsResult);
+							localExistingIds.push(
+								...pageResult.filteredResults.map(scraper.getEntityId),
+							);
+						}
+					} else if (
+						pageResult.results.length === 0 ||
+						(shouldBailOutOnNoNewIds && pageResult.nonVipAdsFound)
+					) {
+						break;
+					}
+				}
+				return {
+					ids: entityIds,
+					lastPage: page,
+				};
+			},
+			{
+				onSuccess: ({ ids, lastPage }) =>
+					`${ids.length} ids fetched, with total pages used ${lastPage}`,
+			},
+		);
+		entityIds = entityIds.concat(newEntityIds);
+	}
+	return entityIds;
+};

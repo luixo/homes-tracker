@@ -1,0 +1,20 @@
+{
+	"name": "@/scrape",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./*": {
+			"types": "./dist/src/*.d.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@/tsconfig": "workspace:*",
+		"@/utils": "workspace:*",
+		"@/db": "workspace:*",
+		"@sindresorhus/transliterate": "^1.6.0"
+	}
+}

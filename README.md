@@ -2,13 +2,41 @@
 
 ## Deploy on Yandex
 
-`pnpm update:patch`
+Please make sure `DOCKER_PREFIX` is located in `.env.local` or `.env` file
 
-Decide if you need to build general image / bot image.
-`pnpm docker:build`
-`pnpm bot:docker:build`
+1. Update version:
 
-Verify that local profile contains `export DOCKER_PREFIX=cr.yandex/<registry>`
-Decide if you need to publish general image / bot image.
-`pnpm docker:publish`
-`pnpm bot:docker:publish`
+```
+# Web
+pnpm --filter @/web exec pnpm version patch
+# Bot
+pnpm --filter @/bot exec pnpm version patch
+```
+
+1. Build an image:
+
+```
+# Web
+pnpm docker build @/web
+# Bot
+pnpm docker build @/bot
+```
+
+1. Push image to the registry:
+
+```
+# dotenv needed for `DOCKER_PREFIX` env variable
+# Web
+pnpm exec dotenv -c -- pnpm docker publish @/web
+# Bot
+pnpm exec dotenv -c -- pnpm docker publish @/bot
+```
+
+One-liner:
+
+```
+# Web
+pnpm --filter @/web exec pnpm version patch && pnpm docker build @/web && pnpm exec dotenv -c -- pnpm docker publish @/web
+# Bot
+pnpm --filter @/bot exec pnpm version patch && pnpm docker build @/bot && pnpm exec dotenv -c -- pnpm docker publish @/bot
+```

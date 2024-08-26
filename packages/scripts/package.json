@@ -1,0 +1,15 @@
+{
+	"name": "@/scripts",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"docker": "tsx ./docker.ts"
+	},
+	"dependencies": {
+		"tsx": "^4.18.0",
+		"zx": "^8.1.4"
+	},
+	"devDependencies": {
+		"@/tsconfig": "workspace:*"
+	}
+}

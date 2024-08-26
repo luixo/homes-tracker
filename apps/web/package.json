@@ -1,0 +1,42 @@
+{
+	"name": "@/web",
+	"private": true,
+	"version": "0.2.0",
+	"type": "module",
+	"exports": {
+		"./*": {
+			"types": "./dist/src/*.d.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"dockerImage": "homes-tracker",
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start"
+	},
+	"dependencies": {
+		"@stitches/react": "^1.2.8",
+		"@tanstack/react-query": "^5.52.1",
+		"next": "^15.0.0-rc.0",
+		"react": "^19.0.0-beta-26f2496093-20240514",
+		"react-dom": "^19.0.0-beta-26f2496093-20240514",
+		"@/utils": "workspace:*",
+		"@/tsconfig": "workspace:*",
+		"@/db": "workspace:*",
+		"@/bot": "workspace:*",
+		"@/scrape": "workspace:*",
+		"@/filters": "workspace:*",
+		"@/intercom": "workspace:*",
+		"@/web": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc"
+	},
+	"overrides": {
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc"
+	}
+}
