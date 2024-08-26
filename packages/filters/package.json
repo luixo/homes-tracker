@@ -12,7 +12,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@/tsconfig": "workspace:*",
-		"@/db": "workspace:*"
+		"@/db": "workspace:*",
+		"@/tsconfig": "workspace:*"
 	}
 }

@@ -12,11 +12,11 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"date-fns": "^3.6.0",
-		"@/utils": "workspace:*",
 		"@/db": "workspace:*",
 		"@/scrape": "workspace:*",
-		"@/tsconfig": "workspace:*"
+		"@/tsconfig": "workspace:*",
+		"@/utils": "workspace:*",
+		"date-fns": "^3.6.0"
 	},
 	"devDependencies": {
 		"@types/node-telegram-bot-api": "^0.64.7"

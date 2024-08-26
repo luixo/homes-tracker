@@ -1,7 +1,7 @@
 {
 	"name": "@/web",
-	"private": true,
 	"version": "0.2.0",
+	"private": true,
 	"type": "module",
 	"exports": {
 		"./*": {
@@ -9,32 +9,32 @@
 			"default": "./src/*.ts"
 		}
 	},
-	"dockerImage": "homes-tracker",
 	"scripts": {
-		"typecheck": "tsc --noEmit",
-		"dev": "next dev",
 		"build": "next build",
-		"start": "next start"
+		"dev": "next dev",
+		"start": "next start",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@/bot": "workspace:*",
+		"@/db": "workspace:*",
+		"@/filters": "workspace:*",
+		"@/intercom": "workspace:*",
+		"@/scrape": "workspace:*",
+		"@/tsconfig": "workspace:*",
+		"@/utils": "workspace:*",
+		"@/web": "workspace:*",
 		"@stitches/react": "^1.2.8",
 		"@tanstack/react-query": "^5.52.1",
 		"next": "^15.0.0-rc.0",
 		"react": "^19.0.0-beta-26f2496093-20240514",
-		"react-dom": "^19.0.0-beta-26f2496093-20240514",
-		"@/utils": "workspace:*",
-		"@/tsconfig": "workspace:*",
-		"@/db": "workspace:*",
-		"@/bot": "workspace:*",
-		"@/scrape": "workspace:*",
-		"@/filters": "workspace:*",
-		"@/intercom": "workspace:*",
-		"@/web": "workspace:*"
+		"react-dom": "^19.0.0-beta-26f2496093-20240514"
 	},
 	"devDependencies": {
 		"@types/react": "npm:types-react@rc",
 		"@types/react-dom": "npm:types-react-dom@rc"
 	},
+	"dockerImage": "homes-tracker",
 	"overrides": {
 		"@types/react": "npm:types-react@rc",
 		"@types/react-dom": "npm:types-react-dom@rc"

@@ -2,17 +2,26 @@
 	"name": "homes-tracker",
 	"version": "0.1.43",
 	"private": true,
-	"packageManager": "pnpm@9.8.0",
 	"type": "module",
 	"scripts": {
-		"web:dev": "pnpm --filter=@/web dev",
 		"bot:start": "dotenv -c -- pnpm --filter=@/bot start",
+		"docker": "pnpm --filter @/scripts docker",
+		"format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css}'",
+		"format:verify": "prettier --check '**/*.{js,jsx,ts,tsx,json,css}'",
 		"lint": "eslint --max-warnings=0",
 		"lint-staged": "lint-staged",
 		"typecheck": "pnpm -r typecheck",
-		"format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css}'",
-		"format:verify": "prettier --check '**/*.{js,jsx,ts,tsx,json,css}'",
-		"docker": "pnpm --filter @/scripts docker"
+		"web:dev": "pnpm --filter=@/web dev"
+	},
+	"pre-commit": [
+		"typecheck",
+		"lint-staged"
+	],
+	"lint-staged": {
+		"*.{j,t}s{,x}": [
+			"prettier --write",
+			"eslint --fix"
+		]
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.1.1",
@@ -36,9 +45,11 @@
 		"lint-staged": "^15.2.9",
 		"pre-commit": "^1.2.2",
 		"prettier": "^3.3.3",
+		"prettier-plugin-packagejson": "^2.5.2",
 		"typescript": "^5.5.4",
 		"typescript-eslint": "^8.2.0"
 	},
+	"packageManager": "pnpm@9.8.0",
 	"pnpm": {
 		"peerDependencyRules": {
 			"allowedVersions": {
@@ -48,15 +59,5 @@
 				"next": "19.0.0-rc-fb9a90fa48-20240614"
 			}
 		}
-	},
-	"pre-commit": [
-		"typecheck",
-		"lint-staged"
-	],
-	"lint-staged": {
-		"*.{j,t}s{,x}": [
-			"prettier --write",
-			"eslint --fix"
-		]
 	}
 }

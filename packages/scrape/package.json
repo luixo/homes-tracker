@@ -12,9 +12,9 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@/db": "workspace:*",
 		"@/tsconfig": "workspace:*",
 		"@/utils": "workspace:*",
-		"@/db": "workspace:*",
 		"@sindresorhus/transliterate": "^1.6.0"
 	}
 }
