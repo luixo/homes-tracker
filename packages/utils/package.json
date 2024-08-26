@@ -12,8 +12,9 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"queue-promise": "^2.2.1",
-		"winston": "^3.14.2"
+		"pino": "^9.3.2",
+		"pino-pretty": "^11.2.2",
+		"queue-promise": "^2.2.1"
 	},
 	"devDependencies": {
 		"@/tsconfig": "workspace:*"

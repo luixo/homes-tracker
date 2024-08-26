@@ -22,10 +22,16 @@ const getClient = () => {
 		throw new Error("Env variable MONGO_CONN_STRING should be set");
 	}
 
-	client = new mongo.MongoClient(url, {
-		tls: process.env.NODE_ENV === "production",
-		tlsCAFile: path.join(baseDir, "./root.crt"),
-	});
+	const options =
+		process.env.NODE_ENV === "production"
+			? {
+					tls: true,
+					tlsCAFile: path.join(baseDir, "./root.crt"),
+				}
+			: {
+					tlsInsecure: true,
+				};
+	client = new mongo.MongoClient(url, options);
 	return client;
 };
 
