@@ -1,6 +1,18 @@
-import type { TrackerRequest } from "@/db/types";
+import type TelegramBot from "node-telegram-bot-api";
 
-export type CurrentTrackerRequest = Omit<
-	TrackerRequest,
-	"_id" | "notifiers" | "notifiedTimestamp" | "enabled"
->;
+import type { Logger } from "@/utils/logger";
+
+export type BotContext = {
+	bot: TelegramBot;
+	respond: (message: string) => Promise<TelegramBot.Message>;
+	sendCard: (chatId: string) => Promise<TelegramBot.Message>;
+	logger: Logger;
+	chatId: string;
+};
+
+export type BotHandler = ((
+	context: BotContext,
+	match: string,
+) => Promise<void>) & {
+	adminOnly?: boolean;
+};

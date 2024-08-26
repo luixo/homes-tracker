@@ -3,8 +3,8 @@ import type TelegramBot from "node-telegram-bot-api";
 import { globalLogger } from "@/utils/logger";
 
 import { getClient } from "./client";
-import type { BotContext } from "./handlers";
 import { handlers } from "./handlers";
+import type { BotContext } from "./types";
 
 const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS ?? "").split(",");
 
