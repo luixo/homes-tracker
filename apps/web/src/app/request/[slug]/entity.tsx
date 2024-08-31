@@ -2,31 +2,17 @@ import type React from "react";
 
 import type { ScrapedEntity } from "@/db/types";
 
-import { styled } from "./styles";
-
 type Props = ScrapedEntity;
 
-const Wrapper = styled("div", {});
-
-const Header = styled("h2", {});
-
-const ElementTimestamp = styled("div", {
-	paddingLeft: 16,
-});
-
-const Link = styled("a", {
-	textDecoration: "underline",
-});
-
 export const Entity: React.FC<Props> = (props) => (
-	<Wrapper>
-		<Header>House #{props._id}</Header>
-		<ElementTimestamp>
+	<div>
+		<h2>House #{props._id}</h2>
+		<div className="pl-4">
 			{new Date(Number(props.postedTimestamp)).toLocaleString()}
-		</ElementTimestamp>
-		<Link href={props._id} target="_blank">
+		</div>
+		<a href={props._id} target="_blank" rel="noreferrer">
 			{props.location.address}
-		</Link>
+		</a>
 		<div>
 			{props.price}
 			{props.currency}
@@ -37,5 +23,5 @@ export const Entity: React.FC<Props> = (props) => (
 		<div>
 			area {props.areaSize}m2 | yard {props.yardAreaSize}m2
 		</div>
-	</Wrapper>
+	</div>
 );

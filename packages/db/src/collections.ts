@@ -1,6 +1,7 @@
 import type { Collection, Document } from "mongodb";
 import * as mongo from "mongodb";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import type {
 	RequestChatLink,
@@ -10,7 +11,8 @@ import type {
 import type { Logger } from "@/utils/logger";
 import { withLogger } from "@/utils/logger";
 
-const baseDir = path.join(import.meta.dirname, "../../../../");
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+const baseDir = path.join(dirname, "../../../../");
 
 let client: mongo.MongoClient | undefined;
 const getClient = () => {

@@ -24,15 +24,20 @@
 		"@/tsconfig": "workspace:*",
 		"@/utils": "workspace:*",
 		"@/web": "workspace:*",
+		"@nextui-org/react": "^2.4.6",
 		"@stitches/react": "^1.2.8",
 		"@tanstack/react-query": "^5.52.1",
+		"framer-motion": "^11.3.31",
 		"next": "^15.0.0-rc.0",
 		"react": "^19.0.0-beta-26f2496093-20240514",
 		"react-dom": "^19.0.0-beta-26f2496093-20240514"
 	},
 	"devDependencies": {
 		"@types/react": "npm:types-react@rc",
-		"@types/react-dom": "npm:types-react-dom@rc"
+		"@types/react-dom": "npm:types-react-dom@rc",
+		"autoprefixer": "^10.4.20",
+		"postcss": "^8.4.41",
+		"tailwindcss": "^3.4.10"
 	},
 	"dockerImage": "homes-tracker",
 	"overrides": {

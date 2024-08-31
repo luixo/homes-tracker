@@ -11,7 +11,7 @@
 		"lint": "eslint --max-warnings=0",
 		"lint-staged": "lint-staged",
 		"typecheck": "pnpm -r typecheck",
-		"web:dev": "pnpm --filter=@/web dev"
+		"web:dev": "dotenv -c -- pnpm --filter=@/web dev"
 	},
 	"pre-commit": [
 		"typecheck",

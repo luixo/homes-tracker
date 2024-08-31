@@ -1,12 +1,13 @@
+"use client";
+
 import type React from "react";
 
-import * as ReactQuery from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 
 import type { ScrapedEntity } from "@/db/types";
+import { getQueryKeyEntities } from "@/web/utils/keys";
 
 import { Entity } from "./entity";
-import { getQueryKeyEntities } from "./queries";
-import { styled } from "./styles";
 
 type Props = {
 	trackerId: string;
@@ -16,25 +17,15 @@ type GetItemsResponse = {
 	items: ScrapedEntity[];
 };
 
-const Wrapper = styled("div", {});
-
-const Header = styled("h2", {});
-
-const NextButton = styled("button", {
-	borderRadius: 4,
-	background: "white",
-	border: "1px solid black",
-});
-
 export const ENTITIES_FETCH_AMOUNT = 10;
 
-export const Service: React.FC<Props> = (props) => {
-	const queryResult = ReactQuery.useInfiniteQuery({
+export const Service: React.FC<Props> = ({ trackerId }) => {
+	const queryResult = useSuspenseInfiniteQuery({
 		queryKey: getQueryKeyEntities(),
 		queryFn: async ({ pageParam }) => {
 			const params = new URLSearchParams();
 			for (const [key, value] of Object.entries({
-				trackerId: props.trackerId,
+				trackerId,
 				limit: ENTITIES_FETCH_AMOUNT,
 				offset: pageParam.offset,
 			})) {
@@ -50,8 +41,6 @@ export const Service: React.FC<Props> = (props) => {
 		}),
 	});
 	switch (queryResult.status) {
-		case "pending":
-			return <div>Loading...</div>;
 		case "error":
 			return <div>Error</div>;
 		case "success": {
@@ -62,17 +51,20 @@ export const Service: React.FC<Props> = (props) => {
 			);
 			const hasMore = pages[pages.length - 1]?.length === ENTITIES_FETCH_AMOUNT;
 			return (
-				<Wrapper>
-					<Header>{props.trackerId}</Header>
+				<div>
+					<h2>{trackerId}</h2>
 					{elements.map((element) => (
 						<Entity key={element._id} {...element} />
 					))}
 					{hasMore ? (
-						<NextButton onClick={() => queryResult.fetchNextPage()}>
+						<button
+							className="br-1 border"
+							onClick={() => queryResult.fetchNextPage()}
+						>
 							More
-						</NextButton>
+						</button>
 					) : null}
-				</Wrapper>
+				</div>
 			);
 		}
 	}
