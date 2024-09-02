@@ -1,39 +1,37 @@
-import type { InsertOneResult } from "mongodb";
-
-import type { RequestChatLink } from "@/db/types";
+import type { ChatId, RequestId } from "@/db/types";
 import type { Logger } from "@/utils/logger";
 
 import { withChatRequestLinks } from "./collections";
 
-export const init = async (logger: Logger): Promise<string[]> =>
-	withChatRequestLinks(logger, "Create indexes", (collection) =>
+export const init = async (logger: Logger) =>
+	withChatRequestLinks(logger, "Create link indexes", (collection) =>
 		collection.createIndexes([{ key: { chatId: 1 } }]),
 	);
 
-export const insertTrackerRequestToChatLink =
-	(requestId: string, chatId: string) =>
-	async (logger: Logger): Promise<InsertOneResult> =>
-		withChatRequestLinks(
-			logger,
-			`Insert "${requestId}" to chat "${chatId}"`,
-			async (collection) => collection.insertOne({ _id: requestId, chatId }),
-		);
-
-export const getTrackerRequestToChatLinkByChatId =
-	(chatId: string) =>
-	async (logger: Logger): Promise<RequestChatLink | null> =>
-		withChatRequestLinks(
-			logger,
-			`Insert by chat "${chatId}" chat id`,
-			(collection) => collection.findOne({ chatId }),
-		);
-
-export const getTrackerRequestToChatLinkByRequestId = async (
+export const insertChatLink = async (
 	logger: Logger,
-	requestId: string,
-): Promise<RequestChatLink | null> =>
+	requestId: RequestId,
+	chatId: ChatId,
+) =>
 	withChatRequestLinks(
 		logger,
-		`Insert by chat "${requestId}" request id`,
+		`Insert link "${requestId}" <-> "${chatId}"`,
+		async (collection) => collection.insertOne({ _id: requestId, chatId }),
+	);
+
+export const getChatLinkByChatId = async (logger: Logger, chatId: ChatId) =>
+	withChatRequestLinks(
+		logger,
+		`Get link by chat id "${chatId}"`,
+		(collection) => collection.findOne({ chatId }),
+	);
+
+export const getChatLinkByRequestId = async (
+	logger: Logger,
+	requestId: RequestId,
+) =>
+	withChatRequestLinks(
+		logger,
+		`Get link by request id "${requestId}"`,
 		(collection) => collection.findOne({ _id: requestId }),
 	);

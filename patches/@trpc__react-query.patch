@@ -1,0 +1,26 @@
+diff --git a/dist/shared/hooks/types.d.ts b/dist/shared/hooks/types.d.ts
+index f02f921e71d25ac77541816b127850b784dc6193..ebea2e3a1f33b35e22416ec6f43e485f5434cdd5 100644
+--- a/dist/shared/hooks/types.d.ts
++++ b/dist/shared/hooks/types.d.ts
+@@ -1,7 +1,7 @@
+ import type { DefinedUseQueryResult, DehydratedState, FetchInfiniteQueryOptions, FetchQueryOptions, InfiniteData, InfiniteQueryObserverSuccessResult, InitialDataFunction, QueryObserverSuccessResult, QueryOptions, UseBaseQueryOptions, UseInfiniteQueryOptions, UseInfiniteQueryResult, UseMutationOptions, UseMutationResult, UseQueryResult, UseSuspenseInfiniteQueryOptions, UseSuspenseInfiniteQueryResult, UseSuspenseQueryOptions, UseSuspenseQueryResult } from '@tanstack/react-query';
+ import type { CreateTRPCClientOptions, TRPCRequestOptions, TRPCUntypedClient } from '@trpc/client';
+ import type { AnyRouter, DistributiveOmit } from '@trpc/server/unstable-core-do-not-import';
+-import type { ReactNode } from 'react';
++import type { ReactNode, JSX } from 'react';
+ import type { TRPCContextProps } from '../../internals/context';
+ import type { TRPCQueryKey } from '../../internals/getQueryKey';
+ export type OutputWithCursor<TData, TCursor = any> = {
+diff --git a/src/shared/hooks/types.ts b/src/shared/hooks/types.ts
+index a5819b3d65453998bc91511ff59502d56af2af54..d6cb0cd1a03454a0051b52d37c9fab125e63e09d 100644
+--- a/src/shared/hooks/types.ts
++++ b/src/shared/hooks/types.ts
+@@ -28,7 +28,7 @@ import type {
+   AnyRouter,
+   DistributiveOmit,
+ } from '@trpc/server/unstable-core-do-not-import';
+-import type { ReactNode } from 'react';
++import type { ReactNode, JSX } from 'react';
+ import type { TRPCContextProps } from '../../internals/context';
+ import type { TRPCQueryKey } from '../../internals/getQueryKey';
+ 

@@ -1,10 +1,10 @@
 import type {
 	AddressFilter,
 	AreaFilter,
+	Filters,
 	LocationFilter,
 	PriceFilter,
 	RoomsFilter,
-	TrackerRequest,
 } from "@/db/types";
 
 const formatRange = <T extends { min?: number; max?: number }>({
@@ -88,17 +88,13 @@ const formatAddress = (filter?: AddressFilter): string | undefined => {
 	}
 };
 
-export const formatRequest = (request: TrackerRequest): string => {
-	if (!request.enabled) {
-		return `отключен`;
-	}
-	return [
-		formatPrice(request.filter.price),
-		formatArea(request.filter.area),
-		formatLocation(request.filter.location),
-		formatRooms(request.filter.rooms),
-		formatAddress(request.filter.address),
+export const formatRequest = (filters: Filters): string =>
+	[
+		formatPrice(filters.price),
+		formatArea(filters.area),
+		formatLocation(filters.location),
+		formatRooms(filters.rooms),
+		formatAddress(filters.address),
 	]
 		.filter(Boolean)
 		.join("; ");
-};

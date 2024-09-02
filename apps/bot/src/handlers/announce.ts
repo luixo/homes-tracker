@@ -1,18 +1,10 @@
-
-import { getTrackerRequests } from "@/db/requests";
 import { notifyMessage } from "@/intercom/index";
-import { withLogger } from "@/utils/logger";
 import { createQueue } from "@/utils/promise";
 
 import type { BotHandler } from "../types";
 
 export const handler: BotHandler = async (context, match) => {
-	const trackerRequests = await withLogger(
-		context.logger,
-		`Fetching tracker requests`,
-		getTrackerRequests,
-		{ onSuccess: (requests) => `${requests.length} requests fetched` },
-	);
+	const trackerRequests = await context.caller.requests.getAll();
 	const { add: addToQueue, getResolvePromise: getQueuePromise } = createQueue(
 		100,
 		(error) => context.logger.error(error),

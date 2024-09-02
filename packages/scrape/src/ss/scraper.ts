@@ -1,6 +1,11 @@
 import transliterate from "@sindresorhus/transliterate";
 
-import type { ScrapedEntity } from "@/db/types";
+import type {
+	EntityId,
+	LocalEntityId,
+	ScrapedEntity,
+	ScraperId,
+} from "@/db/types";
 import type { Logger } from "@/utils/logger";
 import { withLogger } from "@/utils/logger";
 
@@ -9,7 +14,7 @@ import type { Scraper } from "../types";
 import type { PageModel } from "./page-types";
 import type { Model } from "./types";
 
-const ID = "ss.ge";
+const ID = "ss.ge" as ScraperId;
 
 const buildParams = (realEstateType: number, page: number) => ({
 	cityIdList: [95],
@@ -27,8 +32,8 @@ const mapModalToEntity = (model: Model): ScrapedEntity | null => {
 	}
 	return {
 		version: "v1",
-		_id: `${ID}:${model.applicationId}`,
-		entityId: model.applicationId.toString(),
+		_id: `${ID}:${model.applicationId}` as EntityId,
+		entityId: model.applicationId.toString() as LocalEntityId,
 		scraperId: ID,
 		postedTimestamp: new Date(model.orderDate).valueOf(),
 		scrapedTimestamp: Date.now(),
@@ -115,7 +120,7 @@ const prepare = (logger: Logger) =>
 const fetchEntity = (
 	logger: Logger,
 	prepareResult: PrepareResult,
-	entityId: number,
+	entityId: LocalEntityId,
 ) =>
 	withLogger(logger, `Fetching ${ID} element #${entityId}`, async () => {
 		const response = await fetch(
@@ -158,7 +163,7 @@ const fetchPageByType =
 				};
 				const results = data.realStateItemModel
 					.filter((model) => model.price.priceGeo && model.price.priceUsd)
-					.map((model) => model.applicationId);
+					.map((model) => model.applicationId.toString() as LocalEntityId);
 				return {
 					results,
 					nonVipAdsFound: data.realStateItemModel.some(
@@ -174,11 +179,11 @@ const fetchPageByType =
 			},
 		);
 
-export const scraper: Scraper<number, PrepareResult> = {
+export const scraper: Scraper<LocalEntityId, PrepareResult> = {
 	id: ID,
 	prepare,
 	pageFetchers: [fetchPageByType("house"), fetchPageByType("flat")],
-	getEntityId: (entityId) => entityId.toString(),
+	getEntityId: (applicationId) => applicationId,
 	fetchEntity,
 	getUrl,
 };

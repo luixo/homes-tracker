@@ -1,10 +1,10 @@
 import type {
 	AddressFilter,
 	AreaFilter,
+	Filters,
 	LocationFilter,
 	PriceFilter,
 	RoomsFilter,
-	TrackerRequest,
 } from "@/db/types";
 
 const unparseRange = <T extends { min?: number; max?: number }>({
@@ -75,17 +75,13 @@ const unparseAddress = (filter?: AddressFilter): string | undefined => {
 	}
 };
 
-export const unparseRequest = (request: TrackerRequest): string | null => {
-	if (!request.enabled) {
-		return null;
-	}
-	return [
-		unparsePrice(request.filter.price),
-		unparseArea(request.filter.area),
-		unparseLocation(request.filter.location),
-		unparseRooms(request.filter.rooms),
-		unparseAddress(request.filter.address),
+export const unparseRequest = (filters: Filters): string | null =>
+	[
+		unparsePrice(filters.price),
+		unparseArea(filters.area),
+		unparseLocation(filters.location),
+		unparseRooms(filters.rooms),
+		unparseAddress(filters.address),
 	]
 		.filter(Boolean)
 		.join("; ");
-};

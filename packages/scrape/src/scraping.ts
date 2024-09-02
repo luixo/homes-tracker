@@ -1,4 +1,4 @@
-import { putEntity, removeEntity } from "@/db/entities";
+import { putEntity } from "@/db/entities";
 import type { Logger } from "@/utils/logger";
 import { withLogger } from "@/utils/logger";
 import { timeout, wait } from "@/utils/promise";
@@ -12,6 +12,7 @@ const fetchAndPutIds = async <T, P>(
 	results: T[],
 	prepareResult: P,
 	scraper: Scraper<T, P>,
+	dryRun?: boolean,
 ): Promise<string[]> => {
 	const entityIds: string[] = [];
 	for (const result of results) {
@@ -19,10 +20,10 @@ const fetchAndPutIds = async <T, P>(
 		// We're not filthy scraperers, aren't we?
 		const promises: Promise<unknown>[] = [];
 		if (entity) {
-			promises.push(putEntity(logger, entity));
+			if (!dryRun) {
+				promises.push(putEntity(logger, entity));
+			}
 			entityIds.push(entity._id);
-		} else {
-			promises.push(removeEntity(logger, scraper.getEntityId(result)));
 		}
 		await Promise.all(promises);
 	}
@@ -32,13 +33,14 @@ const fetchAndPutIds = async <T, P>(
 type ScrapeOptions = {
 	maxPages?: number;
 	shouldBailOutOnNoNewIds?: boolean;
+	dryRun?: boolean;
 };
 
 export const scrapeEntities = async <T, P>(
 	logger: Logger,
 	scraper: Scraper<T, P>,
 	existingIds: string[],
-	{ maxPages = Infinity, shouldBailOutOnNoNewIds }: ScrapeOptions,
+	{ maxPages = Infinity, shouldBailOutOnNoNewIds, dryRun }: ScrapeOptions,
 ): Promise<string[]> => {
 	const localExistingIds = existingIds.concat();
 	const prepareResult = await withLogger(
@@ -108,6 +110,7 @@ export const scrapeEntities = async <T, P>(
 								pageResult.filteredResults,
 								prepareResult,
 								scraper,
+								dryRun,
 							),
 							10 * MINUTE,
 						);

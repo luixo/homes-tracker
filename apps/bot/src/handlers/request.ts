@@ -1,38 +1,9 @@
-import {
-	getTrackerRequestToChatLinkByChatId,
-	insertTrackerRequestToChatLink,
-} from "@/db/request-chat-links";
-import { upsertTrackerRequest } from "@/db/requests";
 import type { TrackerRequest } from "@/db/types";
 import { formatRequest } from "@/filters/format";
 import { parseFilters } from "@/filters/parse";
 import { unparseRequest } from "@/filters/unparse";
-import type { Logger } from "@/utils/logger";
-import { withLogger } from "@/utils/logger";
-import { MINUTE } from "@/utils/time";
 
 import type { BotContext, BotHandler } from "../types";
-import { getExistingRequestByChatId } from "../utils";
-
-export const createRequestByChatId = async (
-	logger: Logger,
-	chatId: string,
-): Promise<string> => {
-	const existingLink = await withLogger(
-		logger,
-		`Fetching existing link for chat id ${chatId}`,
-		getTrackerRequestToChatLinkByChatId(chatId),
-	);
-	if (existingLink) {
-		return existingLink._id;
-	}
-	const creationResponse = await withLogger(
-		logger,
-		`Creating link for chat id ${chatId}`,
-		insertTrackerRequestToChatLink(crypto.randomUUID(), chatId),
-	);
-	return creationResponse.insertedId.toString();
-};
 
 const requestHelpResponse = [
 	'Чтобы создать или изменить запрос - напиши его в виде фильтров разделенных символом ";", например:',
@@ -62,11 +33,16 @@ export const respondGet = async (
 	currentRequest: TrackerRequest | null,
 ) => {
 	if (currentRequest) {
+		if (!currentRequest.enabled) {
+			await context.respond(
+				["Запрос выключен", "", requestHelpResponse].join("\n"),
+			);
+		}
 		await context.respond(
 			[
 				"Твой текущий запрос:",
-				formatRequest(currentRequest),
-				`(${unparseRequest(currentRequest)})`,
+				formatRequest(currentRequest.filter),
+				`(${unparseRequest(currentRequest.filter)})`,
 				"",
 				requestHelpResponse,
 			].join("\n"),
@@ -78,51 +54,22 @@ export const respondGet = async (
 	}
 };
 
-const getNextRequest = async (
-	context: BotContext,
-	currentRequst: TrackerRequest | null,
-	input: string,
-): Promise<TrackerRequest> => {
-	const filter = parseFilters(input);
-	let requestId = currentRequst ? currentRequst._id : null;
-	if (!requestId) {
-		requestId = await createRequestByChatId(context.logger, context.chatId);
-	}
-	return {
-		filter,
-		version: "v1",
-		city: "Tbilisi",
-		_id: requestId,
-		enabled: true,
-		notifiedTimestamp: currentRequst
-			? currentRequst.notifiedTimestamp
-			: Date.now() - 10 * MINUTE,
-		notifiers: [
-			{
-				type: "telegram",
-				chatId: context.chatId,
-			},
-		],
-	};
-};
-
 export const handler: BotHandler = async (context, input) => {
-	const currentRequest = await getExistingRequestByChatId(
-		context.logger,
-		context.chatId,
-	);
+	const currentRequest = await context.caller.requests.get();
 	if (!input) {
 		return respondGet(context, currentRequest);
 	}
 	try {
-		const nextRequest = await getNextRequest(context, currentRequest, input);
-		await withLogger(
-			context.logger,
-			`Updating tracker request ${nextRequest._id}`,
-			(logger) => upsertTrackerRequest(logger, nextRequest),
-		);
+		const filters = parseFilters(input);
+		await context.caller.requests.upsert({
+			request: {
+				filters,
+				version: "v1",
+				city: "Tbilisi",
+			},
+		});
 		await context.respond(
-			`Твой запрос теперь:\n${formatRequest(nextRequest)}\nЖди уведомлений!`,
+			`Твой запрос теперь:\n${formatRequest(filters)}\nЖди уведомлений!`,
 		);
 	} catch (error) {
 		if (error instanceof Error && Array.isArray(error.cause)) {

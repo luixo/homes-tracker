@@ -4,11 +4,12 @@ const config = {
 		"@/utils",
 		"@/tsconfig",
 		"@/db",
-		"@/bot",
 		"@/scrape",
 		"@/filters",
 		"@/intercom",
 		"@/web",
+		"@/telegram",
+		"@/server",
 	],
 };
 

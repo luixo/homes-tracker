@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@trpc/react-query':
+    hash: jyl5yehlsguu43fopod3od4gdm
+    path: patches/@trpc__react-query.patch
+
 importers:
 
   .:
@@ -53,6 +58,9 @@ importers:
       eslint-plugin-import:
         specifier: ^2.29.1
         version: 2.29.1(@typescript-eslint/parser@8.2.0(eslint@9.9.1(jiti@1.21.6))(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1)(eslint@9.9.1(jiti@1.21.6))
+      eslint-plugin-jsx-a11y:
+        specifier: ^6.9.0
+        version: 6.9.0(eslint@9.9.1(jiti@1.21.6))
       eslint-plugin-react:
         specifier: ^7.35.0
         version: 7.35.0(eslint@9.9.1(jiti@1.21.6))
@@ -92,12 +100,21 @@ importers:
       '@/intercom':
         specifier: workspace:*
         version: link:../../packages/intercom
+      '@/server':
+        specifier: workspace:*
+        version: link:../../packages/server
+      '@/telegram':
+        specifier: workspace:*
+        version: link:../../packages/telegram
       '@/tsconfig':
         specifier: workspace:*
         version: link:../../packages/typescript
       '@/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@trpc/server':
+        specifier: 11.0.0-rc.490
+        version: 11.0.0-rc.490
       node-telegram-bot-api:
         specifier: ^0.66.0
         version: 0.66.0(request@2.88.2)
@@ -111,21 +128,15 @@ importers:
 
   apps/web:
     dependencies:
-      '@/bot':
-        specifier: workspace:*
-        version: link:../bot
       '@/db':
         specifier: workspace:*
         version: link:../../packages/db
       '@/filters':
         specifier: workspace:*
         version: link:../../packages/filters
-      '@/intercom':
+      '@/server':
         specifier: workspace:*
-        version: link:../../packages/intercom
-      '@/scrape':
-        specifier: workspace:*
-        version: link:../../packages/scrape
+        version: link:../../packages/server
       '@/tsconfig':
         specifier: workspace:*
         version: link:../../packages/typescript
@@ -144,6 +155,18 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.52.1
         version: 5.52.1(react@19.0.0-rc-fb9a90fa48-20240614)
+      '@trpc/client':
+        specifier: 11.0.0-rc.490
+        version: 11.0.0-rc.490(@trpc/server@11.0.0-rc.490)
+      '@trpc/next':
+        specifier: 11.0.0-rc.490
+        version: 11.0.0-rc.490(@tanstack/react-query@5.52.1(react@19.0.0-rc-fb9a90fa48-20240614))(@trpc/client@11.0.0-rc.490(@trpc/server@11.0.0-rc.490))(@trpc/react-query@11.0.0-rc.490(patch_hash=jyl5yehlsguu43fopod3od4gdm)(@tanstack/react-query@5.52.1(react@19.0.0-rc-fb9a90fa48-20240614))(@trpc/client@11.0.0-rc.490(@trpc/server@11.0.0-rc.490))(@trpc/server@11.0.0-rc.490)(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614))(@trpc/server@11.0.0-rc.490)(next@15.0.0-rc.0(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614))(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)
+      '@trpc/react-query':
+        specifier: 11.0.0-rc.490
+        version: 11.0.0-rc.490(patch_hash=jyl5yehlsguu43fopod3od4gdm)(@tanstack/react-query@5.52.1(react@19.0.0-rc-fb9a90fa48-20240614))(@trpc/client@11.0.0-rc.490(@trpc/server@11.0.0-rc.490))(@trpc/server@11.0.0-rc.490)(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)
+      '@trpc/server':
+        specifier: 11.0.0-rc.490
+        version: 11.0.0-rc.490
       framer-motion:
         specifier: ^11.3.31
         version: 11.3.31(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)
@@ -187,10 +210,16 @@ importers:
       tsx:
         specifier: ^4.18.0
         version: 4.18.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
     devDependencies:
       '@types/geojson':
         specifier: ^7946.0.14
         version: 7946.0.14
+      ts-brand:
+        specifier: ^0.1.0
+        version: 0.1.0
 
   packages/filters:
     dependencies:
@@ -250,6 +279,53 @@ importers:
       '@/tsconfig':
         specifier: workspace:*
         version: link:../typescript
+
+  packages/server:
+    dependencies:
+      '@/db':
+        specifier: workspace:*
+        version: link:../db
+      '@/filters':
+        specifier: workspace:*
+        version: link:../filters
+      '@/intercom':
+        specifier: workspace:*
+        version: link:../intercom
+      '@/scrape':
+        specifier: workspace:*
+        version: link:../scrape
+      '@/server':
+        specifier: workspace:*
+        version: 'link:'
+      '@/telegram':
+        specifier: workspace:*
+        version: link:../telegram
+      '@/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@trpc/server':
+        specifier: 11.0.0-rc.490
+        version: 11.0.0-rc.490
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@/tsconfig':
+        specifier: workspace:*
+        version: link:../typescript
+
+  packages/telegram:
+    dependencies:
+      node-telegram-bot-api:
+        specifier: ^0.66.0
+        version: 0.66.0(request@2.88.2)
+    devDependencies:
+      '@/tsconfig':
+        specifier: workspace:*
+        version: link:../typescript
+      '@types/node-telegram-bot-api':
+        specifier: ^0.64.7
+        version: 0.64.7
 
   packages/typescript: {}
 
@@ -2055,6 +2131,39 @@ packages:
     resolution: {integrity: sha512-soyn4dNIUZ8US8NaPVXv06gkZFHaZnPfKWPDjRJjFRW3Y7WZ0jx72eT6zhw3VQlkMPysmXye8l35ewPHspKgbQ==}
     peerDependencies:
       react: ^18 || ^19
+
+  '@trpc/client@11.0.0-rc.490':
+    resolution: {integrity: sha512-rfAzHF27osuP36JWGzq9TgXMnNc5kk1oAIoMafVHkCu3XlEZH3Ym2BpucHBWp/b5JYrtvzM91jskzvE0yO3mYw==}
+    peerDependencies:
+      '@trpc/server': 11.0.0-rc.490+b6a851870
+
+  '@trpc/next@11.0.0-rc.490':
+    resolution: {integrity: sha512-ie0adjNr78ZvuBCaRL5Yr3u98TUo61ASVPBOgdYNx6/S2XLEUpL7nhY0VHNjSrnh3Ng8IzpdKM4uJsqHvnCFVg==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.49.2
+      '@trpc/client': 11.0.0-rc.490+b6a851870
+      '@trpc/react-query': 11.0.0-rc.490+b6a851870
+      '@trpc/server': 11.0.0-rc.490+b6a851870
+      next: '*'
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    peerDependenciesMeta:
+      '@tanstack/react-query':
+        optional: true
+      '@trpc/react-query':
+        optional: true
+
+  '@trpc/react-query@11.0.0-rc.490':
+    resolution: {integrity: sha512-sM1AlLA5JPjsTRZJmXieAcbxHQXx+TGg1WTpyCAlBAue9rXGu9FoydfYxhpVcSrSbzdZ5HRmg/cXnC77/O7nBg==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.49.2
+      '@trpc/client': 11.0.0-rc.490+b6a851870
+      '@trpc/server': 11.0.0-rc.490+b6a851870
+      react: '>=18.2.0'
+      react-dom: '>=18.2.0'
+
+  '@trpc/server@11.0.0-rc.490':
+    resolution: {integrity: sha512-JkKLvA0QIErqslsgU6uFvpv9xtxe78C59zqUdZFmUI0V9pIAJlxmODV4I9hTDcX8P+B30rP3z+q2+bPozN2MaQ==}
 
   '@types/caseless@0.12.5':
     resolution: {integrity: sha512-hWtVTC2q7hc7xZ/RLbxapMvDMgUnDvKvMOpKal4DrMyfGBUfB1oKaZlIRr6mJL+If3bAP6sV/QneGzF6tJjZDg==}
@@ -4202,6 +4311,9 @@ packages:
     peerDependencies:
       typescript: '>=4.2.0'
 
+  ts-brand@0.1.0:
+    resolution: {integrity: sha512-DDPY7vBCCAMC9nN4STBSF3s4+aay/jZFTVmISngAoTsYRG/drdzAXPr8npKah0AhwjHspys3/+DyR2QwyZ3JgA==}
+
   ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
 
@@ -4412,6 +4524,9 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+
+  zod@3.23.8:
+    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
 
   zx@8.1.4:
     resolution: {integrity: sha512-QFDYYpnzdpRiJ3dL2102Cw26FpXpWshW4QLTGxiYfIcwdAqg084jRCkK/kuP/NOSkxOjydRwNFG81qzA5r1a6w==}
@@ -7447,6 +7562,31 @@ snapshots:
       '@tanstack/query-core': 5.52.0
       react: 19.0.0-rc-fb9a90fa48-20240614
 
+  '@trpc/client@11.0.0-rc.490(@trpc/server@11.0.0-rc.490)':
+    dependencies:
+      '@trpc/server': 11.0.0-rc.490
+
+  '@trpc/next@11.0.0-rc.490(@tanstack/react-query@5.52.1(react@19.0.0-rc-fb9a90fa48-20240614))(@trpc/client@11.0.0-rc.490(@trpc/server@11.0.0-rc.490))(@trpc/react-query@11.0.0-rc.490(patch_hash=jyl5yehlsguu43fopod3od4gdm)(@tanstack/react-query@5.52.1(react@19.0.0-rc-fb9a90fa48-20240614))(@trpc/client@11.0.0-rc.490(@trpc/server@11.0.0-rc.490))(@trpc/server@11.0.0-rc.490)(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614))(@trpc/server@11.0.0-rc.490)(next@15.0.0-rc.0(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614))(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)':
+    dependencies:
+      '@trpc/client': 11.0.0-rc.490(@trpc/server@11.0.0-rc.490)
+      '@trpc/server': 11.0.0-rc.490
+      next: 15.0.0-rc.0(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)
+      react: 19.0.0-rc-fb9a90fa48-20240614
+      react-dom: 19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614)
+    optionalDependencies:
+      '@tanstack/react-query': 5.52.1(react@19.0.0-rc-fb9a90fa48-20240614)
+      '@trpc/react-query': 11.0.0-rc.490(patch_hash=jyl5yehlsguu43fopod3od4gdm)(@tanstack/react-query@5.52.1(react@19.0.0-rc-fb9a90fa48-20240614))(@trpc/client@11.0.0-rc.490(@trpc/server@11.0.0-rc.490))(@trpc/server@11.0.0-rc.490)(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)
+
+  '@trpc/react-query@11.0.0-rc.490(patch_hash=jyl5yehlsguu43fopod3od4gdm)(@tanstack/react-query@5.52.1(react@19.0.0-rc-fb9a90fa48-20240614))(@trpc/client@11.0.0-rc.490(@trpc/server@11.0.0-rc.490))(@trpc/server@11.0.0-rc.490)(react-dom@19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614))(react@19.0.0-rc-fb9a90fa48-20240614)':
+    dependencies:
+      '@tanstack/react-query': 5.52.1(react@19.0.0-rc-fb9a90fa48-20240614)
+      '@trpc/client': 11.0.0-rc.490(@trpc/server@11.0.0-rc.490)
+      '@trpc/server': 11.0.0-rc.490
+      react: 19.0.0-rc-fb9a90fa48-20240614
+      react-dom: 19.0.0-rc-fb9a90fa48-20240614(react@19.0.0-rc-fb9a90fa48-20240614)
+
+  '@trpc/server@11.0.0-rc.490': {}
+
   '@types/caseless@0.12.5': {}
 
   '@types/eslint@9.6.0':
@@ -9892,6 +10032,8 @@ snapshots:
     dependencies:
       typescript: 5.5.4
 
+  ts-brand@0.1.0: {}
+
   ts-interface-checker@0.1.13: {}
 
   tsconfig-paths@3.15.0:
@@ -10128,6 +10270,8 @@ snapshots:
   yaml@2.5.0: {}
 
   yocto-queue@0.1.0: {}
+
+  zod@3.23.8: {}
 
   zx@8.1.4:
     optionalDependencies:

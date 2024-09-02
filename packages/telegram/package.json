@@ -1,0 +1,21 @@
+{
+	"name": "@/telegram",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./*": {
+			"types": "./dist/src/*.d.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"node-telegram-bot-api": "^0.66.0"
+	},
+	"devDependencies": {
+		"@/tsconfig": "workspace:*",
+		"@types/node-telegram-bot-api": "^0.64.7"
+	}
+}

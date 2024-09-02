@@ -1,8 +1,8 @@
-import type { ScrapedEntity } from "@/db/types";
+import type { LocalEntityId, ScrapedEntity, ScraperId } from "@/db/types";
 import type { Logger } from "@/utils/logger";
 
 export type Scraper<T, P> = {
-	id: string;
+	id: ScraperId;
 	prepare: (logger: Logger) => Promise<P>;
 	pageFetchers: ((
 		logger: Logger,
@@ -14,11 +14,6 @@ export type Scraper<T, P> = {
 		prepareResult: P,
 		result: T,
 	) => Promise<ScrapedEntity | null>;
-	getEntityId: (result: T) => string;
+	getEntityId: (result: T) => LocalEntityId;
 	getUrl: (id: string) => string;
-};
-
-export type EntityIdentification = {
-	entityId: string;
-	scraperId: string;
 };

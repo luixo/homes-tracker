@@ -1,18 +1,19 @@
+import { TRPCError } from "@trpc/server";
 import type TelegramBot from "node-telegram-bot-api";
 
+import type { ChatId } from "@/db/types";
+import { getClient } from "@/telegram/client";
 import { globalLogger } from "@/utils/logger";
 
-import { getClient } from "./client";
 import { handlers } from "./handlers";
+import { getCaller } from "./trpc";
 import type { BotContext } from "./types";
-
-const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS ?? "").split(",");
 
 const getContext = async (
 	bot: TelegramBot,
-	inMessage: TelegramBot.Message,
+	message: TelegramBot.Message,
 ): Promise<BotContext> => {
-	const inChatId = inMessage.chat.id.toString();
+	const inChatId = message.chat.id.toString() as ChatId;
 	if (Number(inChatId) < 0) {
 		await bot.sendMessage(
 			inChatId,
@@ -36,6 +37,7 @@ const getContext = async (
 		},
 		logger: globalLogger.child({ service: "bot" }),
 		chatId: inChatId,
+		caller: getCaller(inChatId),
 	};
 };
 
@@ -48,15 +50,18 @@ const main = async () => {
 				`Got message with handler ${key} from ${context.chatId}`,
 			);
 			try {
-				if (handler.adminOnly && !ADMIN_USER_IDS.includes(context.chatId)) {
+				await handler(context, match?.[1] ?? "");
+			} catch (e) {
+				if (
+					e instanceof TRPCError &&
+					e.message === "You are not allowed here"
+				) {
 					await bot.sendMessage(
 						context.chatId,
 						"Это действие может делать только администратор!",
 					);
 					return;
 				}
-				await handler(context, match?.[1] ?? "");
-			} catch (e) {
 				context.logger.error(
 					`Error happened on message with handler ${key} from ${
 						context.chatId

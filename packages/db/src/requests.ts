@@ -1,31 +1,26 @@
-import type { UpdateResult, WithId } from "mongodb";
-
 import type { TrackerRequest } from "@/db/types";
 import type { Logger } from "@/utils/logger";
 
 import { withTrackerRequests } from "./collections";
+import type { RequestId } from "./types/ids";
 
-export const getTrackerRequests = async (
-	logger: Logger,
-): Promise<TrackerRequest[]> =>
-	withTrackerRequests(logger, `Fetch all`, (collection) =>
+export const getTrackerRequests = async (logger: Logger) =>
+	withTrackerRequests(logger, `Fetch all requests`, (collection) =>
 		collection.find({}).toArray(),
 	);
 
-export const getTrackerRequest =
-	(requestId: string) =>
-	async (logger: Logger): Promise<TrackerRequest | null> =>
-		withTrackerRequests(logger, `Fetch all`, (collection) =>
-			collection.findOne({ _id: requestId }),
-		);
+export const getTrackerRequest = async (logger: Logger, requestId: RequestId) =>
+	withTrackerRequests(logger, `Fetch request id "${requestId}"`, (collection) =>
+		collection.findOne({ _id: requestId }),
+	);
 
 export const upsertTrackerRequest = async (
 	logger: Logger,
 	request: TrackerRequest,
-): Promise<string> =>
+) =>
 	withTrackerRequests(
 		logger,
-		`Upsert id ${request._id}`,
+		`Upsert request id "${request._id}"`,
 		async (collection) => {
 			const matched = await collection.findOne({ _id: request._id });
 			if (!matched) {
@@ -39,12 +34,12 @@ export const upsertTrackerRequest = async (
 
 export const upsertTrackerRequestEnabledStatus = async (
 	logger: Logger,
-	requestId: string,
+	requestId: RequestId,
 	nextStatus: boolean,
-): Promise<UpdateResult> =>
+) =>
 	withTrackerRequests(
 		logger,
-		`Update id ${requestId} enabled status`,
+		`Update request id "${requestId}" enabled status`,
 		(collection) =>
 			collection.updateOne(
 				{ _id: requestId },
@@ -52,12 +47,16 @@ export const upsertTrackerRequestEnabledStatus = async (
 			),
 	);
 
-export const updateTrackerRequestWithTimestamp =
-	(id: string) =>
-	async (logger: Logger): Promise<WithId<TrackerRequest> | null> =>
-		withTrackerRequests(logger, `Update "${id}" with timestamp`, (collection) =>
+export const updateTrackerRequestWithTimestamp = async (
+	logger: Logger,
+	id: RequestId,
+) =>
+	withTrackerRequests(
+		logger,
+		`Update request "${id}" with timestamp`,
+		(collection) =>
 			collection.findOneAndUpdate(
 				{ _id: id },
 				{ $set: { notifiedTimestamp: Date.now() } },
 			),
-		);
+	);

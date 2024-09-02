@@ -1,13 +1,18 @@
 import transliterate from "@sindresorhus/transliterate";
 
-import type { ScrapedEntity } from "@/db/types";
+import type {
+	EntityId,
+	LocalEntityId,
+	ScrapedEntity,
+	ScraperId,
+} from "@/db/types";
 import { withLogger } from "@/utils/logger";
 
 import type { Scraper } from "../types";
 
 import type { CurrencyId, Model } from "./types";
 
-const ID = "myhome.ge";
+const ID = "myhome.ge" as ScraperId;
 
 const getRealtyType = (
 	input: Model["real_estate_type_id"],
@@ -41,9 +46,9 @@ const getModelCurrency = (
 
 const mapModelToEntity = (model: Model): ScrapedEntity => ({
 	version: "v1",
-	_id: `${ID}:${model.id}`,
+	_id: `${ID}:${model.id}` as EntityId,
 	scraperId: ID,
-	entityId: model.id.toString(),
+	entityId: model.id.toString() as LocalEntityId,
 	price: model.price[2].price_total,
 	currency: getModelCurrency(model.currency_id),
 	areaSize: model.area,
