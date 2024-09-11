@@ -12,8 +12,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-l
 
 FROM base AS builder
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+ARG NEXT_PUBLIC_MAPBOX_API_KEY
 RUN pnpm --filter @/web build
-RUN ls /app/apps/web/.next/standalone
 
 # Production image, copy all the files and run next
 FROM base AS runner
@@ -32,15 +32,12 @@ RUN chown nextjs:nodejs .next
 # Automatically leverage output traces to reduce image size 
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 
-RUN cp CA.pem /app/.next/root.crt
-RUN chmod 0444 /app/.next/root.crt
+RUN chmod 0444 root.crt
 
 USER nextjs
 
-EXPOSE 3000
-
-ENV PORT=3000
+EXPOSE 80
 
 CMD HOSTNAME="0.0.0.0" node apps/web/server.js

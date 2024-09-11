@@ -11,7 +11,6 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-l
 
 ENV NODE_ENV=production
 
-RUN cp CA.pem ./root.crt
 RUN chmod 0444 ./root.crt
 
 CMD pnpm run --filter=@/bot start

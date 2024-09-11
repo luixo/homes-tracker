@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 import { removeAdmin } from "@/db/admins";
-import { chatId } from "@/db/types";
 import { adminProcedure } from "@/server/trpc";
+import { chatId } from "@/types/ids";
 
 export const handler = adminProcedure
 	.input(z.object({ chatId }))

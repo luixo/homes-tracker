@@ -1,8 +1,8 @@
-import type { TrackerRequest } from "@/db/types";
+import type { TrackerRequest } from "@/types/db/index";
+import type { RequestId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 
 import { withTrackerRequests } from "./collections";
-import type { RequestId } from "./types/ids";
 
 export const getTrackerRequests = async (logger: Logger) =>
 	withTrackerRequests(logger, `Fetch all requests`, (collection) =>
@@ -32,31 +32,14 @@ export const upsertTrackerRequest = async (
 		},
 	);
 
-export const upsertTrackerRequestEnabledStatus = async (
+export const updateTrackerRequest = async (
 	logger: Logger,
 	requestId: RequestId,
-	nextStatus: boolean,
+	partialRequest: Partial<TrackerRequest>,
 ) =>
 	withTrackerRequests(
 		logger,
-		`Update request id "${requestId}" enabled status`,
+		`Update request id "${requestId}" on key(s) ${Object.keys(partialRequest).join(", ")}`,
 		(collection) =>
-			collection.updateOne(
-				{ _id: requestId },
-				{ $set: { enabled: nextStatus } },
-			),
-	);
-
-export const updateTrackerRequestWithTimestamp = async (
-	logger: Logger,
-	id: RequestId,
-) =>
-	withTrackerRequests(
-		logger,
-		`Update request "${id}" with timestamp`,
-		(collection) =>
-			collection.findOneAndUpdate(
-				{ _id: id },
-				{ $set: { notifiedTimestamp: Date.now() } },
-			),
+			collection.updateOne({ _id: requestId }, { $set: partialRequest }),
 	);

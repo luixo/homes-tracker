@@ -39,7 +39,7 @@ export type Model = {
 	lat: number;
 	lng: number;
 	images: Image[];
-	address: string;
+	address: string | null;
 	area: number;
 	yard_area: number | null;
 	area_type_id: 1; // ?

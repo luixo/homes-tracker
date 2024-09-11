@@ -27,15 +27,15 @@ const handler = async (req: Request) => {
 		router: appRouter,
 		req,
 		createContext: ({ req: { headers } }) => {
-			const requestId = headers.get("x-request-id");
 			const source = headers.get("x-trpc-source") as Context["source"] | null;
 			return {
 				logger: trpcLogger,
-				auth: requestId ? { requestId } : null,
+				auth: null,
 				source: source || "unknown",
 			};
 		},
-		onError: trpcLogger.error,
+		onError: (opts) =>
+			trpcLogger.error(opts.error, `TRPC error in "${opts.path}"`),
 	});
 
 	setCorsHeaders(response);

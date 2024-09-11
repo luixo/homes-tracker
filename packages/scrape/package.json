@@ -16,5 +16,8 @@
 		"@/tsconfig": "workspace:*",
 		"@/utils": "workspace:*",
 		"@sindresorhus/transliterate": "^1.6.0"
+	},
+	"devDependencies": {
+		"@/types": "workspace:*"
 	}
 }

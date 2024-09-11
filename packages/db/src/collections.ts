@@ -8,12 +8,12 @@ import type {
 	RequestChatLink,
 	ScrapedEntity,
 	TrackerRequest,
-} from "@/db/types";
+} from "@/types/db/index";
 import type { Logger } from "@/utils/logger";
 import { withLogger } from "@/utils/logger";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-const baseDir = path.join(dirname, "../../../../");
+const baseDir = path.join(dirname, "../../../");
 
 let client: mongo.MongoClient | undefined;
 const getClient = () => {
@@ -25,16 +25,10 @@ const getClient = () => {
 		throw new Error("Env variable MONGO_CONN_STRING should be set");
 	}
 
-	const options =
-		process.env.NODE_ENV === "production"
-			? {
-					tls: true,
-					tlsCAFile: path.join(baseDir, "./root.crt"),
-				}
-			: {
-					tlsInsecure: true,
-				};
-	client = new mongo.MongoClient(url, options);
+	client = new mongo.MongoClient(url, {
+		tls: true,
+		tlsCAFile: path.join(baseDir, "./root.crt"),
+	});
 	return client;
 };
 
@@ -53,13 +47,19 @@ const withCollection =
 	async <T>(
 		logger: Logger,
 		action: string,
-		run: (collection: Collection<C>, logger: Logger) => Promise<T>,
+		run: (
+			collection: Collection<C>,
+			db: mongo.Db,
+			logger: Logger,
+		) => Promise<T>,
 	): Promise<T> =>
 		withLogger(
 			logger.child({ service: "mongodb", collection: collectionName }),
 			action,
 			(innerLogger) =>
-				withMongo((db) => run(db.collection<C>(collectionName), innerLogger)),
+				withMongo((db) =>
+					run(db.collection<C>(collectionName), db, innerLogger),
+				),
 		);
 
 export const withEntities = withCollection<ScrapedEntity>("entities");

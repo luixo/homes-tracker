@@ -1,11 +1,7 @@
 import transliterate from "@sindresorhus/transliterate";
 
-import type {
-	EntityId,
-	LocalEntityId,
-	ScrapedEntity,
-	ScraperId,
-} from "@/db/types";
+import type { ScrapedEntity } from "@/types/db/index";
+import type { EntityId, LocalEntityId, ScraperId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 import { withLogger } from "@/utils/logger";
 
@@ -63,10 +59,13 @@ const mapModalToEntity = (model: Model): ScrapedEntity | null => {
 						? ""
 						: ` ${model.address.streetNumber}`
 				}`,
-			),
-			district: model.address.districtTitle,
-			subdistrict: model.address.subdistrictTitle,
-			coordinates: [model.locationLatitude, model.locationLongitude],
+			).trim(),
+			district: model.address.districtTitle.trim(),
+			subdistrict: model.address.subdistrictTitle.trim(),
+			coordinates: {
+				lat: model.locationLatitude,
+				lon: model.locationLongitude,
+			},
 		},
 		images: model.appImages
 			.sort((a, b) => (a.isMain ? -1 : b.isMain ? 1 : 0))
@@ -81,23 +80,34 @@ const getUrl = (id: string) => `https://home.ss.ge/en/real-estate/${id}`;
 
 const COOKIE_KEY = "ss-session-token";
 
+const getCookieFromString = (str: string) => {
+	const cookies = str.split(";").map((s) => s.trim());
+	const matchedCookie = cookies.find((cookie) =>
+		cookie.includes(`${COOKIE_KEY}=`),
+	);
+	if (!matchedCookie) {
+		throw new Error(`Expected to have cookie with key ${COOKIE_KEY}!`);
+	}
+	const cookieParts = matchedCookie.split(",").map((s) => s.trim());
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const matchedCookiePart = cookieParts.find((part) =>
+		part.startsWith(`${COOKIE_KEY}=`),
+	)!;
+	return matchedCookiePart.replace(`${COOKIE_KEY}=`, "");
+};
+
 const extractToken = (cookie?: string | string[]) => {
 	if (cookie === undefined) {
 		throw new Error("Expected to have cookie!");
 	}
-	const getCookieFromString = (str: string) => {
-		const keyPart = str.split(";").map((s) => s.trim())[0];
-		if (!keyPart?.startsWith(`${COOKIE_KEY}=`)) {
-			throw new Error(`Expected to have ${COOKIE_KEY} cookie key!`);
-		}
-		return keyPart.replace(`${COOKIE_KEY}=`, "");
-	};
 	if (typeof cookie === "string") {
 		return getCookieFromString(cookie);
 	}
 	const matchedCookie = cookie.find((element) => element.includes(COOKIE_KEY));
 	if (!matchedCookie) {
-		throw new Error(`Expected to have cookie with key ${COOKIE_KEY}!`);
+		throw new Error(
+			`Expected to have cookie with key ${COOKIE_KEY} (in array)!`,
+		);
 	}
 	return getCookieFromString(matchedCookie);
 };
@@ -124,7 +134,7 @@ const fetchEntity = (
 ) =>
 	withLogger(logger, `Fetching ${ID} element #${entityId}`, async () => {
 		const response = await fetch(
-			`https://api-gateway.ss.ge/v1/RealEstate/details?applicationId=${entityId}}`,
+			`https://api-gateway.ss.ge/v1/RealEstate/details?applicationId=${entityId}`,
 			{
 				method: "PUT",
 				headers: {

@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import type TelegramBot from "node-telegram-bot-api";
 
-import type { ChatId } from "@/db/types";
 import { getClient } from "@/telegram/client";
+import type { ChatId } from "@/types/ids";
 import { globalLogger } from "@/utils/logger";
 
 import { handlers } from "./handlers";
@@ -63,9 +63,10 @@ const main = async () => {
 					return;
 				}
 				context.logger.error(
+					e,
 					`Error happened on message with handler ${key} from ${
 						context.chatId
-					}:\n${message.text}\n${String(e)}`,
+					}:\n${message.text}`,
 				);
 			}
 		});

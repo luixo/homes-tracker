@@ -4,7 +4,6 @@ import { cache } from "react";
 
 import { createHydrationHelpers } from "@trpc/react-query/rsc";
 
-import type { RequestId } from "@/db/types";
 import { appRouter } from "@/server/router";
 import { createCallerFactory } from "@/server/trpc";
 import { globalLogger } from "@/utils/logger";
@@ -14,15 +13,13 @@ const getQueryClient = cache(makeQueryClient);
 
 const rscLogger = globalLogger.child({ service: "trpc/rsc" });
 
-const getRscCaller = (requestId?: RequestId) =>
-	createCallerFactory(appRouter)(() => ({
+const getRscCaller = cache(() =>
+	createCallerFactory(appRouter)({
 		logger: rscLogger,
-		auth: requestId ? { requestId } : null,
+		auth: null,
 		source: "rsc",
-	}));
+	}),
+);
 
-export const generateHydrationHelpers = (requestId?: RequestId) =>
-	createHydrationHelpers<typeof appRouter>(
-		getRscCaller(requestId),
-		getQueryClient,
-	);
+export const generateHydrationHelpers = () =>
+	createHydrationHelpers<typeof appRouter>(getRscCaller(), getQueryClient);

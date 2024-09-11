@@ -1,7 +1,7 @@
+import type { ChatId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 
 import { withAdmins } from "./collections";
-import type { ChatId } from "./types";
 
 export const getAdminIds = async (logger: Logger) =>
 	withAdmins(logger, `Get admin ids`, async (collection) => {

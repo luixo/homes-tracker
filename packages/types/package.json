@@ -1,0 +1,21 @@
+{
+	"name": "@/types",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./*": {
+			"types": "./dist/src/*.d.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"@/tsconfig": "workspace:*",
+		"ts-brand": "^0.1.0"
+	}
+}

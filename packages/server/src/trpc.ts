@@ -1,14 +1,13 @@
 import { TRPCError, initTRPC } from "@trpc/server";
 
 import { getAdminIds } from "@/db/admins";
-import { getChatLinkByRequestId } from "@/db/request-chat-links";
-import type { ChatId, RequestId } from "@/db/types";
+import type { ChatId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 import { withLogger } from "@/utils/logger";
 
 export type Context = {
 	logger: Logger;
-	auth: null | { chatId: ChatId } | { requestId: string };
+	auth: null | { chatId: ChatId };
 	source: "ssr" | "csr" | "rsc" | "http" | "bot" | "unknown";
 };
 
@@ -24,7 +23,11 @@ export const procedure = t.procedure.use(async ({ path, type, next, ctx }) =>
 		if (result.ok) {
 			logger.info("OK request timing:", { path, type, durationMs });
 		} else {
-			logger.info("Non-OK request timing", { path, type, durationMs });
+			logger.error(result.error, "Non-OK request timing", {
+				path,
+				type,
+				durationMs,
+			});
 		}
 		return result;
 	}),
@@ -36,27 +39,6 @@ export const clientProcedure = procedure.use(
 			throw new TRPCError({
 				code: "UNAUTHORIZED",
 				message: "You should authorize by chat id or request id",
-			});
-		}
-		if ("requestId" in auth) {
-			if (!auth.requestId) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "Token invalid",
-				});
-			}
-			const chatLink = await getChatLinkByRequestId(
-				ctx.logger,
-				auth.requestId as RequestId,
-			);
-			if (!chatLink) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "Token invalid",
-				});
-			}
-			return next({
-				ctx: { ...ctx, chatId: chatLink.chatId },
 			});
 		}
 		return next({

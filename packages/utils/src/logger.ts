@@ -84,11 +84,12 @@ export const withLogger = async <T>(
 		return result;
 	} catch (e) {
 		if (!options.skipFail) {
-			nextLogger.error("", {
-				status: "!",
-				error: e,
-			});
+			nextLogger.error(e, `Action ${action} failed`, { status: "!" });
 		}
 		throw e;
 	}
 };
+
+process.on("uncaughtException", (err) => {
+	globalLogger.error(err, "Uncaught exception detected");
+});

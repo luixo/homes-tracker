@@ -1,6 +1,6 @@
 {
 	"name": "@/bot",
-	"version": "0.2.0",
+	"version": "0.2.4",
 	"private": true,
 	"type": "module",
 	"exports": {
@@ -10,16 +10,17 @@
 		}
 	},
 	"scripts": {
+		"docker:all": "docker buildx build -f ./Dockerfile -t ${DOCKER_PREFIX}/homes-tracker-bot:$(npm show ./ version) --platform linux/amd64 --push ../..",
 		"start": "tsx src/index.ts",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@/db": "workspace:*",
-		"@/filters": "workspace:*",
 		"@/intercom": "workspace:*",
 		"@/server": "workspace:*",
 		"@/telegram": "workspace:*",
 		"@/tsconfig": "workspace:*",
+		"@/types": "workspace:*",
 		"@/utils": "workspace:*",
 		"@trpc/server": "11.0.0-rc.490",
 		"node-telegram-bot-api": "^0.66.0",
@@ -27,6 +28,5 @@
 	},
 	"devDependencies": {
 		"@types/node-telegram-bot-api": "^0.64.7"
-	},
-	"dockerImage": "homes-tracker-bot"
+	}
 }

@@ -13,13 +13,14 @@
 	},
 	"dependencies": {
 		"@/db": "workspace:*",
-		"@/filters": "workspace:*",
 		"@/intercom": "workspace:*",
 		"@/scrape": "workspace:*",
 		"@/server": "workspace:*",
 		"@/telegram": "workspace:*",
+		"@/types": "workspace:*",
 		"@/utils": "workspace:*",
 		"@trpc/server": "11.0.0-rc.490",
+		"@turf/boolean-point-in-polygon": "^7.1.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {

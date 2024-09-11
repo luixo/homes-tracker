@@ -1,4 +1,4 @@
-import type { ChatId, RequestId } from "@/db/types";
+import { type ChatId, type RequestId, generateRequestId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 
 import { withChatRequestLinks } from "./collections";
@@ -6,17 +6,6 @@ import { withChatRequestLinks } from "./collections";
 export const init = async (logger: Logger) =>
 	withChatRequestLinks(logger, "Create link indexes", (collection) =>
 		collection.createIndexes([{ key: { chatId: 1 } }]),
-	);
-
-export const insertChatLink = async (
-	logger: Logger,
-	requestId: RequestId,
-	chatId: ChatId,
-) =>
-	withChatRequestLinks(
-		logger,
-		`Insert link "${requestId}" <-> "${chatId}"`,
-		async (collection) => collection.insertOne({ _id: requestId, chatId }),
 	);
 
 export const getChatLinkByChatId = async (logger: Logger, chatId: ChatId) =>
@@ -34,4 +23,23 @@ export const getChatLinkByRequestId = async (
 		logger,
 		`Get link by request id "${requestId}"`,
 		(collection) => collection.findOne({ _id: requestId }),
+	);
+
+export const getOrUpsertChatLinkByChatId = async (
+	logger: Logger,
+	chatId: ChatId,
+) =>
+	withChatRequestLinks(
+		logger,
+		`Get or upsert link for "${chatId}"`,
+		async (collection) => {
+			const matched = await collection.findOne({ chatId });
+			if (matched) {
+				return { requestId: matched._id };
+			}
+
+			const requestId = generateRequestId();
+			const response = await collection.insertOne({ _id: requestId, chatId });
+			return { requestId: response.insertedId };
+		},
 	);

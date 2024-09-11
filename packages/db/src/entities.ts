@@ -1,18 +1,23 @@
-import type { EntityId, ScrapedEntity } from "@/db/types";
+import type { ScrapedEntity } from "@/types/db/index";
+import type { EntityId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 
 import { withEntities } from "./collections";
 
 export const init = async (logger: Logger) =>
-	withEntities(logger, `Create entities indexes`, (collection) =>
-		collection.createIndexes([
+	withEntities(logger, `Create entities indexes`, async (collection, db) => {
+		await db.createCollection("entities");
+		await collection.createIndexes([
 			{ key: { entityId: 2, scraperId: 1 } },
 			{ key: { scrapedTimestamp: 1 } },
-		]),
-	);
+		]);
+	});
 
 export const deleteAllEntities = async (logger: Logger) =>
-	withEntities(logger, `Wipe entities`, (collection) => collection.drop());
+	withEntities(logger, `Wipe entities`, async (collection) => {
+		await collection.drop();
+		await init(logger);
+	});
 
 export const getEntitiesByIds = async (logger: Logger, ids: EntityId[]) =>
 	withEntities(logger, `Get entity by ids`, (collection) =>

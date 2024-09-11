@@ -1,6 +1,6 @@
 import type TelegramBot from "node-telegram-bot-api";
 
-import type { ChatId, OutChatId } from "@/db/types";
+import type { ChatId, OutChatId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 
 import type { getCaller } from "./trpc";

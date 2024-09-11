@@ -12,11 +12,13 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@/types": "workspace:*",
 		"pino": "^9.3.2",
 		"pino-pretty": "^11.2.2",
 		"queue-promise": "^2.2.1"
 	},
 	"devDependencies": {
-		"@/tsconfig": "workspace:*"
+		"@/tsconfig": "workspace:*",
+		"@types/geojson": "^7946.0.14"
 	}
 }

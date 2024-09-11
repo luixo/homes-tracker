@@ -1,0 +1,24 @@
+diff --git a/src/index.js b/src/index.js
+index 7af9ee5fa5d7163d1bd0aad8e29bf6ed6303a463..c91cb124ccff7df1f0485e3525f343ef42e19caa 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -1,8 +1,16 @@
+-import DrawPolygon from '@mapbox/mapbox-gl-draw/src/modes/draw_polygon';
+-import {geojsonTypes, cursors, types, updateActions, modes, events} from '@mapbox/mapbox-gl-draw/src/constants';
++import MapboxGlDraw from '@mapbox/mapbox-gl-draw';
+ import simplify from "@turf/simplify";
+ 
+-const FreehandMode = Object.assign({}, DrawPolygon)
++const {
++    geojsonTypes,
++    cursors,
++    types,
++    updateActions,
++    modes,
++    events,
++} = MapboxGlDraw.constants;
++
++const FreehandMode = Object.assign({}, MapboxGlDraw.modes.draw_polygon)
+ 
+ FreehandMode.onSetup = function() {
+     const polygon = this.newFeature({

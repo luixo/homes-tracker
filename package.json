@@ -1,11 +1,9 @@
 {
 	"name": "homes-tracker",
-	"version": "0.1.43",
 	"private": true,
 	"type": "module",
 	"scripts": {
 		"bot:start": "dotenv -c -- pnpm --filter=@/bot start",
-		"docker": "pnpm --filter @/scripts docker",
 		"format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css}'",
 		"format:verify": "prettier --check '**/*.{js,jsx,ts,tsx,json,css}'",
 		"lint": "eslint --max-warnings=0",
@@ -61,7 +59,11 @@
 			}
 		},
 		"patchedDependencies": {
-			"@trpc/react-query": "patches/@trpc__react-query.patch"
+			"@mapbox/mapbox-gl-draw": "patches/@mapbox__mapbox-gl-draw.patch",
+			"@nextui-org/listbox": "patches/@nextui-org__listbox.patch",
+			"@trpc/react-query": "patches/@trpc__react-query.patch",
+			"mapbox-gl-draw-freehand-mode": "patches/mapbox-gl-draw-freehand-mode.patch",
+			"react-icons": "patches/react-icons.patch"
 		}
 	},
 	"overrides": {

@@ -1,15 +1,20 @@
 const config = {
+	experimental: {
+		reactCompiler: true,
+	},
 	output: "standalone",
 	transpilePackages: [
 		"@/utils",
 		"@/tsconfig",
 		"@/db",
 		"@/scrape",
-		"@/filters",
 		"@/intercom",
 		"@/web",
 		"@/telegram",
 		"@/server",
+		"mapbox-gl-draw-freehand-mode",
+		"@mapbox/mapbox-gl-draw",
+		"@react-hookz/web",
 	],
 };
 

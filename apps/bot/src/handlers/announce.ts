@@ -1,3 +1,4 @@
+import { convertToLastRequest } from "@/db/convert-requests";
 import { notifyMessage } from "@/intercom/index";
 import { createQueue } from "@/utils/promise";
 
@@ -10,7 +11,8 @@ export const handler: BotHandler = async (context, match) => {
 		(error) => context.logger.error(error),
 	);
 	const enabledRequests = trackerRequests.filter((request) => request.enabled);
-	for (const request of enabledRequests) {
+	for (const unknownRequest of enabledRequests) {
+		const request = convertToLastRequest(unknownRequest);
 		addToQueue(async () => {
 			try {
 				await notifyMessage(context, request, match);

@@ -1,0 +1,13 @@
+diff --git a/dist/base/listbox-item-base.d.ts b/dist/base/listbox-item-base.d.ts
+index dfe78414c01dc96f20575611546463c69e50cf7e..aeb569dbad6b183f0f5401e0dd0845ed1ee049db 100644
+--- a/dist/base/listbox-item-base.d.ts
++++ b/dist/base/listbox-item-base.d.ts
+@@ -2,7 +2,7 @@ import { ListboxItemVariantProps, SlotsToClasses, ListboxItemSlots } from '@next
+ import { AriaOptionProps } from '@react-aria/listbox';
+ import { FocusableProps, PressEvents } from '@react-types/shared';
+ import { ItemProps } from '@nextui-org/aria-utils';
+-import { ReactNode } from 'react';
++import { ReactNode, JSX } from 'react';
+ 
+ type ListboxItemSelectedIconProps = {
+     /**

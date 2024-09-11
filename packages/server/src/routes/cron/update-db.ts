@@ -1,16 +1,17 @@
 import { z } from "zod";
 
 import { deleteAllEntities, getEntitiesIds } from "@/db/entities";
-import type { ScrapedEntity } from "@/db/types";
 import { scrapers } from "@/scrape/index";
 import { scrapeEntities } from "@/scrape/scraping";
 import { procedure } from "@/server/trpc";
+import type { ScrapedEntity } from "@/types/db/index";
+import { scraperId as scraperIdSchema } from "@/types/ids";
 import { withLogger } from "@/utils/logger";
 
 export const handler = procedure
 	.input(
 		z.object({
-			scraperIds: z.string().uuid().array().optional(),
+			scraperIds: scraperIdSchema.array().optional(),
 			shouldWipe: z.boolean().optional(),
 			dryRun: z.boolean().optional(),
 			fullRun: z.boolean().optional(),

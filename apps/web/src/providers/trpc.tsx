@@ -1,18 +1,19 @@
+"use client";
+
 import React from "react";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { unstable_httpBatchStreamLink as httpBatchStreamLink } from "@trpc/client";
-import { usePathname } from "next/navigation";
 
+import { getQueryClient } from "@/web/utils/query-client";
 import { trpc } from "@/web/utils/trpc/client";
-
-const queryClient = new QueryClient({
-	defaultOptions: { queries: { staleTime: 5 * 1000 } },
-});
 
 const getBaseUrl = () => {
 	if (typeof window !== "undefined") {
 		return "";
+	}
+	if (process.env.SERVER_BASE_URL) {
+		return process.env.SERVER_BASE_URL;
 	}
 	return `http://localhost:${process.env.PORT ?? 3000}`;
 };
@@ -20,7 +21,7 @@ const getBaseUrl = () => {
 export const TrpcProvider: React.FC<React.PropsWithChildren> = ({
 	children,
 }) => {
-	const pathname = usePathname();
+	const [queryClient] = React.useState(getQueryClient);
 	const [trpcClient] = React.useState(() =>
 		trpc.createClient({
 			links: [
@@ -32,10 +33,8 @@ export const TrpcProvider: React.FC<React.PropsWithChildren> = ({
 								"x-trpc-source": "ssr",
 							};
 						}
-						const requestIdMatch = /request\/(.*)\??/.exec(pathname);
 						return {
-							"x-trpc-source": typeof window !== "undefined" ? "csr" : "ssr",
-							"x-request-id": requestIdMatch ? requestIdMatch[1] : undefined,
+							"x-trpc-source": "csr",
 						};
 					},
 				}),

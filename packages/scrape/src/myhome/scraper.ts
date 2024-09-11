@@ -1,11 +1,7 @@
 import transliterate from "@sindresorhus/transliterate";
 
-import type {
-	EntityId,
-	LocalEntityId,
-	ScrapedEntity,
-	ScraperId,
-} from "@/db/types";
+import type { ScrapedEntity } from "@/types/db/index";
+import type { EntityId, LocalEntityId, ScraperId } from "@/types/ids";
 import { withLogger } from "@/utils/logger";
 
 import type { Scraper } from "../types";
@@ -57,10 +53,10 @@ const mapModelToEntity = (model: Model): ScrapedEntity => ({
 	rooms: model.room === "10+" ? 10 : Number(model.room),
 	bedrooms: model.bedroom === null ? 0 : Number(model.bedroom),
 	location: {
-		address: transliterate(model.address),
-		district: model.district_name,
-		subdistrict: model.urban_name,
-		coordinates: [model.lat, model.lng],
+		address: model.address ? transliterate(model.address).trim() : "unknown",
+		district: model.district_name.trim(),
+		subdistrict: model.urban_name.trim(),
+		coordinates: { lat: model.lat, lon: model.lng },
 	},
 	images: model.images.slice(0, 10).map((image) => image.thumb),
 	postedTimestamp: new Date(model.last_updated).valueOf(),

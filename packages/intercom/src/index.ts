@@ -1,4 +1,4 @@
-import type { ScrapedEntity, TrackerRequest } from "@/db/types";
+import type { ScrapedEntity, TrackerRequest } from "@/types/db/index";
 
 import { formatScrapedEntity } from "./format";
 import { escapeMarkdown } from "./markdown";

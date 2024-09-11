@@ -1,0 +1,14 @@
+diff --git a/lib/iconBase.d.ts b/lib/iconBase.d.ts
+index 96b251fc900f86871ff3f7ceaf9442f72eb42c78..6f392a3c04b6041b5639d3c0bf15b26c47fa5849 100644
+--- a/lib/iconBase.d.ts
++++ b/lib/iconBase.d.ts
+@@ -13,7 +13,7 @@ export interface IconBaseProps extends React.SVGAttributes<SVGElement> {
+     color?: string;
+     title?: string;
+ }
+-export type IconType = (props: IconBaseProps) => JSX.Element;
++export type IconType = (props: IconBaseProps) => React.JSX.Element;
+ export declare function IconBase(props: IconBaseProps & {
+     attr?: Record<string, string>;
+-}): JSX.Element;
++}): React.JSX.Element;

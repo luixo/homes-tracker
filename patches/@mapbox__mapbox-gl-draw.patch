@@ -1,0 +1,138 @@
+diff --git a/dist/mapbox-gl-draw-unminified.js b/dist/mapbox-gl-draw-unminified.js
+index 7dd1a3c7cb3195a2ae3b8bfa681e94ef53466d00..6d1fea97c8ca436e24df27859e660b5f7b4f4283 100644
+--- a/dist/mapbox-gl-draw-unminified.js
++++ b/dist/mapbox-gl-draw-unminified.js
+@@ -2309,6 +2309,9 @@ function ui(ctx) {
+ 
+ function runSetup(ctx) {
+ 
++  ctx.events = events(ctx);
++  ctx.store = new Store(ctx);
++
+   var controlContainer = null;
+   var mapLoadedInterval = null;
+ 
+@@ -2358,10 +2361,8 @@ function runSetup(ctx) {
+       }
+ 
+       ctx.map = map;
+-      ctx.events = events(ctx);
+       ctx.ui = ui(ctx);
+       ctx.container = map.getContainer();
+-      ctx.store = new Store(ctx);
+ 
+ 
+       controlContainer = ctx.ui.addButtons();
+@@ -3924,10 +3925,11 @@ SimpleSelect.onSetup = function(opts) {
+   return state;
+ };
+ 
+-SimpleSelect.fireUpdate = function() {
++SimpleSelect.fireUpdate = function(triggerEvent) {
+   this.map.fire(events$1.UPDATE, {
+     action: updateActions.MOVE,
+-    features: this.getSelected().map(function (f) { return f.toGeoJSON(); })
++    features: this.getSelected().map(function (f) { return f.toGeoJSON(); }),
++    triggerEvent: triggerEvent
+   });
+ };
+ 
+@@ -3992,7 +3994,7 @@ SimpleSelect.onStop = function() {
+ 
+ SimpleSelect.onMouseMove = function(state, e) {
+   var isFeature$1 = isFeature(e);
+-  if (isFeature$1 && state.dragMoving) { this.fireUpdate(); }
++  if (isFeature$1 && state.dragMoving) { this.fireUpdate('onMouseMove'); }
+ 
+   // On mousemove that is not a drag, stop extended interactions.
+   // This is useful if you drag off the canvas, release the button,
+@@ -4007,7 +4009,7 @@ SimpleSelect.onMouseMove = function(state, e) {
+ 
+ SimpleSelect.onMouseOut = function(state) {
+   // As soon as you mouse leaves the canvas, update the feature
+-  if (state.dragMoving) { return this.fireUpdate(); }
++  if (state.dragMoving) { return this.fireUpdate('onMouseOut'); }
+ 
+   // Skip render
+   return true;
+@@ -4169,7 +4171,7 @@ SimpleSelect.onTouchEnd = SimpleSelect.onMouseUp = function(state, e) {
+ 
+   // End any extended interactions
+   if (state.dragMoving) {
+-    this.fireUpdate();
++    this.fireUpdate('onTouchEnd');
+   } else if (state.boxSelecting) {
+     var bbox = [
+       state.boxSelectStartLocation,
+@@ -4292,10 +4294,11 @@ var DirectSelect = {};
+ 
+ // INTERNAL FUCNTIONS
+ 
+-DirectSelect.fireUpdate = function() {
++DirectSelect.fireUpdate = function(triggerEvent) {
+   this.map.fire(events$1.UPDATE, {
+     action: updateActions.CHANGE_COORDINATES,
+-    features: this.getSelected().map(function (f) { return f.toGeoJSON(); })
++    features: this.getSelected().map(function (f) { return f.toGeoJSON(); }),
++    triggerEvent: triggerEvent
+   });
+ };
+ 
+@@ -4338,7 +4341,7 @@ DirectSelect.onMidpoint = function(state, e) {
+   this.startDragging(state, e);
+   var about = e.featureTarget.properties;
+   state.feature.addCoordinate(about.coord_path, about.lng, about.lat);
+-  this.fireUpdate();
++  this.fireUpdate('onMidpoint');
+   state.selectedCoordPaths = [about.coord_path];
+ };
+ 
+@@ -4449,7 +4452,7 @@ DirectSelect.onTrash = function(state) {
+   state.selectedCoordPaths
+     .sort(function (a, b) { return b.localeCompare(a, 'en', { numeric: true }); })
+     .forEach(function (id) { return state.feature.removeCoordinate(id); });
+-  this.fireUpdate();
++  this.fireUpdate('onTrash');
+   state.selectedCoordPaths = [];
+   this.clearSelectedCoordinates();
+   this.fireActionable(state);
+@@ -4470,7 +4473,7 @@ DirectSelect.onMouseMove = function(state, e) {
+   else { this.updateUIClasses({ mouse: cursors.NONE }); }
+ 
+   var isDraggableItem = onVertex || isFeature || isMidPoint;
+-  if (isDraggableItem && state.dragMoving) { this.fireUpdate(); }
++  if (isDraggableItem && state.dragMoving) { this.fireUpdate('onMouseMove'); }
+ 
+   this.stopDragging(state);
+ 
+@@ -4480,7 +4483,7 @@ DirectSelect.onMouseMove = function(state, e) {
+ 
+ DirectSelect.onMouseOut = function(state) {
+   // As soon as you mouse leaves the canvas, update the feature
+-  if (state.dragMoving) { this.fireUpdate(); }
++  if (state.dragMoving) { this.fireUpdate('onMouseOut'); }
+ 
+   // Skip render
+   return true;
+@@ -4522,7 +4525,7 @@ DirectSelect.onTap = function(state, e) {
+ 
+ DirectSelect.onTouchEnd = DirectSelect.onMouseUp = function(state) {
+   if (state.dragMoving) {
+-    this.fireUpdate();
++    this.fireUpdate('onTouchEnd');
+   }
+   this.stopDragging(state);
+ };
+@@ -7025,11 +7028,10 @@ var setupDraw = function(options, api) {
+     options: options
+   };
+ 
++  var setup = runSetup(ctx);
+   api = setupAPI(ctx, api);
+   ctx.api = api;
+ 
+-  var setup = runSetup(ctx);
+-
+   api.onAdd = setup.onAdd;
+   api.onRemove = setup.onRemove;
+   api.types = types$1;

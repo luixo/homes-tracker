@@ -13,30 +13,14 @@ pnpm --filter @/web exec pnpm version patch
 pnpm --filter @/bot exec pnpm version patch
 ```
 
-1. Build an image:
+1. Build, tag and push an image:
 
 ```
 # Web
-pnpm docker build @/web
+pnpx dotenv-cli -c -- pnpm --filter @/web docker:all
 # Bot
-pnpm docker build @/bot
-```
+pnpx dotenv-cli -c -- pnpm --filter @/bot docker:all
 
-1. Push image to the registry:
-
-```
-# dotenv needed for `DOCKER_PREFIX` env variable
-# Web
-pnpm exec dotenv -c -- pnpm docker publish @/web
-# Bot
-pnpm exec dotenv -c -- pnpm docker publish @/bot
-```
-
-One-liner:
-
-```
-# Web
-pnpm --filter @/web exec pnpm version patch && pnpm docker build @/web && pnpm exec dotenv -c -- pnpm docker publish @/web
-# Bot
-pnpm --filter @/bot exec pnpm version patch && pnpm docker build @/bot && pnpm exec dotenv -c -- pnpm docker publish @/bot
+# All
+pnpx dotenv-cli -c -- pnpm docker:all
 ```

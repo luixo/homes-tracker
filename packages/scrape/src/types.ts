@@ -1,4 +1,5 @@
-import type { LocalEntityId, ScrapedEntity, ScraperId } from "@/db/types";
+import type { ScrapedEntity } from "@/types/db/index";
+import type { LocalEntityId, ScraperId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 
 export type Scraper<T, P> = {
