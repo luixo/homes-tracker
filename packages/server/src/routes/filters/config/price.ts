@@ -51,7 +51,8 @@ export const getSteps = (): FilterStep[] => [
 			},
 		},
 		filter: {
-			placeholder: "$",
+			startContent: "$",
+			placeholder: "500",
 		},
 	},
 	{
@@ -68,7 +69,8 @@ export const getSteps = (): FilterStep[] => [
 			},
 		},
 		filter: {
-			placeholder: "$",
+			startContent: "$",
+			placeholder: "10",
 		},
 	},
 	{
@@ -85,7 +87,8 @@ export const getSteps = (): FilterStep[] => [
 			},
 		},
 		filter: {
-			placeholder: "$",
+			startContent: "$",
+			placeholder: "200",
 		},
 	},
 	{
@@ -102,7 +105,8 @@ export const getSteps = (): FilterStep[] => [
 			},
 		},
 		filter: {
-			placeholder: "$",
+			startContent: "$",
+			placeholder: "200",
 		},
 	},
 ];

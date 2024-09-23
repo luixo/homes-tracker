@@ -9,13 +9,13 @@ export const getSteps = (): FilterStep[] => [
 		id: areaStepId,
 		type: "range",
 		title: "Area",
-		filter: { placeholder: "50" },
+		filter: { placeholder: "50", endContent: "m²" },
 	},
 	{
 		id: yardStepId,
 		type: "range",
 		title: "Yard area",
-		filter: { placeholder: "150" },
+		filter: { placeholder: "150", endContent: "m²" },
 	},
 ];
 

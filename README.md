@@ -1,5 +1,19 @@
 # Homes tracker Georgia
 
+# Development
+
+Run local web:
+
+```
+pnpm web:dev
+```
+
+Run local bot:
+
+```
+pnpm bot:start
+```
+
 ## Deploy on Yandex
 
 Please make sure `DOCKER_PREFIX` is located in `.env.local` or `.env` file

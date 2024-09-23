@@ -7,6 +7,7 @@ import type { MultiSelectStep as MultiSelectStepType } from "@/types/filters/con
 import type { SelectOptionId } from "@/types/filters/ids";
 import type { MultiSelectStepValue } from "@/types/filters/values";
 
+import { StepTitle } from "./title";
 import type { UpdateState } from "./types";
 
 type Props = {
@@ -58,10 +59,7 @@ export const MultiSelectStep: React.FC<Props> = ({
 	if (step.filter.options.length < 10) {
 		return (
 			<div className="flex flex-col gap-2">
-				<div className={isInvalid ? "text-danger" : undefined}>
-					{step.title}
-					{step.required ? <span>*</span> : null}
-				</div>
+				<StepTitle step={step} isInvalid={isInvalid} />
 				<div className="flex flex-wrap gap-2">
 					{step.filter.options.map((option) => (
 						<Button

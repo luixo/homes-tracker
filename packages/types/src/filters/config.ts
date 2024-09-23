@@ -16,6 +16,10 @@ const baseConfig = z.strictObject({
 export const rangeConfig = z.strictObject({
 	defaultValues: rangeValue.optional(),
 	placeholder: z.string().optional(),
+	startContent: z.string().optional(),
+	endContent: z.string().optional(),
+	minLabel: z.string().optional(),
+	maxLabel: z.string().optional(),
 });
 
 const select = z.strictObject({

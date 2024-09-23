@@ -1,13 +1,14 @@
 import type React from "react";
 
 import { Button, Modal, ModalContent, useDisclosure } from "@nextui-org/react";
-import { GoCheckCircle } from "react-icons/go";
+import { GoCheckCircle, GoMilestone } from "react-icons/go";
 
 import type { MapStep as MapStepType } from "@/types/filters/config";
 import type { MapStepValue } from "@/types/filters/values";
 import type { Polygon } from "@/types/geojson";
 import { Map } from "@/web/components/map/map";
 
+import { StepTitle } from "./title";
 import type { UpdateState } from "./types";
 
 type Props = {
@@ -38,9 +39,13 @@ export const MapStep: React.FC<Props> = ({ step, data, updateState }) => {
 	const isInvalid = step.required && !data;
 	return (
 		<div className="flex flex-col gap-2">
-			<div>{step.title}</div>
-			<Button onClick={onOpen} color={isInvalid ? "danger" : undefined}>
-				Open map{step.required ? "*" : undefined}
+			<StepTitle step={step} />
+			<Button
+				onClick={onOpen}
+				color={isInvalid ? "danger" : "secondary"}
+				startContent={<GoMilestone size={24} />}
+			>
+				Open map
 			</Button>
 			<Modal
 				isOpen={isOpen}
