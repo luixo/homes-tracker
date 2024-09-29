@@ -39,15 +39,24 @@ export const RangeStep: React.FC<Props> = ({ step, data, updateState }) => {
 			const prevStateValue = prevState
 				? prevState.range
 				: { [inversedType as "max"]: DEFAULT_VALUES[inversedType] };
+			const nextStateValue = {
+				...prevStateValue,
+				[type as "min"]: nextNumber,
+			};
+			if (
+				nextStateValue.min === DEFAULT_VALUES.min &&
+				nextStateValue.max === DEFAULT_VALUES.max
+			) {
+				return;
+			}
 			return {
 				type: "range",
-				range: {
-					...prevStateValue,
-					[type as "min"]: nextNumber,
-				},
+				range: nextStateValue,
 			};
 		});
 	};
+	const sureMin = min ?? "";
+	const sureMax = max ?? "";
 	return (
 		<div className="flex flex-col gap-2">
 			<StepTitle step={step} />
@@ -55,8 +64,8 @@ export const RangeStep: React.FC<Props> = ({ step, data, updateState }) => {
 				<Input
 					label={step.filter.minLabel || "Min"}
 					isRequired={step.required}
-					value={min ?? ""}
-					isInvalid={min !== data?.range.min.toString()}
+					value={sureMin}
+					isInvalid={/[^0-9.]/.test(sureMin)}
 					onValueChange={onChange("min")}
 					placeholder={step.filter.placeholder}
 					startContent={
@@ -82,8 +91,11 @@ export const RangeStep: React.FC<Props> = ({ step, data, updateState }) => {
 				<Input
 					label={step.filter.maxLabel || "Max"}
 					isRequired={step.required}
-					value={max ?? ""}
-					isInvalid={max !== data?.range.max.toString()}
+					value={sureMax}
+					isInvalid={
+						/[^0-9.]/.test(sureMin) ||
+						(sureMax === "" ? false : Number(sureMin) > Number(sureMax))
+					}
 					onValueChange={onChange("max")}
 					placeholder={step.filter.placeholder}
 					startContent={
