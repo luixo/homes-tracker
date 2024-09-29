@@ -58,6 +58,9 @@ export const Steps: React.FC = () => {
 			});
 		};
 	const visibleSteps = steps.filter((step) => {
+		if (step.disabled) {
+			return false;
+		}
 		if (!step.showCondition) {
 			return true;
 		}

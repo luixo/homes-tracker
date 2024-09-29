@@ -16,6 +16,7 @@ export const getSteps = (): FilterStep[] => [
 		type: "range",
 		title: "Yard area",
 		filter: { placeholder: "150", endContent: "m²" },
+		disabled: true,
 	},
 ];
 

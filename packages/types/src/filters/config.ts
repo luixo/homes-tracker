@@ -11,6 +11,7 @@ const baseConfig = z.strictObject({
 	title: z.string(),
 	required: z.boolean().optional(),
 	showCondition: condition.optional(),
+	disabled: z.boolean().optional(),
 });
 
 export const rangeConfig = z.strictObject({
