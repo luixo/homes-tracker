@@ -5,6 +5,7 @@ import { GoPencil, GoSkip, GoTrash } from "react-icons/go";
 
 import type { Polygon } from "@/types/geojson";
 
+import { Events } from "./events";
 import { MarkerAtPolygonTopLeft } from "./marker-at-polygon-top-left";
 
 type Props = {
@@ -23,19 +24,21 @@ export const PolygonControls: React.FC<Props> = ({
 	onStopEdit,
 }) => (
 	<MarkerAtPolygonTopLeft polygon={polygon}>
-		{isEditing ? (
-			<Button size="sm" onClick={onStopEdit} isIconOnly>
-				<GoSkip size={16} />
-			</Button>
-		) : (
-			<ButtonGroup>
-				<Button size="sm" onClick={onEdit} isIconOnly>
-					<GoPencil size={16} />
+		<Events>
+			{isEditing ? (
+				<Button size="sm" onPress={onStopEdit} isIconOnly>
+					<GoSkip size={16} />
 				</Button>
-				<Button size="sm" onClick={onRemove} isIconOnly>
-					<GoTrash size={16} />
-				</Button>
-			</ButtonGroup>
-		)}
+			) : (
+				<ButtonGroup>
+					<Button size="sm" onPress={onEdit} isIconOnly>
+						<GoPencil size={16} />
+					</Button>
+					<Button size="sm" onPress={onRemove} isIconOnly>
+						<GoTrash size={16} />
+					</Button>
+				</ButtonGroup>
+			)}
+		</Events>
 	</MarkerAtPolygonTopLeft>
 );

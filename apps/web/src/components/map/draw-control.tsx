@@ -14,7 +14,7 @@ export const DrawControl: React.FC<Props> = ({
 	onClick: onClickRaw,
 	drawMode,
 }) => {
-	const onClick = React.useCallback<React.MouseEventHandler>(
+	const onClick = React.useCallback<(e: React.PointerEvent) => void>(
 		(e) => {
 			onClickRaw();
 			e.stopPropagation();
@@ -23,7 +23,7 @@ export const DrawControl: React.FC<Props> = ({
 	);
 	return (
 		<Events>
-			<Button onClick={onClick} isIconOnly>
+			<Button onPointerUp={onClick} isIconOnly>
 				{drawMode === "draw_polygon" ? (
 					<GoX size={24} />
 				) : (

@@ -52,14 +52,14 @@ export const ZoomControls: React.FC<{ className?: string }> = ({
 		<Events
 			className={["flex flex-col gap-3", className].filter(Boolean).join(" ")}
 		>
-			<Button onClick={zoomIn} isIconOnly>
+			<Button onPress={zoomIn} isIconOnly>
 				<GoPlus size={24} />
 			</Button>
-			<Button onClick={zoomOut} isIconOnly>
+			<Button onPress={zoomOut} isIconOnly>
 				<GoHorizontalRule size={24} />
 			</Button>
 			<Button
-				onClick={geolocate}
+				onPress={geolocate}
 				disabled={!isGeolocationAvailable || Boolean(positionError)}
 				isIconOnly
 			>

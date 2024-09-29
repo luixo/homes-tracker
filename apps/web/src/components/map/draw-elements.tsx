@@ -191,7 +191,7 @@ export const DrawElements: React.FC<Props> = ({
 			<DrawControl drawMode={mode} onClick={onDrawControlClick} />
 			{polygons.length !== 0 ? (
 				<Events>
-					<Button onClick={removeAllPolygons} isIconOnly color="warning">
+					<Button onPress={removeAllPolygons} isIconOnly color="warning">
 						<GoTrash size={24} />
 					</Button>
 				</Events>
