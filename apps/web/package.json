@@ -1,6 +1,6 @@
 {
 	"name": "@/web",
-	"version": "0.2.7",
+	"version": "0.2.8",
 	"private": true,
 	"type": "module",
 	"exports": {
@@ -39,6 +39,7 @@
 		"@turf/nearest-point-on-line": "^7.1.0",
 		"@turf/polygon-to-line": "^7.1.0",
 		"@turf/simplify": "^7.1.0",
+		"@turf/union": "^7.1.0",
 		"@turf/unkink-polygon": "^7.1.0",
 		"babel-plugin-react-compiler": "^0.0.0-experimental-7449567-20240905",
 		"framer-motion": "^11.3.31",

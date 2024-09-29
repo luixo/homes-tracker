@@ -5,6 +5,7 @@ import type { ViewState, ViewStateChangeEvent } from "react-map-gl";
 import { MapProvider, Map as ReactMap, useMap } from "react-map-gl";
 
 import type { Polygon, Position } from "@/types/geojson";
+import { getBoundingBox } from "@/web/utils/map";
 
 import { Events, NoEvents } from "./events";
 import { Polygons } from "./polygons";
@@ -29,10 +30,20 @@ const MapInner: React.FC<Props> = ({
 	children,
 }) => {
 	const map = useMap();
-	const [viewport, setViewport] = React.useState<Partial<ViewState>>({
-		latitude: initialCenter.lat,
-		longitude: initialCenter.lon,
-		zoom: initialZoom,
+	const [viewport, setViewport] = React.useState<Partial<ViewState>>(() => {
+		if (polygons.length === 0) {
+			return {
+				latitude: initialCenter.lat,
+				longitude: initialCenter.lon,
+				zoom: initialZoom,
+			};
+		}
+		return {
+			bounds: getBoundingBox(...polygons),
+			fitBoundsOptions: {
+				padding: 16,
+			},
+		};
 	});
 	const onMove = React.useCallback(
 		(event: ViewStateChangeEvent) => setViewport(event.viewState),

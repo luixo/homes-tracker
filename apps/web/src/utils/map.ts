@@ -1,5 +1,7 @@
+import bbox from "@turf/bbox";
 import nearestPointOnLine from "@turf/nearest-point-on-line";
 import polygonToLine from "@turf/polygon-to-line";
+import union from "@turf/union";
 
 import type { Polygon, Position } from "@/types/geojson";
 import type { PolygonId } from "@/types/ids";
@@ -105,4 +107,21 @@ export const clearPolygon = <T extends GeoJSON.Polygon | GeoJSON.MultiPolygon>(
 		...polygon,
 		coordinates: polygon.coordinates.map((ring) => ring.map(removeDuplicates)),
 	};
+};
+
+export const getBoundingBox = (
+	...polygons: Polygon[]
+): ReturnType<typeof bbox> => {
+	if (polygons.length === 1) {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		return bbox(mapPolygonToFeature(polygons[0]!));
+	}
+	const unitedPolygons = union({
+		type: "FeatureCollection",
+		features: polygons.map(mapPolygonToFeature),
+	});
+	if (!unitedPolygons) {
+		throw new Error("Uniting polygons crash");
+	}
+	return bbox(unitedPolygons);
 };
