@@ -3,9 +3,11 @@ const config = {
 		reactCompiler: true,
 	},
 	output: "standalone",
+	typescript: {
+		tsconfigPath: "../../tsconfig.json",
+	},
 	transpilePackages: [
 		"@/utils",
-		"@/tsconfig",
 		"@/db",
 		"@/scrape",
 		"@/intercom",

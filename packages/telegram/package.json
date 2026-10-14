@@ -9,13 +9,12 @@
 		}
 	},
 	"scripts": {
-		"typecheck": "tsc --noEmit"
+		"typecheck": "bun check"
 	},
 	"dependencies": {
 		"node-telegram-bot-api": "^0.66.0"
 	},
 	"devDependencies": {
-		"@/tsconfig": "workspace:*",
 		"@types/node-telegram-bot-api": "^0.64.7"
 	}
 }

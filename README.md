@@ -1,17 +1,23 @@
 # Homes tracker Georgia
 
+## Prerequisites
+
+You'll need Bun and Node.js (see `packageManager` and `engines` in `package.json`).
+
 # Development
+
+Run `bun install` to install packages.
 
 Run local web:
 
 ```
-pnpm web:dev
+bun run web:dev
 ```
 
 Run local bot:
 
 ```
-pnpm bot:start
+bun run bot:start
 ```
 
 ## Deploy on Yandex
@@ -22,19 +28,19 @@ Please make sure `DOCKER_PREFIX` is located in `.env.local` or `.env` file
 
 ```
 # Web
-pnpm --filter @/web exec pnpm version patch
+bun pm --cwd apps/web version patch
 # Bot
-pnpm --filter @/bot exec pnpm version patch
+bun pm --cwd apps/bot version patch
 ```
 
 1. Build, tag and push an image:
 
 ```
 # Web
-pnpx dotenv-cli -c -- pnpm --filter @/web docker:all
+bunx --no-install dotenv -c -- bun run --cwd apps/web docker:all
 # Bot
-pnpx dotenv-cli -c -- pnpm --filter @/bot docker:all
+bunx --no-install dotenv -c -- bun run --cwd apps/bot docker:all
 
 # All
-pnpx dotenv-cli -c -- pnpm docker:all
+bunx --no-install dotenv -c -- bun run --cwd apps/web docker:all && bunx --no-install dotenv -c -- bun run --cwd apps/bot docker:all
 ```

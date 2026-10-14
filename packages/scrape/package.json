@@ -9,11 +9,10 @@
 		}
 	},
 	"scripts": {
-		"typecheck": "tsc --noEmit"
+		"typecheck": "bun check"
 	},
 	"dependencies": {
 		"@/db": "workspace:*",
-		"@/tsconfig": "workspace:*",
 		"@/utils": "workspace:*",
 		"@sindresorhus/transliterate": "^1.6.0"
 	},

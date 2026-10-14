@@ -9,12 +9,11 @@
 		}
 	},
 	"scripts": {
-		"typecheck": "tsc --noEmit"
+		"typecheck": "bun check"
 	},
 	"dependencies": {
 		"@/db": "workspace:*",
 		"@/scrape": "workspace:*",
-		"@/tsconfig": "workspace:*",
 		"@/utils": "workspace:*",
 		"date-fns": "^3.6.0"
 	},

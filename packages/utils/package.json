@@ -9,7 +9,7 @@
 		}
 	},
 	"scripts": {
-		"typecheck": "tsc --noEmit"
+		"typecheck": "bun check"
 	},
 	"dependencies": {
 		"@/types": "workspace:*",
@@ -18,7 +18,6 @@
 		"queue-promise": "^2.2.1"
 	},
 	"devDependencies": {
-		"@/tsconfig": "workspace:*",
 		"@types/geojson": "^7946.0.14"
 	}
 }

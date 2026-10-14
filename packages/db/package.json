@@ -10,10 +10,9 @@
 	},
 	"scripts": {
 		"migrate": "tsx ./migrate.ts",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "bun check"
 	},
 	"dependencies": {
-		"@/tsconfig": "workspace:*",
 		"@/types": "workspace:*",
 		"@/utils": "workspace:*",
 		"mongodb": "^6.8.0",

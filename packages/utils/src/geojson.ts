@@ -1,3 +1,5 @@
+import type * as GeoJSON from "geojson";
+
 import type { Polygon, Position } from "@/types/geojson";
 import type { PolygonId } from "@/types/ids";
 

@@ -10,16 +10,15 @@
 		}
 	},
 	"scripts": {
-		"docker:all": "docker buildx build -f ./Dockerfile -t ${DOCKER_PREFIX}/homes-tracker-bot:$(npm show ./ version) --platform linux/amd64 --push ../..",
+		"docker:all": "docker buildx build -f ./Dockerfile -t ${DOCKER_PREFIX}/homes-tracker-bot:$(bun -p 'require(\"./package.json\").version') --platform linux/amd64 --push ../..",
 		"start": "tsx src/index.ts",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "bun check"
 	},
 	"dependencies": {
 		"@/db": "workspace:*",
 		"@/intercom": "workspace:*",
 		"@/server": "workspace:*",
 		"@/telegram": "workspace:*",
-		"@/tsconfig": "workspace:*",
 		"@/types": "workspace:*",
 		"@/utils": "workspace:*",
 		"@trpc/server": "11.0.0-rc.490",
