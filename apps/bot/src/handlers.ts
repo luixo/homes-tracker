@@ -8,11 +8,11 @@ import { handler as stop } from "./handlers/stop";
 import type { BotHandler } from "./types";
 
 export const handlers: Record<string, BotHandler> = {
+	announce,
+	disable,
+	enable,
 	help,
+	request,
 	start,
 	stop,
-	request,
-	enable,
-	disable,
-	announce,
 };

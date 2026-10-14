@@ -11,10 +11,6 @@ import { inRange, validateStep } from "./validators";
 
 export const getSteps = (): FilterStep[] => [
 	{
-		id: priceSelectStepId,
-		type: "select",
-		title: "Price type",
-		required: true,
 		filter: {
 			defaultValue: priceSelectOptions.total,
 			options: [
@@ -36,78 +32,82 @@ export const getSteps = (): FilterStep[] => [
 				},
 			],
 		},
+		id: priceSelectStepId,
+		required: true,
+		title: "Price type",
+		type: "select",
 	},
 	{
+		filter: {
+			placeholder: "500",
+			startContent: "$",
+		},
 		id: priceStepIds.total,
-		type: "range",
-		title: "Price",
 		required: true,
 		showCondition: {
-			type: "other-step",
-			stepId: priceSelectStepId,
 			condition: {
 				type: "select",
 				whiteListValues: [priceSelectOptions.total],
 			},
+			stepId: priceSelectStepId,
+			type: "other-step",
 		},
-		filter: {
-			startContent: "$",
-			placeholder: "500",
-		},
+		title: "Price",
+		type: "range",
 	},
 	{
+		filter: {
+			placeholder: "10",
+			startContent: "$",
+		},
 		id: priceStepIds.perSqm,
-		type: "range",
-		title: "Price per m2",
 		required: true,
 		showCondition: {
-			type: "other-step",
-			stepId: priceSelectStepId,
 			condition: {
 				type: "select",
 				whiteListValues: [priceSelectOptions.perSqm],
 			},
+			stepId: priceSelectStepId,
+			type: "other-step",
 		},
-		filter: {
-			startContent: "$",
-			placeholder: "10",
-		},
+		title: "Price per m2",
+		type: "range",
 	},
 	{
+		filter: {
+			placeholder: "200",
+			startContent: "$",
+		},
 		id: priceStepIds.perRoom,
-		type: "range",
-		title: "Price per room",
 		required: true,
 		showCondition: {
-			type: "other-step",
-			stepId: priceSelectStepId,
 			condition: {
 				type: "select",
 				whiteListValues: [priceSelectOptions.perRoom],
 			},
+			stepId: priceSelectStepId,
+			type: "other-step",
 		},
-		filter: {
-			startContent: "$",
-			placeholder: "200",
-		},
+		title: "Price per room",
+		type: "range",
 	},
 	{
+		filter: {
+			placeholder: "200",
+			startContent: "$",
+		},
 		id: priceStepIds.perSqm,
-		type: "range",
-		title: "Price per bedroom",
 		required: true,
 		showCondition: {
-			type: "other-step",
-			stepId: priceSelectStepId,
 			condition: {
 				type: "select",
 				whiteListValues: [priceSelectOptions.perBedroom],
 			},
+			stepId: priceSelectStepId,
+			type: "other-step",
 		},
-		filter: {
-			startContent: "$",
-			placeholder: "200",
-		},
+		title: "Price per bedroom",
+		type: "range",
 	},
 ];
 

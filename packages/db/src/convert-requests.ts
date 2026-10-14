@@ -12,8 +12,8 @@ import {
 import type { FilterStepValues } from "@/types/filters/values";
 
 const convertRange = ({ min, max }: { min?: number; max?: number }) => ({
+	max: max ?? 99_999,
 	min: min ?? 0,
-	max: max ?? 99999,
 });
 
 const convertPrice = (
@@ -23,50 +23,54 @@ const convertPrice = (
 		return [];
 	}
 	switch (filter.type) {
-		case "total":
+		case "total": {
 			return [
 				{
-					type: "select",
 					id: priceSelectStepId,
 					optionId: priceSelectOptions.total,
+					type: "select",
 				},
-				{ type: "range", id: priceStepIds.total, range: convertRange(filter) },
+				{ id: priceStepIds.total, range: convertRange(filter), type: "range" },
 			];
-		case "per-meter":
+		}
+		case "per-meter": {
 			return [
 				{
-					type: "select",
 					id: priceSelectStepId,
 					optionId: priceSelectOptions.perSqm,
+					type: "select",
 				},
-				{ type: "range", id: priceStepIds.perSqm, range: convertRange(filter) },
+				{ id: priceStepIds.perSqm, range: convertRange(filter), type: "range" },
 			];
-		case "per-room":
+		}
+		case "per-room": {
 			return [
 				{
-					type: "select",
 					id: priceSelectStepId,
 					optionId: priceSelectOptions.perRoom,
+					type: "select",
 				},
 				{
-					type: "range",
 					id: priceStepIds.perRoom,
 					range: convertRange(filter),
+					type: "range",
 				},
 			];
-		case "per-bedroom":
+		}
+		case "per-bedroom": {
 			return [
 				{
-					type: "select",
 					id: priceSelectStepId,
 					optionId: priceSelectOptions.perBedroom,
+					type: "select",
 				},
 				{
-					type: "range",
 					id: priceStepIds.perBedroom,
 					range: convertRange(filter),
+					type: "range",
 				},
 			];
+		}
 	}
 };
 
@@ -76,10 +80,7 @@ const convertArea = (
 	if (!filter) {
 		return [];
 	}
-	switch (filter.type) {
-		case "area":
-			return [{ type: "range", id: areaStepId, range: convertRange(filter) }];
-	}
+	return [{ id: areaStepId, range: convertRange(filter), type: "range" }];
 };
 
 const convertBedroomOptions = (
@@ -122,22 +123,24 @@ const convertRooms = (
 		return [];
 	}
 	switch (filter.type) {
-		case "rooms":
+		case "rooms": {
 			return [
 				{
-					type: "multiselect",
 					id: roomStepId,
 					optionsIds: convertRoomOptions(filter),
+					type: "multiselect",
 				},
 			];
-		case "bedrooms":
+		}
+		case "bedrooms": {
 			return [
 				{
-					type: "multiselect",
 					id: bedroomStepId,
 					optionsIds: convertBedroomOptions(filter),
+					type: "multiselect",
 				},
 			];
+		}
 	}
 };
 
@@ -155,22 +158,14 @@ export const convertToLastRequest = (
 	if (request.version === "v2") {
 		return request;
 	}
-	const {
-		// eslint-disable-next-line @typescript-eslint/naming-convention
-		_id,
-		enabled,
-		notifiers,
-		notifiedTimestamp,
-		city,
-		filter,
-	} = request;
+	const { _id, enabled, notifiers, notifiedTimestamp, city, filter } = request;
 	return {
 		_id,
-		enabled,
-		notifiers,
-		notifiedTimestamp,
 		city,
-		version: "v2",
+		enabled,
 		filters: convertRequestFilters(filter),
+		notifiedTimestamp,
+		notifiers,
+		version: "v2",
 	};
 };

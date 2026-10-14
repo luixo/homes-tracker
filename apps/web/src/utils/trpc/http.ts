@@ -12,8 +12,8 @@ const httpLogger = globalLogger.child({ service: "trpc/http" });
 
 const createCaller = createCallerFactory(appRouter);
 const httpCaller = createCaller({
-	logger: httpLogger,
 	auth: null,
+	logger: httpLogger,
 	source: "http",
 });
 
@@ -28,18 +28,18 @@ export const wrapHttpHandler =
 		try {
 			const data = await handler({ caller: httpCaller, req });
 			return NextResponse.json({ data });
-		} catch (cause) {
-			if (cause instanceof TRPCError) {
-				const httpStatusCode = getHTTPStatusCodeFromError(cause);
+		} catch (error) {
+			if (error instanceof TRPCError) {
+				const httpStatusCode = getHTTPStatusCodeFromError(error);
 
 				return NextResponse.json(
-					{ error: { message: cause.message } },
+					{ error: { message: error.message } },
 					{ status: httpStatusCode },
 				);
 			}
 
 			return NextResponse.json(
-				{ error: { message: `Unknown error`, cause } },
+				{ error: { error, message: `Unknown error` } },
 				{ status: 500 },
 			);
 		}

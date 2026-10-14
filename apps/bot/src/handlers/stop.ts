@@ -1,6 +1,5 @@
+import type { BotHandler } from "@/bot/types";
 import { updateTrackerRequest } from "@/db/requests";
-
-import type { BotHandler } from "../types";
 
 export const handler: BotHandler = async (context) => {
 	try {

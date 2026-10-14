@@ -12,9 +12,6 @@ import { validateStep } from "./validators";
 
 export const getSteps = (): FilterStep[] => [
 	{
-		id: roomStepId,
-		type: "multiselect",
-		title: "Rooms",
 		filter: {
 			defaultValues: [roomSelectOptions[1], roomSelectOptions[2]],
 			options: [
@@ -48,11 +45,11 @@ export const getSteps = (): FilterStep[] => [
 				},
 			],
 		},
+		id: roomStepId,
+		title: "Rooms",
+		type: "multiselect",
 	},
 	{
-		id: bedroomStepId,
-		type: "multiselect",
-		title: "Bedroooms",
 		filter: {
 			options: [
 				{
@@ -73,6 +70,9 @@ export const getSteps = (): FilterStep[] => [
 				},
 			],
 		},
+		id: bedroomStepId,
+		title: "Bedroooms",
+		type: "multiselect",
 	},
 ];
 

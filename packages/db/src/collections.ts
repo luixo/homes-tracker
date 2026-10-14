@@ -1,7 +1,6 @@
 import type { Collection, Document } from "mongodb";
 import * as mongo from "mongodb";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import type {
 	Admin,
@@ -12,10 +11,10 @@ import type {
 import type { Logger } from "@/utils/logger";
 import { withLogger } from "@/utils/logger";
 
-const dirname = path.dirname(fileURLToPath(import.meta.url));
+const { dirname } = import.meta;
 const baseDir = path.join(dirname, "../../../");
 
-let client: mongo.MongoClient | undefined;
+let client: mongo.MongoClient | undefined = undefined;
 const getClient = () => {
 	if (client) {
 		return client;
@@ -54,7 +53,7 @@ const withCollection =
 		) => Promise<T>,
 	): Promise<T> =>
 		withLogger(
-			logger.child({ service: "mongodb", collection: collectionName }),
+			logger.child({ collection: collectionName, service: "mongodb" }),
 			action,
 			(innerLogger) =>
 				withMongo((db) =>

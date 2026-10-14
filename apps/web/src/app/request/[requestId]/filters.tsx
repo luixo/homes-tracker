@@ -30,7 +30,7 @@ export const Filters: React.FC<Props> = ({ requestId }) => {
 		},
 	});
 	const saveValues = () => {
-		saveMutation.mutate({ requestId, filters: localValues });
+		saveMutation.mutate({ filters: localValues, requestId });
 	};
 	const isValid = steps.every((step) =>
 		isStepValid(
@@ -42,11 +42,11 @@ export const Filters: React.FC<Props> = ({ requestId }) => {
 	return (
 		<FiltersContext
 			value={{
-				steps,
-				remoteValues: values,
-				localValues,
-				updateLocalValues: setLocalValues,
 				disabled: saveMutation.isPending,
+				localValues,
+				remoteValues: values,
+				steps,
+				updateLocalValues: setLocalValues,
 			}}
 		>
 			<Steps />

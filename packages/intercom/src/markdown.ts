@@ -1,8 +1,8 @@
 const escapeChars = [
 	"_",
 	"*",
-	"\\[",
-	"\\]",
+	String.raw`\[`,
+	String.raw`\]`,
 	"(",
 	")",
 	"~",
@@ -20,4 +20,7 @@ const escapeChars = [
 ];
 
 export const escapeMarkdown = (input: string) =>
-	input.replaceAll(new RegExp(`([${escapeChars.join("")}])`, "g"), "\\$1");
+	input.replaceAll(
+		new RegExp(`([${escapeChars.join("")}])`, "gu"),
+		String.raw`\$1`,
+	);

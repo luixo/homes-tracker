@@ -15,33 +15,27 @@ export const sendToTelegram =
 				hasImages ? `, with ${images.length} images` : ""
 			}) to ${chatId}`,
 			async () => {
-				while (text.length > 0) {
+				while (text.length !== 0) {
 					const isFirstMessage = text === originalMessage;
-					if (hasImages && isFirstMessage) {
-						await ctx.bot.sendMediaGroup(
-							chatId,
-							// eslint-disable-next-line @typescript-eslint/no-loop-func
-							images.map((image, index) => ({
-								type: "photo",
-								media: image,
-								...(index === 0
-									? {
-											caption: text.slice(0, MAX_TELEGRAM_CHARS),
-											parse_mode: "MarkdownV2",
-										}
-									: undefined),
-							})),
-						);
-					} else {
-						await ctx.bot.sendMessage(
-							chatId,
-							text.slice(0, MAX_TELEGRAM_CHARS),
-							{
+					await (hasImages && isFirstMessage
+						? ctx.bot.sendMediaGroup(
+								chatId,
+								// oxlint-disable-next-line @typescript-eslint/no-loop-func
+								images.map((image, index) => ({
+									media: image,
+									type: "photo",
+									...(index === 0
+										? {
+												caption: text.slice(0, MAX_TELEGRAM_CHARS),
+												parse_mode: "MarkdownV2",
+											}
+										: undefined),
+								})),
+							)
+						: ctx.bot.sendMessage(chatId, text.slice(0, MAX_TELEGRAM_CHARS), {
 								disable_web_page_preview: isFirstMessage,
-							},
-						);
-					}
-					// eslint-disable-next-line no-param-reassign
+							}));
+					// oxlint-disable-next-line no-param-reassign
 					text = text.slice(MAX_TELEGRAM_CHARS + 1);
 				}
 			},

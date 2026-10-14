@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import type { Brand } from "../brand";
-import { branded } from "../brand";
+import type { Brand } from "@/types/brand";
+import { branded } from "@/types/brand";
 
 export const stepId = z.string().refine<Brand<string, "stepId">>(branded);
 export type StepId = z.infer<typeof stepId>;
@@ -18,27 +18,27 @@ export const yardStepId = generateStepId("yard-area");
 export const locationPolygonStepId = generateStepId("location-polygon");
 export const priceSelectStepId = generateStepId("price-select");
 export const priceSelectOptions = {
-	total: generateSelectOptionId("total"),
-	perSqm: generateSelectOptionId("per-sqm"),
-	perRoom: generateSelectOptionId("per-room"),
 	perBedroom: generateSelectOptionId("per-bedroom"),
+	perRoom: generateSelectOptionId("per-room"),
+	perSqm: generateSelectOptionId("per-sqm"),
+	total: generateSelectOptionId("total"),
 };
 export const priceStepIds = {
-	total: generateStepId("price-total"),
-	perSqm: generateStepId("price-per-sqm"),
-	perRoom: generateStepId("price-per-room"),
 	perBedroom: generateStepId("price-per-bedroom"),
+	perRoom: generateStepId("price-per-room"),
+	perSqm: generateStepId("price-per-sqm"),
+	total: generateStepId("price-total"),
 };
 export const roomStepId = generateStepId("rooms");
 export const bedroomStepId = generateStepId("bedrooms");
 export const roomSelectOptions = {
-	studio: generateSelectOptionId("studio"),
 	"1": generateSelectOptionId("1"),
 	"2": generateSelectOptionId("2"),
 	"3": generateSelectOptionId("3"),
 	"4": generateSelectOptionId("4"),
 	"5": generateSelectOptionId("5"),
 	"6plus": generateSelectOptionId("6+"),
+	studio: generateSelectOptionId("studio"),
 };
 export const bedroomSelectOptions = {
 	"1": generateSelectOptionId("1"),

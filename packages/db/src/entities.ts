@@ -28,6 +28,8 @@ export const getEntitiesIds = async (logger: Logger) =>
 	withEntities(logger, `Get entity ids`, (collection) =>
 		collection
 			.find<Pick<ScrapedEntity, "entityId" | "scraperId">>(
+				// MongoDB find accepts query options, not an Array.find thisArg.
+				// oxlint-disable-next-line unicorn/no-array-method-this-argument
 				{},
 				{ projection: { entityId: 1, scraperId: 1 } },
 			)

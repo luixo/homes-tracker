@@ -10,14 +10,9 @@ export const withNotifiers = async (
 	request: TrackerRequest,
 	callback: (notifier: Notifier) => Promise<void>,
 ) => {
-	const notifiers = request.notifiers.map<Notifier>((notifier) => {
-		switch (notifier.type) {
-			case "telegram":
-				return sendToTelegram(ctx, notifier.chatId);
-			default:
-				return async () => {};
-		}
-	});
+	const notifiers = request.notifiers.map<Notifier>((notifier) =>
+		sendToTelegram(ctx, notifier.chatId),
+	);
 	await Promise.all(notifiers.map((notifier) => callback(notifier)));
 };
 
@@ -28,8 +23,8 @@ export const notifyEntity = async (
 ): Promise<void> =>
 	withNotifiers(ctx, request, (notifier) =>
 		notifier({
-			text: formatScrapedEntity(entity, escapeMarkdown),
 			images: entity.images?.slice(0, 3),
+			text: formatScrapedEntity(entity, escapeMarkdown),
 		}),
 	);
 

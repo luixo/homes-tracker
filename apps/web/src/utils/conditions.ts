@@ -40,12 +40,7 @@ const runSelectCondition = (
 const runStepCondition = (
 	condition: SelectCondition,
 	value?: FilterStepValue,
-): boolean => {
-	switch (condition.type) {
-		case "select":
-			return runSelectCondition(condition, value);
-	}
-};
+): boolean => runSelectCondition(condition, value);
 
 const runStaticCondition = (condition: StaticCondition) => condition.value;
 
@@ -60,21 +55,25 @@ export const runCondition = (
 	values: FilterStepValues,
 ): boolean => {
 	switch (condition.type) {
-		case "other-step":
+		case "other-step": {
 			return runStepCondition(
 				condition.condition,
 				values.find((step) => step.id === condition.stepId),
 			);
-		case "static":
+		}
+		case "static": {
 			return runStaticCondition(condition);
-		case "or":
+		}
+		case "or": {
 			return runOrCondition(condition.conditions, (subcondition) =>
 				runCondition(subcondition, values),
 			);
-		case "and":
+		}
+		case "and": {
 			return runAndCondition(condition.conditions, (subcondition) =>
 				runCondition(subcondition, values),
 			);
+		}
 	}
 	return true;
 };

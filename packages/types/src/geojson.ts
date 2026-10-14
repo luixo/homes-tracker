@@ -11,8 +11,8 @@ export type Position = z.infer<typeof position>;
 const polygonRing = position.array();
 
 export const polygon = z.strictObject({
-	type: z.literal("polygon"),
 	id: polygonId,
 	rings: polygonRing.array(),
+	type: z.literal("polygon"),
 });
 export type Polygon = z.infer<typeof polygon>;

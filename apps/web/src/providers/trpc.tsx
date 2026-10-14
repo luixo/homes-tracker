@@ -21,25 +21,27 @@ const getBaseUrl = () => {
 export const TrpcProvider: React.FC<React.PropsWithChildren> = ({
 	children,
 }) => {
-	const [queryClient] = React.useState(getQueryClient);
-	const [trpcClient] = React.useState(() =>
-		trpc.createClient({
-			links: [
-				httpBatchStreamLink({
-					url: `${getBaseUrl()}/api/trpc`,
-					headers: () => {
-						if (typeof window === "undefined") {
+	const queryClient = React.useMemo(() => getQueryClient(), []);
+	const trpcClient = React.useMemo(
+		() =>
+			trpc.createClient({
+				links: [
+					httpBatchStreamLink({
+						headers: () => {
+							if (typeof window === "undefined") {
+								return {
+									"x-trpc-source": "ssr",
+								};
+							}
 							return {
-								"x-trpc-source": "ssr",
+								"x-trpc-source": "csr",
 							};
-						}
-						return {
-							"x-trpc-source": "csr",
-						};
-					},
-				}),
-			],
-		}),
+						},
+						url: `${getBaseUrl()}/api/trpc`,
+					}),
+				],
+			}),
+		[],
 	);
 
 	return (

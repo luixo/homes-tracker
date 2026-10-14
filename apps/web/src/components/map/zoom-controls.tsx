@@ -17,8 +17,8 @@ export const ZoomControls: React.FC<{ className?: string }> = ({
 		(geolocation: GeolocationCoordinates) => {
 			maps.default?.flyTo({
 				center: mapPositionToGeoPosition({
-					lon: geolocation.longitude,
 					lat: geolocation.latitude,
+					lon: geolocation.longitude,
 				}),
 			});
 		},
@@ -26,21 +26,19 @@ export const ZoomControls: React.FC<{ className?: string }> = ({
 	);
 	const { coords, getPosition, positionError, isGeolocationAvailable } =
 		useGeolocated({
+			onSuccess: (value) => onGeolocation(value.coords),
 			positionOptions: {
 				enableHighAccuracy: false,
 			},
-			userDecisionTimeout: 5000,
 			suppressLocationOnMount: true,
-			onSuccess: (value) => onGeolocation(value.coords),
+			userDecisionTimeout: 5000,
 		});
-	const zoomIn = React.useCallback(
-		() => maps.default?.zoomIn(),
-		[maps.default],
-	);
-	const zoomOut = React.useCallback(
-		() => maps.default?.zoomOut(),
-		[maps.default],
-	);
+	const zoomIn = React.useCallback(() => {
+		maps.default?.zoomIn();
+	}, [maps.default]);
+	const zoomOut = React.useCallback(() => {
+		maps.default?.zoomOut();
+	}, [maps.default]);
 	const geolocate = React.useCallback(() => {
 		if (coords) {
 			onGeolocation(coords);

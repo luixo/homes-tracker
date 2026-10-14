@@ -27,7 +27,10 @@ export const isStepValid = (
 			}
 			return isRangeStepValid(step, matchedValue);
 		}
-		default:
+		case "map":
+		case "multiselect":
+		case "select": {
 			return true;
+		}
 	}
 };

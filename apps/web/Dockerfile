@@ -11,6 +11,7 @@ FROM base AS deps
 RUN --mount=type=cache,id=bun,target=/root/.bun/install/cache bun install --production --frozen-lockfile
 
 FROM base AS builder
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=cache,id=bun,target=/root/.bun/install/cache bun install --frozen-lockfile
 ARG NEXT_PUBLIC_MAPBOX_API_KEY
 RUN bun run --cwd apps/web build

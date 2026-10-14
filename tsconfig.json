@@ -1,10 +1,9 @@
 {
-	"$schema": "https://json.schemastore.org/tsconfig",
 	"compilerOptions": {
 		"esModuleInterop": true,
 		"skipLibCheck": true,
-		"target": "ES2022",
-		"lib": ["ES2022", "dom", "dom.iterable"],
+		"target": "esnext",
+		"lib": ["esnext", "dom", "dom.iterable"],
 		"types": ["node"],
 		"jsx": "preserve",
 		"plugins": [
@@ -17,7 +16,6 @@
 		"moduleDetection": "force",
 		"isolatedModules": true,
 		"incremental": true,
-		"tsBuildInfoFile": ".cache/tsbuildinfo.json",
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"checkJs": true,
@@ -25,15 +23,6 @@
 		"moduleResolution": "Bundler",
 		"noEmit": true
 	},
-	"include": [
-		"*.config.ts",
-		"apps/*/src",
-		"apps/web/.next/types/**/*.ts",
-		"apps/web/next-env.d.ts",
-		"apps/web/tailwind.config.ts",
-		"packages/*/src",
-		"packages/db/migrate.ts",
-		".next/types/**/*.ts"
-	],
-	"exclude": ["**/node_modules", "**/.history", "**/.cache"]
+	"include": ["**/*"],
+	"exclude": ["**/node_modules", "**/.history"]
 }

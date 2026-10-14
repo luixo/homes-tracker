@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-import { polygon } from "../geojson";
+import { polygon } from "@/types/geojson";
 
 import { selectOptionId, stepId } from "./ids";
 
 export const rangeValue = z.strictObject({
-	min: z.number().int(),
 	max: z.number().int(),
+	min: z.number().int(),
 });
 
 const commonFilterValue = z.strictObject({
@@ -14,23 +14,23 @@ const commonFilterValue = z.strictObject({
 });
 
 export const rangeStepValue = commonFilterValue.extend({
-	type: z.literal("range"),
 	range: rangeValue,
+	type: z.literal("range"),
 });
 export type RangeStepValue = z.infer<typeof rangeStepValue>;
 export const selectStepValue = commonFilterValue.extend({
-	type: z.literal("select"),
 	optionId: selectOptionId,
+	type: z.literal("select"),
 });
 export type SelectStepValue = z.infer<typeof selectStepValue>;
 export const multiSelectStepValue = commonFilterValue.extend({
-	type: z.literal("multiselect"),
 	optionsIds: selectOptionId.array(),
+	type: z.literal("multiselect"),
 });
 export type MultiSelectStepValue = z.infer<typeof multiSelectStepValue>;
 export const mapStepValue = commonFilterValue.extend({
-	type: z.literal("map"),
 	polygons: polygon.array(),
+	type: z.literal("map"),
 });
 export type MapStepValue = z.infer<typeof mapStepValue>;
 

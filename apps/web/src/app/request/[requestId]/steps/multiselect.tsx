@@ -30,15 +30,15 @@ export const MultiSelectStep: React.FC<Props> = ({
 			updateState(undefined);
 		} else {
 			updateState({
-				type: "multiselect",
 				optionsIds: nextSelected as SelectOptionId[],
+				type: "multiselect",
 			});
 		}
 	};
 	const onItemClick = (optionId: SelectOptionId) => {
 		updateState((prevState) => {
 			if (!prevState) {
-				return { type: "multiselect", optionsIds: [optionId] };
+				return { optionsIds: [optionId], type: "multiselect" };
 			}
 			if (prevState.optionsIds.includes(optionId)) {
 				const nextOptionIds = prevState.optionsIds.filter(

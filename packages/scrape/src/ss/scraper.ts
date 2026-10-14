@@ -1,11 +1,10 @@
 import transliterate from "@sindresorhus/transliterate";
 
+import type { Scraper } from "@/scrape/types";
 import type { ScrapedEntity } from "@/types/db/index";
 import type { EntityId, LocalEntityId, ScraperId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 import { withLogger } from "@/utils/logger";
-
-import type { Scraper } from "../types";
 
 import type { PageModel } from "./page-types";
 import type { Model } from "./types";
@@ -15,10 +14,10 @@ const ID = "ss.ge" as ScraperId;
 const buildParams = (realEstateType: number, page: number) => ({
 	cityIdList: [95],
 	currencyId: 1,
+	order: 1, // Order by date desc.
 	page: page + 1,
 	pageSize: 20,
 	realEstateDealType: 1,
-	order: 1, // Order by date desc.
 	realEstateType,
 });
 
@@ -27,31 +26,17 @@ const mapModalToEntity = (model: Model): ScrapedEntity | null => {
 		return null;
 	}
 	return {
-		version: "v1",
 		_id: `${ID}:${model.applicationId}` as EntityId,
-		entityId: model.applicationId.toString() as LocalEntityId,
-		scraperId: ID,
-		postedTimestamp: new Date(model.orderDate).valueOf(),
-		scrapedTimestamp: Date.now(),
-		price:
-			model.price.currencyType === 1
-				? model.price.priceGeo
-				: model.price.priceUsd,
-		currency: model.price.currencyType === 1 ? "₾" : "$",
-		realtyType:
-			model.realEstateTypeId === 4
-				? "house"
-				: model.realEstateTypeId === 5
-					? "apartment"
-					: model.realEstateTypeId === 6
-						? "commercial"
-						: "unknown",
 		areaSize: model.areaOfHouse
 			? Number(model.areaOfHouse)
 			: Number(model.totalArea),
-		yardAreaSize: model.areaOfYard ? Number(model.areaOfYard) : null,
-		rooms: model.rooms ? Number(model.rooms) : 0,
 		bedrooms: model.bedrooms,
+		currency: model.price.currencyType === 1 ? "₾" : "$",
+		entityId: model.applicationId.toString() as LocalEntityId,
+		images: model.appImages
+			.toSorted((a, b) => (a.isMain ? -1 : b.isMain ? 1 : 0))
+			.slice(0, 10)
+			.map((image) => image.fileNameThumb),
 		location: {
 			address: transliterate(
 				`${model.address.streetTitle}${
@@ -60,17 +45,31 @@ const mapModalToEntity = (model: Model): ScrapedEntity | null => {
 						: ` ${model.address.streetNumber}`
 				}`,
 			).trim(),
-			district: model.address.districtTitle.trim(),
-			subdistrict: model.address.subdistrictTitle.trim(),
 			coordinates: {
 				lat: model.locationLatitude,
 				lon: model.locationLongitude,
 			},
+			district: model.address.districtTitle.trim(),
+			subdistrict: model.address.subdistrictTitle.trim(),
 		},
-		images: model.appImages
-			.sort((a, b) => (a.isMain ? -1 : b.isMain ? 1 : 0))
-			.slice(0, 10)
-			.map((image) => image.fileNameThumb),
+		postedTimestamp: new Date(model.orderDate).valueOf(),
+		price:
+			model.price.currencyType === 1
+				? model.price.priceGeo
+				: model.price.priceUsd,
+		realtyType:
+			model.realEstateTypeId === 4
+				? "house"
+				: model.realEstateTypeId === 5
+					? "apartment"
+					: model.realEstateTypeId === 6
+						? "commercial"
+						: "unknown",
+		rooms: model.rooms ? Number(model.rooms) : 0,
+		scrapedTimestamp: Date.now(),
+		scraperId: ID,
+		version: "v1",
+		yardAreaSize: model.areaOfYard ? Number(model.areaOfYard) : null,
 	};
 };
 
@@ -89,7 +88,7 @@ const getCookieFromString = (str: string) => {
 		throw new Error(`Expected to have cookie with key ${COOKIE_KEY}!`);
 	}
 	const cookieParts = matchedCookie.split(",").map((s) => s.trim());
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	// oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const matchedCookiePart = cookieParts.find((part) =>
 		part.startsWith(`${COOKIE_KEY}=`),
 	)!;
@@ -136,12 +135,12 @@ const fetchEntity = (
 		const response = await fetch(
 			`https://api-gateway.ss.ge/v1/RealEstate/details?applicationId=${entityId}`,
 			{
-				method: "PUT",
 				headers: {
 					"accept-language": "en",
 					authorization: `Bearer ${prepareResult.token}`,
 					"content-type": "application/json",
 				},
+				method: "PUT",
 			},
 		);
 		const data = (await response.json()) as Model;
@@ -160,12 +159,12 @@ const fetchPageByType =
 				const response = await fetch(
 					`https://api-gateway.ss.ge/v1/RealEstate/LegendSearch`,
 					{
-						method: "POST",
+						body: JSON.stringify(buildParams(realEstateType, page)),
 						headers: {
 							authorization: `Bearer ${prepareResult.token}`,
 							"content-type": "application/json",
 						},
-						body: JSON.stringify(buildParams(realEstateType, page)),
+						method: "POST",
 					},
 				);
 				const data = (await response.json()) as {
@@ -175,10 +174,10 @@ const fetchPageByType =
 					.filter((model) => model.price.priceGeo && model.price.priceUsd)
 					.map((model) => model.applicationId.toString() as LocalEntityId);
 				return {
-					results,
 					nonVipAdsFound: data.realStateItemModel.some(
 						(model) => model.vipStatus === 0,
 					),
+					results,
 				};
 			},
 			{
@@ -190,10 +189,10 @@ const fetchPageByType =
 		);
 
 export const scraper: Scraper<LocalEntityId, PrepareResult> = {
-	id: ID,
-	prepare,
-	pageFetchers: [fetchPageByType("house"), fetchPageByType("flat")],
-	getEntityId: (applicationId) => applicationId,
 	fetchEntity,
+	getEntityId: (applicationId) => applicationId,
 	getUrl,
+	id: ID,
+	pageFetchers: [fetchPageByType("house"), fetchPageByType("flat")],
+	prepare,
 };

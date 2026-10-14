@@ -1,6 +1,7 @@
 import Queue from "queue-promise";
 
 export const wait = async (ms: number): Promise<undefined> => {
+	// oxlint-disable-next-line promise/avoid-new
 	await new Promise((resolve) => {
 		setTimeout(resolve, ms);
 	});
@@ -27,6 +28,7 @@ export const createQueue = (
 	return {
 		add: (...args) => queue.enqueue(...args),
 		getResolvePromise: () =>
+			// oxlint-disable-next-line promise/avoid-new
 			new Promise((resolve) => {
 				if (queue.size === 0) {
 					resolve();

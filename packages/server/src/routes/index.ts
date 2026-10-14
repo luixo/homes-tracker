@@ -7,9 +7,9 @@ import { router as filters } from "./filters";
 import { router as requests } from "./requests";
 
 export const router = routerFactory({
-	cron,
-	requests,
-	chatLinks,
 	admin,
+	chatLinks,
+	cron,
 	filters,
+	requests,
 });

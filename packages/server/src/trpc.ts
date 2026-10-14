@@ -18,15 +18,17 @@ export const { router, createCallerFactory } = t;
 export const procedure = t.procedure.use(async ({ path, type, next, ctx }) =>
 	withLogger(ctx.logger, path, async (logger) => {
 		const start = Date.now();
+		// tRPC next returns a result; timing and logging must run after it resolves.
+		// oxlint-disable-next-line node/callback-return
 		const result = await next({ ctx: { logger } });
 		const durationMs = Date.now() - start;
 		if (result.ok) {
-			logger.info("OK request timing:", { path, type, durationMs });
+			logger.info("OK request timing:", { durationMs, path, type });
 		} else {
 			logger.error(result.error, "Non-OK request timing", {
+				durationMs,
 				path,
 				type,
-				durationMs,
 			});
 		}
 		return result;

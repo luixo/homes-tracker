@@ -50,17 +50,19 @@ const MapInner: React.FC<Props> = ({
 		[setViewport],
 	);
 	const { width, height } = useWindowSize(
+		// oxlint-disable-next-line react/hooks
 		useRafState,
 		typeof window === "undefined",
 	);
 	React.useEffect(() => {
 		map.current?.resize();
+		// oxlint-disable-next-line react/exhaustive-effect-dependencies
 	}, [map, width, height]);
 	return (
 		<div className="size-full">
 			<style
 				// Overriding defaults for mapbox
-				// eslint-disable-next-line react/no-danger
+				// oxlint-disable-next-line react/no-danger
 				dangerouslySetInnerHTML={{
 					__html: `
           .mapboxgl-map { font-family: inherit; font-size: inherit; line-height: inherit; }

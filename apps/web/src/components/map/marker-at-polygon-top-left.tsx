@@ -1,6 +1,6 @@
 import React from "react";
 
-import bbox from "@turf/bbox";
+import { bbox } from "@turf/bbox";
 import { Marker } from "react-map-gl";
 
 import type { Polygon, Position } from "@/types/geojson";

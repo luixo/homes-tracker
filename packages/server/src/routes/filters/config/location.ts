@@ -9,13 +9,13 @@ import { validateStep } from "./validators";
 
 export const getSteps = (): FilterStep[] => [
 	{
-		id: locationPolygonStepId,
-		type: "map",
-		title: "Location",
 		filter: {
-			initialCenter: { lon: 44.801561, lat: 41.693083 },
+			initialCenter: { lat: 41.693083, lon: 44.801561 },
 			initialZoom: 14,
 		},
+		id: locationPolygonStepId,
+		title: "Location",
+		type: "map",
 	},
 ];
 

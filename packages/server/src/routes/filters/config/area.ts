@@ -6,17 +6,17 @@ import { inRange, validateStep } from "./validators";
 
 export const getSteps = (): FilterStep[] => [
 	{
+		filter: { endContent: "m²", placeholder: "50" },
 		id: areaStepId,
-		type: "range",
 		title: "Area",
-		filter: { placeholder: "50", endContent: "m²" },
+		type: "range",
 	},
 	{
-		id: yardStepId,
-		type: "range",
-		title: "Yard area",
-		filter: { placeholder: "150", endContent: "m²" },
 		disabled: true,
+		filter: { endContent: "m²", placeholder: "150" },
+		id: yardStepId,
+		title: "Yard area",
+		type: "range",
 	},
 ];
 

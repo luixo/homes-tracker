@@ -1,9 +1,8 @@
 import { z } from "zod";
 
+import { currencySymbol } from "@/types/currency";
 import { position } from "@/types/geojson";
-
-import { currencySymbol } from "../currency";
-import { entityId, localEntityId, scraperId } from "../ids";
+import { entityId, localEntityId, scraperId } from "@/types/ids";
 
 export const realtyType = z.union([
 	z.literal("apartment"),
@@ -16,26 +15,26 @@ export const realtyType = z.union([
 export type RealtyType = z.infer<typeof realtyType>;
 
 export const scrapedEntityV1 = z.strictObject({
-	version: z.literal("v1"),
 	_id: entityId,
-	entityId: localEntityId,
-	scraperId,
-	postedTimestamp: z.number(),
-	scrapedTimestamp: z.number(),
-	price: z.number(),
-	currency: currencySymbol,
-	realtyType,
 	areaSize: z.number(),
-	yardAreaSize: z.number().or(z.null()),
-	rooms: z.number(),
 	bedrooms: z.number(),
+	currency: currencySymbol,
+	entityId: localEntityId,
+	images: z.string().array().optional(),
 	location: z.strictObject({
 		address: z.string(),
+		coordinates: position.or(z.tuple([z.number(), z.number()])).or(z.null()),
 		district: z.string().or(z.null()),
 		subdistrict: z.string().or(z.null()),
-		coordinates: position.or(z.tuple([z.number(), z.number()])).or(z.null()),
 	}),
-	images: z.string().array().optional(),
+	postedTimestamp: z.number(),
+	price: z.number(),
+	realtyType,
+	rooms: z.number(),
+	scrapedTimestamp: z.number(),
+	scraperId,
+	version: z.literal("v1"),
+	yardAreaSize: z.number().or(z.null()),
 });
 export type ScrapedEntityV1 = z.infer<typeof scrapedEntityV1>;
 

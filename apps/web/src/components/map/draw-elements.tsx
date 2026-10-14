@@ -3,7 +3,7 @@ import React from "react";
 import type MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { Button } from "@nextui-org/react";
 import { useRerender } from "@react-hookz/web";
-import simplify from "@turf/simplify";
+import { simplify } from "@turf/simplify";
 // @ts-expect-error Freehand mode doesn't have types
 import FreehandMode from "mapbox-gl-draw-freehand-mode";
 import { GoTrash } from "react-icons/go";
@@ -22,15 +22,15 @@ import { PolygonControls } from "./polygon-controls";
 // Tolerance is marked as ε
 const SIMPLIFY_TOLERANCE = 0.0008;
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+// oxlint-disable-next-line @typescript-eslint/no-unsafe-member-access
 FreehandMode.simplify = (
 	polygon: GeoJSON.Feature<GeoJSON.Polygon>,
 	// zoom: number
 ): GeoJSON.Feature<GeoJSON.Polygon> =>
 	simplify(polygon, {
+		highQuality: true,
 		mutate: true,
 		tolerance: SIMPLIFY_TOLERANCE,
-		highQuality: true,
 	});
 
 export type FixedDrawMode = Exclude<
@@ -106,10 +106,11 @@ export const DrawElements: React.FC<Props> = ({
 			onUpdatePolygon(polygon);
 			setTimeout(rerender, 10);
 		},
-		(drawInstance) =>
-			polygons.forEach((polygon) =>
-				drawInstance.add(mapPolygonToFeature(polygon)),
-			),
+		(drawInstance) => {
+			for (const polygon of polygons) {
+				drawInstance.add(mapPolygonToFeature(polygon));
+			}
+		},
 	);
 	const [mode, setMode] = React.useState<MapboxDraw.DrawMode>(DEFAULT_MODE);
 
@@ -117,16 +118,18 @@ export const DrawElements: React.FC<Props> = ({
 		const prevMode = draw.getMode();
 		switch (prevMode) {
 			case "draw_polygon":
-			case "draw_line_string":
+			case "draw_line_string": {
 				draw.changeMode("draw_point");
 				draw.changeMode("simple_select");
 				setMode("simple_select");
 				break;
-			default:
+			}
+			default: {
 				// We do change mode + set mode because changing mode via "changeMode"
 				// function does not emit "draw.modechange" event on map (because of silent: true option)
 				draw.changeMode("draw_polygon");
 				setMode("draw_polygon");
+			}
 		}
 	}, [draw]);
 
@@ -175,7 +178,9 @@ export const DrawElements: React.FC<Props> = ({
 				event.features.length === 1
 			) {
 				// Disable select mode in case of polygon was clicked (but not in case of it being edited)
-				setTimeout(() => draw.changeMode("simple_select"), 0);
+				setTimeout(() => {
+					draw.changeMode("simple_select");
+				}, 0);
 			}
 			manualSelectRef.current = false;
 		};
@@ -188,13 +193,13 @@ export const DrawElements: React.FC<Props> = ({
 	return (
 		<NoEvents className="gap-2 items-end justify-end">
 			<DrawControl drawMode={mode} onClick={onDrawControlClick} />
-			{polygons.length !== 0 ? (
+			{polygons.length === 0 ? null : (
 				<Events>
 					<Button onPress={removeAllPolygons} isIconOnly color="warning">
 						<GoTrash size={24} />
 					</Button>
 				</Events>
-			) : null}
+			)}
 			{polygons.map((polygon) => (
 				<PolygonElement
 					key={polygon.id}

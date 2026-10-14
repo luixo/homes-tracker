@@ -13,7 +13,7 @@
 		}
 	},
 	"scripts": {
-		"build": "next build",
+		"build": "bun run --cwd ../.. lint && next build",
 		"dev": "next dev",
 		"docker:all": "docker buildx build -f ./Dockerfile --build-arg NEXT_PUBLIC_MAPBOX_API_KEY -t ${DOCKER_PREFIX}/homes-tracker:$(bun -p 'require(\"./package.json\").version') --platform linux/amd64 --push ../..",
 		"start": "next start",

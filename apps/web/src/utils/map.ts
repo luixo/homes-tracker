@@ -1,7 +1,7 @@
-import bbox from "@turf/bbox";
-import nearestPointOnLine from "@turf/nearest-point-on-line";
-import polygonToLine from "@turf/polygon-to-line";
-import union from "@turf/union";
+import { bbox } from "@turf/bbox";
+import { nearestPointOnLine } from "@turf/nearest-point-on-line";
+import { polygonToLine } from "@turf/polygon-to-line";
+import { union } from "@turf/union";
 
 import type { Polygon, Position } from "@/types/geojson";
 import type { PolygonId } from "@/types/ids";
@@ -22,7 +22,7 @@ export const getClosestPolygonPointToPoint = (
 		const [exteriorRingPoint, ...interiorRingPoints] = polygon.rings.map(
 			(ring) =>
 				getClosestPolygonPointToPoint(
-					{ type: "polygon", rings: [ring], id: "" as PolygonId },
+					{ id: "" as PolygonId, rings: [ring], type: "polygon" },
 					coordinates,
 				),
 		) as [NearestPointOnLine, ...NearestPointOnLine[]];
@@ -45,9 +45,9 @@ export const getClosestPolygonPointToPoint = (
 		return exteriorRingPoint;
 	}
 	const lineString = polygonToLine({
-		type: "Feature",
 		geometry: mapPolygonToFeature(polygon).geometry,
 		properties: null,
+		type: "Feature",
 	});
 	if (lineString.type !== "Feature") {
 		throw new Error(
@@ -66,12 +66,12 @@ export const getClosestPolygonPointToPoint = (
 	return nearestPointOnLine(
 		lineStringGeometry,
 		{
-			type: "Feature",
 			geometry: {
-				type: "Point",
 				coordinates: mapPositionToGeoPosition(coordinates),
+				type: "Point",
 			},
 			properties: null,
+			type: "Feature",
 		},
 		{},
 	);
@@ -84,13 +84,13 @@ export const removeDuplicates = (
 ): GeoJSON.Position[] =>
 	positions.reduce(
 		(acc, position) => {
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			if (arePositionsEqual(acc[acc.length - 1]!, position)) {
+			// oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
+			if (arePositionsEqual(acc.at(-1)!, position)) {
 				return acc;
 			}
 			return [...acc, position];
 		},
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		// oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
 		[positions[0]!],
 	);
 
@@ -113,12 +113,12 @@ export const getBoundingBox = (
 	...polygons: Polygon[]
 ): ReturnType<typeof bbox> => {
 	if (polygons.length === 1) {
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		// oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
 		return bbox(mapPolygonToFeature(polygons[0]!));
 	}
 	const unitedPolygons = union({
-		type: "FeatureCollection",
 		features: polygons.map(mapPolygonToFeature),
+		type: "FeatureCollection",
 	});
 	if (!unitedPolygons) {
 		throw new Error("Uniting polygons crash");

@@ -15,7 +15,9 @@ type Props = {
 };
 
 const parseNumber = (value: string): number | undefined => {
-	const float = parseFloat(value);
+	// Empty input must remain undefined, and partial numeric input is supported.
+	// oxlint-disable-next-line unicorn/prefer-number-coercion
+	const float = Number.parseFloat(value);
 	if (Number.isNaN(float)) {
 		return;
 	}
@@ -23,8 +25,8 @@ const parseNumber = (value: string): number | undefined => {
 };
 
 const DEFAULT_VALUES = {
-	min: 0,
 	max: Infinity,
+	min: 0,
 };
 
 export const RangeStep: React.FC<Props> = ({ step, data, updateState }) => {
@@ -50,8 +52,8 @@ export const RangeStep: React.FC<Props> = ({ step, data, updateState }) => {
 				return;
 			}
 			return {
-				type: "range",
 				range: nextStateValue,
+				type: "range",
 			};
 		});
 	};
@@ -65,7 +67,7 @@ export const RangeStep: React.FC<Props> = ({ step, data, updateState }) => {
 					label={step.filter.minLabel || "Min"}
 					isRequired={step.required}
 					value={sureMin}
-					isInvalid={/[^0-9.]/.test(sureMin)}
+					isInvalid={/[^0-9.]/u.test(sureMin)}
 					onValueChange={onChange("min")}
 					placeholder={step.filter.placeholder}
 					startContent={
@@ -93,7 +95,7 @@ export const RangeStep: React.FC<Props> = ({ step, data, updateState }) => {
 					isRequired={step.required}
 					value={sureMax}
 					isInvalid={
-						/[^0-9.]/.test(sureMin) ||
+						/[^0-9.]/u.test(sureMin) ||
 						(sureMax === "" ? false : Number(sureMin) > Number(sureMax))
 					}
 					onValueChange={onChange("max")}

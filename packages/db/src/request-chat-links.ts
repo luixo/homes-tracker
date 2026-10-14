@@ -1,4 +1,5 @@
-import { type ChatId, type RequestId, generateRequestId } from "@/types/ids";
+import { generateRequestId } from "@/types/ids";
+import type { ChatId, RequestId } from "@/types/ids";
 import type { Logger } from "@/utils/logger";
 
 import { withChatRequestLinks } from "./collections";

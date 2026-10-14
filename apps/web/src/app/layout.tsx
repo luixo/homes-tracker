@@ -1,6 +1,6 @@
 import type React from "react";
 
-import "../globals.css";
+import "@/web/globals.css";
 
 import { Providers } from "./providers";
 

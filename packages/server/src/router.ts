@@ -1,4 +1,5 @@
-import { router as appRouter } from "./routes/index";
+import type { router as appRouter } from "./routes/index";
 
-export { appRouter };
+export { router as appRouter } from "./routes/index";
+
 export type AppRouter = typeof appRouter;

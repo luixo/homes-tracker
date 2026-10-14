@@ -2,11 +2,10 @@ import { convertToLastRequest } from "@/db/convert-requests";
 import { getEntitiesWithScrapedTimestampGt } from "@/db/entities";
 import { getTrackerRequests, updateTrackerRequest } from "@/db/requests";
 import { notifyEntity, notifyMessage } from "@/intercom/index";
+import { doesMatch } from "@/server/routes/filters/config/match";
 import { procedure } from "@/server/trpc";
 import { getClient } from "@/telegram/client";
 import { createQueue } from "@/utils/promise";
-
-import { doesMatch } from "../filters/config/match";
 
 const MAX_MATCHED_ENTITIES = 10;
 

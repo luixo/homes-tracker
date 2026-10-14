@@ -6,33 +6,37 @@ import type { Position } from "@/types/geojson";
 import { mapGeoPositionToPosition } from "@/utils/geojson";
 
 const formatterUsd = new Intl.NumberFormat("ru-RU", {
-	style: "currency",
 	currency: "USD",
 	maximumFractionDigits: 0,
+	style: "currency",
 });
 
 const formatterEur = new Intl.NumberFormat("ru-RU", {
-	style: "currency",
 	currency: "EUR",
 	maximumFractionDigits: 0,
+	style: "currency",
 });
 
 const formatterGel = new Intl.NumberFormat("ru-RU", {
-	style: "currency",
 	currency: "GEL",
 	maximumFractionDigits: 0,
+	style: "currency",
 });
 
 const formatPrice = (price: number, currency: ScrapedEntity["currency"]) => {
 	switch (currency) {
-		case "$":
+		case "$": {
 			return formatterUsd.format(price);
-		case "€":
+		}
+		case "€": {
 			return formatterEur.format(price);
-		case "₾":
+		}
+		case "₾": {
 			return formatterGel.format(price);
-		default:
+		}
+		case "?": {
 			return `${price} ???`;
+		}
 	}
 };
 

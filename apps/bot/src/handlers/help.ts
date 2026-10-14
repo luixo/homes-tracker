@@ -1,4 +1,4 @@
-import type { BotHandler } from "../types";
+import type { BotHandler } from "@/bot/types";
 
 const helpResponse = [
 	"Что я умею:",

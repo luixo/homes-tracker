@@ -1,8 +1,9 @@
 **/Dockerfile
 .dockerignore
-node_modules
+**/node_modules
 README.md
-.next
+**/.next
+**/.history
 .git
 *.env.local
 **/scripts/

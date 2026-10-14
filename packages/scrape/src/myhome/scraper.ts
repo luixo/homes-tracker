@@ -1,10 +1,9 @@
 import transliterate from "@sindresorhus/transliterate";
 
+import type { Scraper } from "@/scrape/types";
 import type { ScrapedEntity } from "@/types/db/index";
 import type { EntityId, LocalEntityId, ScraperId } from "@/types/ids";
 import { withLogger } from "@/utils/logger";
-
-import type { Scraper } from "../types";
 
 import type { CurrencyId, Model } from "./types";
 
@@ -14,14 +13,18 @@ const getRealtyType = (
 	input: Model["real_estate_type_id"],
 ): ScrapedEntity["realtyType"] => {
 	switch (input) {
-		case 1:
+		case 1: {
 			return "apartment";
-		case 2:
+		}
+		case 2: {
 			return "house";
-		case 5:
+		}
+		case 5: {
 			return "commercial";
-		default:
+		}
+		default: {
 			return "unknown";
+		}
 	}
 };
 
@@ -29,45 +32,51 @@ const getModelCurrency = (
 	currencyId: CurrencyId,
 ): ScrapedEntity["currency"] => {
 	switch (currencyId) {
-		case 1:
+		case 1: {
 			return "₾";
-		case 2:
+		}
+		case 2: {
 			return "$";
-		case 3:
+		}
+		case 3: {
 			return "€";
-		default:
+		}
+		default: {
 			return "?";
+		}
 	}
 };
 
 const mapModelToEntity = (model: Model): ScrapedEntity => ({
-	version: "v1",
 	_id: `${ID}:${model.id}` as EntityId,
-	scraperId: ID,
-	entityId: model.id.toString() as LocalEntityId,
-	price: model.price[2].price_total,
-	currency: getModelCurrency(model.currency_id),
 	areaSize: model.area,
-	yardAreaSize: model.yard_area,
-	realtyType: getRealtyType(model.real_estate_type_id),
-	rooms: model.room === "10+" ? 10 : Number(model.room),
 	bedrooms: model.bedroom === null ? 0 : Number(model.bedroom),
+	currency: getModelCurrency(model.currency_id),
+	entityId: model.id.toString() as LocalEntityId,
+	images: model.images.slice(0, 10).map((image) => image.thumb),
 	location: {
 		address: model.address ? transliterate(model.address).trim() : "unknown",
+		coordinates: { lat: model.lat, lon: model.lng },
 		district: model.district_name.trim(),
 		subdistrict: model.urban_name.trim(),
-		coordinates: { lat: model.lat, lon: model.lng },
 	},
-	images: model.images.slice(0, 10).map((image) => image.thumb),
 	postedTimestamp: new Date(model.last_updated).valueOf(),
+	price: model.price[2].price_total,
+	realtyType: getRealtyType(model.real_estate_type_id),
+	rooms: model.room === "10+" ? 10 : Number(model.room),
 	scrapedTimestamp: Date.now(),
+	scraperId: ID,
+	version: "v1",
+	yardAreaSize: model.yard_area,
 });
 
 const getUrl = (id: string): string => `https://www.myhome.ge/en/pr/${id}/`;
 
 export const scraper: Scraper<ScrapedEntity, null> = {
+	fetchEntity: (_logger, _prepareResult, result) => Promise.resolve(result),
+	getEntityId: (model) => model.entityId,
+	getUrl,
 	id: ID,
-	prepare: async () => null,
 	pageFetchers: [
 		(logger, _prepareResult, page) =>
 			withLogger(
@@ -76,10 +85,10 @@ export const scraper: Scraper<ScrapedEntity, null> = {
 				async () => {
 					const params = new URLSearchParams("");
 					for (const [key, value] of Object.entries({
-						deal_types: 2, // rent
 						cities: 1, // Tbilisi
-						real_estate_types: "1,2,3", // apartments, houses, country houses
+						deal_types: 2, // rent
 						page,
+						real_estate_types: "1,2,3", // apartments, houses, country houses,
 					})) {
 						params.set(key, value.toString());
 					}
@@ -102,11 +111,11 @@ export const scraper: Scraper<ScrapedEntity, null> = {
 					};
 					const results = models.map(mapModelToEntity);
 					return {
-						results,
 						nonVipAdsFound: models.some(
 							(model) =>
 								!model.is_vip && !model.is_vip_plus && !model.is_super_vip,
 						),
+						results,
 					};
 				},
 				{
@@ -117,7 +126,5 @@ export const scraper: Scraper<ScrapedEntity, null> = {
 				},
 			),
 	],
-	getEntityId: (model) => model.entityId,
-	fetchEntity: async (_logger, _prepareResult, result) => result,
-	getUrl,
+	prepare: () => Promise.resolve(null),
 };

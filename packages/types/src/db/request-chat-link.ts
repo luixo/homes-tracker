@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { chatId, requestId } from "../ids";
+import { chatId, requestId } from "@/types/ids";
 
 export const requestChatLink = z.strictObject({
 	_id: requestId,

@@ -3,8 +3,8 @@ import { z } from "zod";
 import { chatId } from "./ids";
 
 export const telegramNotifier = z.strictObject({
-	type: z.literal("telegram"),
 	chatId,
+	type: z.literal("telegram"),
 });
 export type TelegramNotifier = z.infer<typeof telegramNotifier>;
 

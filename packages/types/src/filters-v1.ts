@@ -4,70 +4,70 @@ import { polygon } from "./geojson";
 
 export const priceFilter = z.discriminatedUnion("type", [
 	z.strictObject({
+		max: z.number().int().optional(),
+		min: z.number().int().optional(),
 		type: z.literal("total"),
-		min: z.number().int().optional(),
-		max: z.number().int().optional(),
 	}),
 	z.strictObject({
+		max: z.number().int().optional(),
+		min: z.number().int().optional(),
 		type: z.literal("per-meter"),
-		min: z.number().int().optional(),
-		max: z.number().int().optional(),
 	}),
 	z.strictObject({
+		max: z.number().int().optional(),
+		min: z.number().int().optional(),
 		type: z.literal("per-room"),
-		min: z.number().int().optional(),
-		max: z.number().int().optional(),
 	}),
 	z.strictObject({
-		type: z.literal("per-bedroom"),
-		min: z.number().int().optional(),
 		max: z.number().int().optional(),
+		min: z.number().int().optional(),
+		type: z.literal("per-bedroom"),
 	}),
 ]);
 export type PriceFilter = z.infer<typeof priceFilter>;
 
 export const locationFilter = z.discriminatedUnion("type", [
 	z.strictObject({
-		type: z.literal("district"),
 		districts: z.string().array(),
+		type: z.literal("district"),
 	}),
 	z.strictObject({
-		type: z.literal("subdistrict"),
 		subdistricts: z.string().array(),
+		type: z.literal("subdistrict"),
 	}),
 	z.strictObject({
-		type: z.literal("polygon"),
 		polygon,
+		type: z.literal("polygon"),
 	}),
 ]);
 export type LocationFilter = z.infer<typeof locationFilter>;
 
 export const areaFilter = z.discriminatedUnion("type", [
 	z.strictObject({
-		type: z.literal("area"),
-		min: z.number().int().optional(),
 		max: z.number().int().optional(),
+		min: z.number().int().optional(),
+		type: z.literal("area"),
 	}),
 ]);
 export type AreaFilter = z.infer<typeof areaFilter>;
 
 export const roomsFilter = z.discriminatedUnion("type", [
 	z.strictObject({
-		type: z.literal("rooms"),
-		min: z.number().int().optional(),
 		max: z.number().int().optional(),
+		min: z.number().int().optional(),
+		type: z.literal("rooms"),
 	}),
 	z.strictObject({
-		type: z.literal("bedrooms"),
-		min: z.number().int().optional(),
 		max: z.number().int().optional(),
+		min: z.number().int().optional(),
+		type: z.literal("bedrooms"),
 	}),
 ]);
 export type RoomsFilter = z.infer<typeof roomsFilter>;
 
 export const regexFilter = z.strictObject({
-	type: z.literal("regex"),
 	regex: z.string(),
+	type: z.literal("regex"),
 });
 export type RegexFilter = z.infer<typeof regexFilter>;
 
@@ -76,11 +76,11 @@ export type AddressFilter = z.infer<typeof addressFilter>;
 
 export const filtersV1 = z
 	.object({
-		price: priceFilter,
-		location: locationFilter,
-		area: areaFilter,
-		rooms: roomsFilter,
 		address: addressFilter,
+		area: areaFilter,
+		location: locationFilter,
+		price: priceFilter,
+		rooms: roomsFilter,
 	})
 	.partial();
 export type FiltersV1 = z.infer<typeof filtersV1>;

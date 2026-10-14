@@ -83,7 +83,7 @@ export const Steps: React.FC = () => {
 							/>
 						);
 					}
-					case "range":
+					case "range": {
 						return (
 							<RangeStep
 								key={step.id}
@@ -92,7 +92,8 @@ export const Steps: React.FC = () => {
 								updateState={coerceUpdateState(setStepValue(step.id))}
 							/>
 						);
-					case "multiselect":
+					}
+					case "multiselect": {
 						return (
 							<MultiSelectStep
 								key={step.id}
@@ -105,7 +106,8 @@ export const Steps: React.FC = () => {
 								updateState={coerceUpdateState(setStepValue(step.id))}
 							/>
 						);
-					case "map":
+					}
+					case "map": {
 						return (
 							<MapStep
 								key={step.id}
@@ -114,8 +116,10 @@ export const Steps: React.FC = () => {
 								updateState={coerceUpdateState(setStepValue(step.id))}
 							/>
 						);
-					default:
+					}
+					default: {
 						return null;
+					}
 				}
 			})}
 		</div>

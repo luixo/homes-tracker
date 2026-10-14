@@ -11,11 +11,11 @@ import { withLogger } from "@/utils/logger";
 export const handler = procedure
 	.input(
 		z.object({
-			scraperIds: scraperIdSchema.array().optional(),
-			shouldWipe: z.boolean().optional(),
 			dryRun: z.boolean().optional(),
 			fullRun: z.boolean().optional(),
 			maxPages: z.number().int().optional(),
+			scraperIds: scraperIdSchema.array().optional(),
+			shouldWipe: z.boolean().optional(),
 		}),
 	)
 	.mutation(
@@ -48,9 +48,9 @@ export const handler = procedure
 									.filter(({ scraperId }) => scraperId === scraper.id)
 									.map(({ entityId }) => entityId),
 								{
-									shouldBailOutOnNoNewIds: !fullRun,
-									maxPages,
 									dryRun,
+									maxPages,
+									shouldBailOutOnNoNewIds: !fullRun,
 								},
 							),
 						),

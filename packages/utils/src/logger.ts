@@ -1,7 +1,7 @@
 import type { Color } from "colorette";
 import type { LogDescriptor } from "pino";
 import { pino } from "pino";
-import { PinoPretty } from "pino-pretty";
+import { PinoPretty as pinoPretty } from "pino-pretty";
 
 export type Logger = pino.Logger;
 
@@ -20,7 +20,8 @@ const getMessagePrefix = (
 	);
 };
 
-const prettyTransport = PinoPretty({
+const prettyTransport = pinoPretty({
+	ignore: "pid,hostname",
 	messageFormat: (log, messageKey, levelLabel, { colors }) =>
 		`${[
 			getMessagePrefix(
@@ -43,15 +44,14 @@ const prettyTransport = PinoPretty({
 		]
 			.filter(Boolean)
 			.join(" ")} ${log[messageKey] as string}`,
-	ignore: "pid,hostname",
 });
 
 export const globalLogger = pino(
 	{
-		level: "info",
 		formatters: {
 			bindings: () => ({}),
 		},
+		level: "info",
 	},
 	process.env.NODE_ENV === "production" ? undefined : prettyTransport,
 );
@@ -82,11 +82,11 @@ export const withLogger = async <T>(
 			});
 		}
 		return result;
-	} catch (e) {
+	} catch (error) {
 		if (!options.skipFail) {
-			nextLogger.error(e, `Action ${action} failed`, { status: "!" });
+			nextLogger.error(error, `Action ${action} failed`, { status: "!" });
 		}
-		throw e;
+		throw error;
 	}
 };
 

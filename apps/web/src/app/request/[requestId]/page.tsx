@@ -15,17 +15,17 @@ const Page: React.FC<PageProps<{ requestId: string }>> = async ({ params }) => {
 	try {
 		await trpc.filters.config.get();
 		await trpc.filters.values.get({ requestId });
-		return (
-			<HydrateClient>
-				<div className="max-w-screen-md gap-6 flex w-full flex-col">
-					<Header />
-					<Filters requestId={requestId} />
-				</div>
-			</HydrateClient>
-		);
 	} catch {
 		return notFound();
 	}
+	return (
+		<HydrateClient>
+			<div className="max-w-screen-md gap-6 flex w-full flex-col">
+				<Header />
+				<Filters requestId={requestId} />
+			</div>
+		</HydrateClient>
+	);
 };
 
 export default Page;

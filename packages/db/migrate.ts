@@ -9,4 +9,4 @@ export const migrate = async () => {
 	);
 };
 
-void migrate();
+await migrate();

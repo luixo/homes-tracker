@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { chatId } from "../ids";
+import { chatId } from "@/types/ids";
 
 export const admin = z.strictObject({
 	_id: chatId,

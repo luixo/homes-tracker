@@ -1,8 +1,7 @@
+import type { BotHandler } from "@/bot/types";
 import { convertToLastRequest } from "@/db/convert-requests";
 import { notifyMessage } from "@/intercom/index";
 import { createQueue } from "@/utils/promise";
-
-import type { BotHandler } from "../types";
 
 export const handler: BotHandler = async (context, match) => {
 	const trackerRequests = await context.caller.requests.getAll();
@@ -16,14 +15,19 @@ export const handler: BotHandler = async (context, match) => {
 		addToQueue(async () => {
 			try {
 				await notifyMessage(context, request, match);
-			} catch (e) {
-				if (typeof e === "object" && e && "code" in e && "message" in e) {
+			} catch (error) {
+				if (
+					typeof error === "object" &&
+					error &&
+					"code" in error &&
+					"message" in error
+				) {
 					context.logger.warn(
-						`Tracker request ${request._id} got telegram error: [${String(e.code)}]: ${String(e.message)}`,
+						`Tracker request ${request._id} got telegram error: [${String(error.code)}]: ${String(error.message)}`,
 					);
 				} else {
 					context.logger.warn(
-						`Tracker request ${request._id} got error: ${String(e)}`,
+						`Tracker request ${request._id} got error: ${String(error)}`,
 					);
 				}
 			}

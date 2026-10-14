@@ -10,44 +10,29 @@
 		"bot:start": "dotenv -c -- bun run --cwd apps/bot start",
 		"format": "oxfmt --write",
 		"format:verify": "oxfmt --check",
-		"lint": "eslint --max-warnings=0",
+		"lint": "oxlint",
+		"lint:fix": "oxlint --fix",
 		"lint-staged": "lint-staged",
 		"typecheck": "bun check",
 		"web:dev": "dotenv -c -- bun run --cwd apps/web dev"
 	},
 	"devDependencies": {
-		"@eslint/compat": "^1.1.1",
-		"@eslint/eslintrc": "^3.1.0",
-		"@eslint/js": "^9.9.0",
 		"@luixo/configs": "^0.1.0",
-		"@types/eslint__js": "^8.42.3",
 		"@types/node": "^22.5.0",
-		"@typescript-eslint/eslint-plugin": "^8.1.0",
-		"@typescript-eslint/parser": "^8.1.0",
 		"dotenv-cli": "^7.4.2",
-		"eslint": "9.9.1",
-		"eslint-config-airbnb": "^19.0.4",
-		"eslint-config-airbnb-typescript": "^18.0.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-import-resolver-typescript": "^3.6.1",
-		"eslint-plugin-deprecation": "^3.0.0",
-		"eslint-plugin-import": "^2.29.1",
-		"eslint-plugin-jsx-a11y": "^6.9.0",
-		"eslint-plugin-react": "^7.35.0",
-		"eslint-plugin-react-hooks": "^4.6.2",
-		"globals": "^15.9.0",
 		"lint-staged": "^17.6.0",
 		"oxfmt": "0.73.0",
+		"oxlint": "1.88.0",
+		"oxlint-tsgolint": "7.0.2004",
 		"pre-commit": "^2.0.0",
-		"typescript": "^5.5.4",
-		"typescript-eslint": "^8.2.0"
+		"typescript": "^5.5.4"
 	},
 	"overrides": {
 		"@types/react": "npm:types-react@rc",
 		"@types/react-dom": "npm:types-react-dom@rc"
 	},
 	"lint-staged": {
-		"*.{j,t}s{,x}": "eslint --fix"
+		"*.{j,t}s{,x}": "oxlint --fix"
 	},
 	"pre-commit": [
 		"typecheck",

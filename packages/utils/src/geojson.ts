@@ -12,21 +12,21 @@ const toFixed = (input: number, precision = 6) =>
 
 export const mapGeoPositionToPosition = (
 	position: GeoJSON.Position,
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-): Position => ({ lon: toFixed(position[0]!), lat: toFixed(position[1]!) });
+	// oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
+): Position => ({ lat: toFixed(position[1]!), lon: toFixed(position[0]!) });
 
 export const mapPolygonToFeature = (
 	polygon: Polygon,
 ): GeoJSON.Feature<GeoJSON.Polygon> => ({
-	type: "Feature",
-	id: polygon.id,
 	geometry: {
-		type: "Polygon",
 		coordinates: polygon.rings.map((ring) =>
 			ring.map(mapPositionToGeoPosition),
 		),
+		type: "Polygon",
 	},
+	id: polygon.id,
 	properties: {},
+	type: "Feature",
 });
 
 export const mapFeatureToPolygon = (feature: GeoJSON.Feature): Polygon => {
@@ -34,16 +34,16 @@ export const mapFeatureToPolygon = (feature: GeoJSON.Feature): Polygon => {
 		`unknown-${Math.random()}`) as PolygonId;
 	if (feature.geometry.type !== "Polygon") {
 		return {
-			type: "polygon",
 			id,
 			rings: [],
+			type: "polygon",
 		};
 	}
 	return {
-		type: "polygon",
 		id,
 		rings: feature.geometry.coordinates.map((ring) =>
 			ring.map(mapGeoPositionToPosition),
 		),
+		type: "polygon",
 	};
 };

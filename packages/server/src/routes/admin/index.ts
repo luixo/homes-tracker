@@ -5,7 +5,7 @@ import { handler as remove } from "./remove";
 import { handler as setStopSignal } from "./set-stop-signal";
 
 export const router = routerFactory({
-	setStopSignal,
 	add,
 	remove,
+	setStopSignal,
 });

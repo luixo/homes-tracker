@@ -2,8 +2,7 @@ import { getFormatConfig } from "@luixo/configs";
 
 export default getFormatConfig({
 	imports: {
-		customGroups: [{ groupName: "react-first", elementNamePattern: ["react"] }],
-		internalPattern: ["@/"],
+		customGroups: [{ elementNamePattern: ["react"], groupName: "react-first" }],
 		groups: [
 			"react-first",
 			["builtin", "external"],
@@ -12,6 +11,7 @@ export default getFormatConfig({
 			["sibling", "index"],
 			"unknown",
 		],
+		internalPattern: ["@/"],
 		newlinesBetween: true,
 	},
 	tailwind: {

@@ -14,8 +14,8 @@ const rscLogger = globalLogger.child({ service: "trpc/rsc" });
 
 const getRscCaller = cache(() =>
 	createCallerFactory(appRouter)({
-		logger: rscLogger,
 		auth: null,
+		logger: rscLogger,
 		source: "rsc",
 	}),
 );

@@ -8,7 +8,7 @@ import { filterStepValues } from "@/types/filters/values";
 import { requestId as requestIdType } from "@/types/ids";
 
 export const handler = procedure
-	.input(z.object({ requestId: requestIdType, filters: filterStepValues }))
+	.input(z.object({ filters: filterStepValues, requestId: requestIdType }))
 	.mutation(async ({ input: { filters, requestId }, ctx }) => {
 		const chatLink = await getChatLinkByRequestId(ctx.logger, requestId);
 		if (!chatLink) {
@@ -18,18 +18,18 @@ export const handler = procedure
 			});
 		}
 		await upsertTrackerRequest(ctx.logger, {
-			version: "v2",
-			city: "Tbilisi",
-			filters,
 			_id: requestId,
+			city: "Tbilisi",
 			enabled: true,
+			filters,
 			notifiedTimestamp: Date.now(),
 			notifiers: [
 				{
-					type: "telegram",
 					chatId: chatLink.chatId,
+					type: "telegram",
 				},
 			],
+			version: "v2",
 		});
 		return { id: requestId };
 	});

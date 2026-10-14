@@ -31,8 +31,8 @@ export const MapStep: React.FC<Props> = ({ step, data, updateState }) => {
 				return;
 			}
 			return {
-				type: "map",
 				polygons: nextValue,
+				type: "map",
 			};
 		});
 	};

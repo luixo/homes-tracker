@@ -5,7 +5,7 @@ import { handler as getAll } from "./get-all";
 import { handler as patch } from "./patch";
 
 export const router = routerFactory({
-	getAll,
 	get,
+	getAll,
 	patch,
 });

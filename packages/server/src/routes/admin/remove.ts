@@ -9,5 +9,3 @@ export const handler = adminProcedure
 	.mutation(async ({ ctx, input }) => {
 		await removeAdmin(ctx.logger, input.chatId);
 	});
-
-export default handler;

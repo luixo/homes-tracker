@@ -23,6 +23,9 @@ const getContext = async (
 	}
 	return {
 		bot,
+		caller: getCaller(inChatId),
+		chatId: inChatId,
+		logger: globalLogger.child({ service: "bot" }),
 		respond: (outMessage) => bot.sendMessage(inChatId, outMessage),
 		sendCard: async (outChatId) => {
 			const chat = await bot.getChat(outChatId);
@@ -35,26 +38,26 @@ const getContext = async (
 				},
 			);
 		},
-		logger: globalLogger.child({ service: "bot" }),
-		chatId: inChatId,
-		caller: getCaller(inChatId),
 	};
 };
 
-const main = async () => {
+const main = () => {
 	const bot = getClient({ polling: true });
-	Object.entries(handlers).forEach(([key, handler]) => {
-		bot.onText(new RegExp(`/${key} ?(.*)`, "ms"), async (message, match) => {
+	for (const [key, handler] of Object.entries(handlers)) {
+		const onMessage = async (
+			message: TelegramBot.Message,
+			match: RegExpExecArray | null,
+		) => {
 			const context = await getContext(bot, message);
 			context.logger.info(
 				`Got message with handler ${key} from ${context.chatId}`,
 			);
 			try {
 				await handler(context, match?.[1] ?? "");
-			} catch (e) {
+			} catch (error) {
 				if (
-					e instanceof TRPCError &&
-					e.message === "You are not allowed here"
+					error instanceof TRPCError &&
+					error.message === "You are not allowed here"
 				) {
 					await bot.sendMessage(
 						context.chatId,
@@ -63,18 +66,23 @@ const main = async () => {
 					return;
 				}
 				context.logger.error(
-					e,
+					error,
 					`Error happened on message with handler ${key} from ${
 						context.chatId
 					}:\n${message.text}`,
 				);
 			}
+		};
+		bot.onText(new RegExp(`/${key} ?(.*)`, "msu"), (message, match) => {
+			void onMessage(message, match).catch((error: unknown) => {
+				globalLogger.error(error, `Failed to handle /${key}`);
+			});
 		});
-	});
+	}
 	const initLogger = globalLogger.child({ handler: "init" });
 	initLogger.info(
 		`Bot started with ${Object.keys(handlers).join(", ")} handlers connected`,
 	);
 };
 
-void main();
+main();

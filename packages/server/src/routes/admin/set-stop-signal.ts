@@ -8,5 +8,3 @@ export const handler = adminProcedure
 	.mutation(({ input }) => {
 		changeStopSignal(input.nextSignal);
 	});
-
-export default handler;

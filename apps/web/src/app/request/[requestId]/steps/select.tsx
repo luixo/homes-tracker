@@ -20,14 +20,14 @@ export const SelectStep: React.FC<Props> = ({ step, data, updateState }) => {
 		if (selection === "all") {
 			return;
 		}
-		const nextSelected = [...selection.values()][0];
-		if (!nextSelected) {
-			updateState(undefined);
-		} else {
+		const [nextSelected] = selection.values();
+		if (nextSelected) {
 			updateState({
-				type: "select",
 				optionId: nextSelected as SelectOptionId,
+				type: "select",
 			});
+		} else {
+			updateState(undefined);
 		}
 	};
 	return (

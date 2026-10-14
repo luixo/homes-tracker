@@ -54,7 +54,7 @@ export const scrapeEntities = async <T, P>(
 			logger.child({ scraper: `${scraper.id} #${index}` }),
 			`Scraping`,
 			// TODO: figure out why
-			// eslint-disable-next-line @typescript-eslint/no-loop-func
+			// oxlint-disable-next-line @typescript-eslint/no-loop-func
 			async (scraperLogger) => {
 				let page = 0;
 				while (page < maxPages) {
@@ -68,7 +68,7 @@ export const scrapeEntities = async <T, P>(
 					const pageResult = await withLogger(
 						scraperLogger,
 						`Fetch page #${page}`,
-						// eslint-disable-next-line @typescript-eslint/no-loop-func
+						// oxlint-disable-next-line @typescript-eslint/no-loop-func
 						async () => {
 							const rawPageResult = await timeout(
 								fetcher(scraperLogger, prepareResult, page),
@@ -78,23 +78,23 @@ export const scrapeEntities = async <T, P>(
 								return null;
 							}
 							return {
-								results: rawPageResult.results,
-								nonVipAdsFound: rawPageResult.nonVipAdsFound,
 								filteredResults: rawPageResult.results.filter(
 									(result) =>
 										!localExistingIds.includes(scraper.getEntityId(result)),
 								),
+								nonVipAdsFound: rawPageResult.nonVipAdsFound,
+								results: rawPageResult.results,
 							};
 						},
 						{
 							onSuccess: (response) =>
 								response
 									? `${response.filteredResults.length} new ids found${
-											response.filteredResults.length
-												? ` : ${response.filteredResults
+											response.filteredResults.length === 0
+												? ""
+												: ` : ${response.filteredResults
 														.map(scraper.getEntityId)
 														.join(", ")}`
-												: ""
 										}`
 									: undefined,
 						},

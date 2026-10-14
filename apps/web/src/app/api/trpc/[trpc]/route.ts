@@ -23,19 +23,19 @@ const trpcLogger = globalLogger.child({ service: "trpc" });
 
 const handler = async (req: Request) => {
 	const response = await fetchRequestHandler({
-		endpoint: "/api/trpc",
-		router: appRouter,
-		req,
 		createContext: ({ req: { headers } }) => {
 			const source = headers.get("x-trpc-source") as Context["source"] | null;
 			return {
-				logger: trpcLogger,
 				auth: null,
+				logger: trpcLogger,
 				source: source || "unknown",
 			};
 		},
+		endpoint: "/api/trpc",
 		onError: (opts) =>
 			trpcLogger.error(opts.error, `TRPC error in "${opts.path}"`),
+		req,
+		router: appRouter,
 	});
 
 	setCorsHeaders(response);
