@@ -8,6 +8,14 @@ You'll need Bun and Node.js (see `packageManager` and `engines` in `package.json
 
 Run `bun install` to install packages.
 
+Verifications:
+
+```
+bun run format:verify
+bun run lint
+bun run typecheck
+```
+
 Run local web:
 
 ```

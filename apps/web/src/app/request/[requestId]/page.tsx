@@ -17,7 +17,7 @@ const Page: React.FC<PageProps<{ requestId: string }>> = async ({ params }) => {
 		await trpc.filters.values.get({ requestId });
 		return (
 			<HydrateClient>
-				<div className="w-full max-w-screen-md flex flex-col gap-6">
+				<div className="max-w-screen-md gap-6 flex w-full flex-col">
 					<Header />
 					<Filters requestId={requestId} />
 				</div>

@@ -38,7 +38,7 @@ export const MapStep: React.FC<Props> = ({ step, data, updateState }) => {
 	};
 	const isInvalid = step.required && !data;
 	return (
-		<div className="flex flex-col gap-2">
+		<div className="gap-2 flex flex-col">
 			<StepTitle step={step} />
 			<Button
 				onClick={onOpen}

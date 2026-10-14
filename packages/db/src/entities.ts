@@ -27,9 +27,10 @@ export const getEntitiesByIds = async (logger: Logger, ids: EntityId[]) =>
 export const getEntitiesIds = async (logger: Logger) =>
 	withEntities(logger, `Get entity ids`, (collection) =>
 		collection
-			.find<
-				Pick<ScrapedEntity, "entityId" | "scraperId">
-			>({}, { projection: { entityId: 1, scraperId: 1 } })
+			.find<Pick<ScrapedEntity, "entityId" | "scraperId">>(
+				{},
+				{ projection: { entityId: 1, scraperId: 1 } },
+			)
 			.toArray(),
 	);
 

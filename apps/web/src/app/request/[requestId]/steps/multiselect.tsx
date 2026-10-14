@@ -58,9 +58,9 @@ export const MultiSelectStep: React.FC<Props> = ({
 	const isInvalid = step.required && !data;
 	if (step.filter.options.length < 10) {
 		return (
-			<div className="flex flex-col gap-2">
+			<div className="gap-2 flex flex-col">
 				<StepTitle step={step} isInvalid={isInvalid} />
-				<div className="flex flex-wrap gap-2">
+				<div className="gap-2 flex flex-wrap">
 					{step.filter.options.map((option) => (
 						<Button
 							key={option.id}

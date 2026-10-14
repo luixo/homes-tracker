@@ -8,7 +8,6 @@ import simplify from "@turf/simplify";
 import FreehandMode from "mapbox-gl-draw-freehand-mode";
 import { GoTrash } from "react-icons/go";
 import { useMap } from "react-map-gl";
-
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 
 import type { Polygon } from "@/types/geojson";
@@ -187,7 +186,7 @@ export const DrawElements: React.FC<Props> = ({
 	}, [defaultMap, draw]);
 
 	return (
-		<NoEvents className="justify-end items-end gap-2">
+		<NoEvents className="gap-2 items-end justify-end">
 			<DrawControl drawMode={mode} onClick={onDrawControlClick} />
 			{polygons.length !== 0 ? (
 				<Events>

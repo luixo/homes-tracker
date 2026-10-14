@@ -58,9 +58,9 @@ export const RangeStep: React.FC<Props> = ({ step, data, updateState }) => {
 	const sureMin = min ?? "";
 	const sureMax = max ?? "";
 	return (
-		<div className="flex flex-col gap-2">
+		<div className="gap-2 flex flex-col">
 			<StepTitle step={step} />
-			<div className="flex gap-2 items-center max-[480px]:flex-col">
+			<div className="gap-2 flex items-center max-[480px]:flex-col">
 				<Input
 					label={step.filter.minLabel || "Min"}
 					isRequired={step.required}

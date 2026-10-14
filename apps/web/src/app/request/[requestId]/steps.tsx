@@ -67,7 +67,7 @@ export const Steps: React.FC = () => {
 		return runCondition(step.showCondition, localValues);
 	});
 	const stepsElements = (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			{visibleSteps.map((step) => {
 				const matchedValue = localValues.find(({ id }) => id === step.id);
 				switch (step.type) {

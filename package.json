@@ -1,28 +1,25 @@
 {
 	"name": "homes-tracker",
 	"private": true,
+	"workspaces": [
+		"packages/*",
+		"apps/*"
+	],
 	"type": "module",
 	"scripts": {
 		"bot:start": "dotenv -c -- bun run --cwd apps/bot start",
-		"format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css}'",
-		"format:verify": "prettier --check '**/*.{js,jsx,ts,tsx,json,css}'",
+		"format": "oxfmt --write",
+		"format:verify": "oxfmt --check",
 		"lint": "eslint --max-warnings=0",
 		"lint-staged": "lint-staged",
 		"typecheck": "bun check",
 		"web:dev": "dotenv -c -- bun run --cwd apps/web dev"
 	},
-	"lint-staged": {
-		"*.{j,t}s{,x}": "eslint --fix"
-	},
-	"pre-commit": [
-		"typecheck",
-		"format",
-		"lint-staged"
-	],
 	"devDependencies": {
 		"@eslint/compat": "^1.1.1",
 		"@eslint/eslintrc": "^3.1.0",
 		"@eslint/js": "^9.9.0",
+		"@luixo/configs": "^0.1.0",
 		"@types/eslint__js": "^8.42.3",
 		"@types/node": "^22.5.0",
 		"@typescript-eslint/eslint-plugin": "^8.1.0",
@@ -40,23 +37,27 @@
 		"eslint-plugin-react-hooks": "^4.6.2",
 		"globals": "^15.9.0",
 		"lint-staged": "^17.6.0",
+		"oxfmt": "0.73.0",
 		"pre-commit": "^2.0.0",
-		"prettier": "^3.3.3",
-		"prettier-plugin-packagejson": "^2.5.2",
 		"typescript": "^5.5.4",
 		"typescript-eslint": "^8.2.0"
 	},
-	"packageManager": "bun@1.4.3",
-	"engines": {
-		"node": "26"
-	},
-	"trustedDependencies": [
-		"pre-commit"
-	],
 	"overrides": {
 		"@types/react": "npm:types-react@rc",
 		"@types/react-dom": "npm:types-react-dom@rc"
 	},
+	"lint-staged": {
+		"*.{j,t}s{,x}": "eslint --fix"
+	},
+	"pre-commit": [
+		"typecheck",
+		"format",
+		"lint-staged"
+	],
+	"engines": {
+		"node": "26"
+	},
+	"packageManager": "bun@1.4.3",
 	"patchedDependencies": {
 		"@mapbox/mapbox-gl-draw@1.4.3": "patches/@mapbox__mapbox-gl-draw.patch",
 		"@nextui-org/listbox@2.1.25": "patches/@nextui-org__listbox.patch",
@@ -64,8 +65,7 @@
 		"mapbox-gl-draw-freehand-mode@2.1.0": "patches/mapbox-gl-draw-freehand-mode.patch",
 		"react-icons@5.3.0": "patches/react-icons.patch"
 	},
-	"workspaces": [
-		"packages/*",
-		"apps/*"
+	"trustedDependencies": [
+		"pre-commit"
 	]
 }

@@ -7,7 +7,7 @@ import { Link } from "@nextui-org/react";
 import { Header } from "@/web/components/header";
 
 const Page: React.FC = () => (
-	<main className="py-10 w-full h-full align-center flex flex-col items-center text-center leading-8 gap-4">
+	<main className="py-10 align-center leading-8 gap-4 flex h-full w-full flex-col items-center text-center">
 		<div>
 			<Header />
 			<h3 className="tracking-tight font-semibold text-3xl">

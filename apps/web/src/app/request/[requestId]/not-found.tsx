@@ -5,11 +5,11 @@ import { Link } from "@nextui-org/react";
 import { Header } from "@/web/components/header";
 
 const NotFound = () => (
-	<div className="flex flex-col gap-20 items-center text-center">
-		<div className="flex flex-col gap-6">
+	<div className="gap-20 flex flex-col items-center text-center">
+		<div className="gap-6 flex flex-col">
 			<Header />
 			<h2 className="tracking-tight font-semibold text-6xl">404 Not Found</h2>
-			<div className="flex flex-col gap-2">
+			<div className="gap-2 flex flex-col">
 				<h3 className="tracking-tight font-semibold text-4xl">
 					You might misspelled the request id
 				</h3>
